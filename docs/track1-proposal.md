@@ -1,4 +1,5 @@
-# Project Proposal — *Sevai Setu* (சேவை சேது)
+# Project Proposal — Constituency Intelligence Engine
+### *(working title — final product name TBD)*
 ### Track 1 submission for "Build with AI: Code for Communities" (Google Cloud)
 
 **Prepared for:** Tech Lead review & approval to proceed
@@ -11,7 +12,7 @@
 
 ## 1. Executive summary (read this first)
 
-We are building **Sevai Setu** — an AI decision-support system for Members of Parliament that turns scattered, multilingual citizen demands and fragmented public data into **a clear, defensible action plan**.
+We are building a **Constituency Intelligence Engine** *(working title — name TBD)* — an AI decision-support system for Members of Parliament that turns scattered, multilingual citizen demands and fragmented public data into **a clear, defensible action plan**.
 
 The key insight that differentiates us: an MP's own development fund (**MPLADS ≈ ₹5 crore/year**) is tiny next to the **hundreds of crores of existing government schemes** (housing, water, jobs, pensions) already meant for their constituents. **Most citizen needs are unfilled *entitlements*, not requests for new money.** So instead of building "yet another complaint dashboard," we built an engine that:
 
@@ -178,7 +179,7 @@ Cloud Run API (FastAPI)  →  Next.js dashboard (Google Maps Platform) + Gemini-
 
 We are asking the Tech Lead to approve:
 
-1. **Direction** — proceed with *Sevai Setu* (scheme-convergence / entitlement-gap engine) as the Track 1 entry. ☐
+1. **Direction** — proceed with this Constituency Intelligence Engine (scheme-convergence / entitlement-gap engine) as the Track 1 entry. ☐
 2. **Tech stack** — Google Cloud native stack as in §6. ☐
 3. **Scope** — the in/out scope in §8 (depth over breadth, no fabricated impact prediction). ☐
 4. **Intake** — Tier 1 (own web/voice) + Tier 2 (Telegram bot). ☐
@@ -186,7 +187,7 @@ We are asking the Tech Lead to approve:
 
 **Attachments / references in repo:**
 - Clickable prototype: `prototype/index.html`
-- Full design spec: `docs/sevai-setu-design-spec.md`
+- Full design spec: `docs/track1-design-spec.md`
 - Event details: `docs/build-with-ai-code-for-communities.md`
 
 ---
