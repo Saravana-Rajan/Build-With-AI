@@ -44,27 +44,44 @@ Tamil voice intake and silent-area detection are **supporting features**, not th
 
 ---
 
-## 4. The engine — what it actually does
+## 4. The engine — a two-floor model
 
-1. **Understand** — transcribe/translate Tamil voice & text → structured *demand record* `{need, sector, village→LGD code, urgency, beneficiaries}` (Gemini).
-2. **Match to scheme** 🔗 — classify each need to the responsible scheme/fund (e.g. housing → PMAY-G) vs. "no scheme covers this → MPLADS candidate."
-3. **Reconcile with ground truth** — join real public data: is the village covered by that scheme? eligible-but-unserved count? Compute a transparent **Need/Gap score** per village × sector.
-   `gap = eligible/needy population (Census/NFHS/UDISE) − covered population (scheme dashboards)`
-4. **Detect the silent gap** 🔇 — flag villages with **high measured need but zero petitions**.
-5. **Recommend two tracks** — Track A (unlock existing entitlements, ₹0 of MPLADS) and Track B (budget-constrained best use of ₹5 cr on true gaps), each with an **auto-generated justification** (Gemini).
+We deliberately build **both floors**. Floor 1 is exactly what the problem statement asks for (and what most teams build) — we do it solidly so we score full marks on Problem-Solution Fit. Floor 2 is our differentiator, built **on top of** Floor 1, not instead of it.
 
-> **Design rule:** the Need/Gap score is a **transparent weighted formula**, NOT a black-box ML model — government will only deploy what it can explain, and it's faster to build.
+### 🏢 Floor 1 — The required basics (consolidate → theme → map → rank)
+*Directly answers the four things the problem statement asks for.*
+
+1. **Analyze submissions** — transcribe/translate Tamil voice, text & photos → structured *demand record* `{need, sector, village→LGD code, urgency, beneficiaries}` (Gemini + Speech-to-Text + Translation). Each is auto-categorised (water / road / school / health …).
+2. **Detect recurring themes** — embeddings cluster thousands of submissions into recurring needs per ward, with volume + recency. *Output the MP sees:* "Drinking water = biggest recurring issue — 400 requests across 3 weeks."
+3. **Map demand hotspots** — a Google Maps view showing **where complaints concentrate** (e.g. Ward 3 = red, 250 road complaints). The straightforward "where is the noise" map.
+4. **Combine with public data + rank** — fuse citizen demand with Census/NFHS/UDISE, infrastructure gaps and the **local development plan** (RAG over the real plan document, so recommendations map to real proposed projects — not invented ones). Produce a **transparent ranked project list** (e.g. School upgrade 95 · Drinking water 90 · Road 75 · Vocational centre 50), each with its "why this rank" reasoning shown.
+
+> **Design rule:** ranking is a **transparent weighted formula** (`Demand × Need × Feasibility + Equity-boost`), NOT a black-box model — government only deploys what it can explain and audit.
+
+### 🏢 Floor 2 — Our differentiator (built on top of Floor 1)
+*Why we beat the "smart suggestion box" crowd.*
+
+5. **Match to scheme — "whose money is this?"** 🔗 — for every ranked need, classify the responsible scheme/fund (e.g. housing → PMAY-G) vs. "no scheme covers this → MPLADS candidate."
+6. **Reconcile with ground truth (gap math)** — `gap = eligible/needy population − population already covered (scheme dashboards)`. Surfaces entitlements owed-but-undelivered.
+7. **Two-track recommendation** — **Track A** (unlock existing entitlements, ₹0 of MPLADS — push the official) + **Track B** (budget-constrained best use of ₹5 cr on true gaps), each with an auto-generated justification (Gemini).
+8. **Silent-village detection** 🔇 — flag villages with **high measured need but zero petitions**.
+9. **Anti-lobbying / astroturfing guard** 🛡️ — detect coordinated near-identical message floods and down-weight them, so vocal groups can't game the ranking.
+10. **Close the loop** — citizen gets a status update when their issue is actioned → trust + repeat usage.
 
 ---
 
-## 5. Screens & flows (built in the clickable prototype)
+## 5. Screens & flows
 
-1. **Citizen intake** — Tamil voice/text → instant acknowledgement → AI shows which scheme it matched.
-2. **Constituency X-Ray** 🩻 (hero) — village heatmap of scheme coverage + ranked scheme-gap list (PMAY-G, Jal Jeevan, MGNREGA …), expandable to village/family lists.
-3. **Act — Unlock / Spend** ⚖️ — **Track A** (generate official letters, push departments) | **Track B** (live ₹5 cr allocation cart on true gaps, approve → PDF plan).
-4. **Forgotten villages** 🔇 — alert card for silent + high-need villages, with proof, "add to ₹5 cr plan."
+**Floor 1 screens (the required basics):**
+1. **Citizen intake** — Tamil voice/text/photo → instant acknowledgement → AI shows the category it matched.
+2. **Priorities** 📊 — recurring-theme list (top recurring needs by volume) + **demand hotspot map** (where complaints concentrate) + the **ranked project list** with "why this rank" reasoning.
 
-*(Prototype: `prototype/index.html` — bilingual, clickable, all four screens.)*
+**Floor 2 screens (the differentiator):**
+3. **Constituency X-Ray** 🩻 (hero) — village heatmap of *scheme coverage* + ranked scheme-gap list (PMAY-G, Jal Jeevan, MGNREGA …), expandable to village/family lists.
+4. **Act — Unlock / Spend** ⚖️ — **Track A** (generate official letters, push departments) | **Track B** (live ₹5 cr allocation cart on true gaps, approve → PDF plan).
+5. **Forgotten villages** 🔇 — alert card for silent + high-need villages, with proof, "add to ₹5 cr plan."
+
+*(Clickable prototype: `prototype/index.html` — bilingual; Floor 2 screens built, Floor 1 screens to be added during the build.)*
 
 ---
 

@@ -37,33 +37,47 @@ The key insight that differentiates us: an MP's own development fund (**MPLADS �
 **One-line pitch:**
 > "We don't help an MP spend ₹5 crore. We help them unlock the ₹500 crore of schemes already meant for their people — and spend their own ₹5 crore only on the gaps nothing else covers."
 
-### The engine (5 steps)
-1. **Understand** — Tamil/English voice & text → structured *demand record* `{need, sector, village→LGD code, urgency, beneficiaries}` via Gemini + Speech-to-Text + Translation.
-2. **Match to scheme** — classify each need to the responsible scheme/fund (e.g. housing → PMAY-G) vs. "no scheme covers this → MPLADS candidate."
-3. **Reconcile with ground truth** — join real public datasets; compute a **transparent Need/Gap score**: `gap = eligible/needy population − population already covered`.
-4. **Detect the silent gap** — flag villages with high measured need but **zero petitions**.
-5. **Recommend two tracks** — Track A (unlock entitlements, ₹0 cost) + Track B (budget-optimised use of ₹5 cr on true gaps), each with an auto-generated justification.
+### The engine — a two-floor model
+We build **both floors**. Floor 1 is exactly what the problem statement asks for (we do it solidly to score full Problem-Solution Fit); Floor 2 is our differentiator, built **on top of** Floor 1 — not instead of it.
 
-> **Design principle:** the priority score is a **transparent weighted formula, not a black-box ML model** — government will only deploy what it can explain and audit. (Weighting indicative: demand, population impact, infrastructure gap, urgency, equity.)
+**🏢 Floor 1 — the required basics (consolidate → theme → map → rank):**
+1. **Analyze submissions** — Tamil/English voice, text & photo → structured demand record, auto-categorised (water/road/school/health) via Gemini + Speech-to-Text + Translation.
+2. **Detect recurring themes** — cluster thousands of submissions into recurring needs per ward by volume + recency (e.g. "drinking water = 400 requests, biggest issue").
+3. **Map demand hotspots** — Google Maps view of where complaints concentrate (e.g. Ward 3 = red, 250 road complaints).
+4. **Combine public data + rank** — fuse demand with Census/NFHS/UDISE + infrastructure gaps + the **local development plan (RAG over the real plan, not invented projects)** → a transparent **ranked project list** with "why this rank" reasoning.
+
+**🏢 Floor 2 — our differentiator (built on top):**
+5. **Match to scheme — "whose money is this?"** — route each need to the responsible scheme/fund (housing → PMAY-G) vs. "no scheme covers this → MPLADS candidate."
+6. **Gap math + two-track recommendation** — `gap = eligible − already covered`; **Track A** unlock entitlements (₹0 cost) + **Track B** spend ₹5 cr only on true gaps, each auto-justified.
+7. **Silent-village detection** — high measured need but zero petitions.
+8. **Anti-lobbying guard** — detect coordinated message floods and down-weight them.
+9. **Close the loop** — citizen status updates → trust + repeat usage.
+
+> **Design principle:** ranking is a **transparent weighted formula** (`Demand × Need × Feasibility + Equity-boost`), not a black box — government only deploys what it can explain and audit.
 
 ### Why this is differentiated (honest)
-Most teams will build complaint-collection + categorisation + heatmap + ranking. We do that **plus** the scheme-convergence layer — which requires understanding how Indian governance/money actually works and integrating real scheme-coverage data. **The moat is domain insight + data execution, not a single feature.** We deliberately **avoid fabricated "impact prediction" numbers** (e.g. "reduces dropout by 12%") — they are unprovable and a knowledgeable judge/MP will reject them. All our impact figures are **computable and real** (people served, eligible-but-unserved counts, distance to nearest facility).
+Most teams stop at Floor 1 (complaint-collection + categorisation + heatmap + ranking). **We do Floor 1 properly *and* add the Floor 2 scheme-convergence layer** — which requires understanding how Indian governance/money actually works and integrating real scheme-coverage data. **The moat is domain insight + data execution, not a single feature.** We deliberately **avoid fabricated "impact prediction" numbers** (e.g. "reduces dropout by 12%") — unprovable and a knowledgeable judge/MP will reject them. All our impact figures are **computable and real** (people served, eligible-but-unserved counts, distance to nearest facility).
 
 ---
 
 ## 4. Key features (build scope)
 
-| Feature | Notes |
-|---|---|
-| Multilingual (Tamil) voice/text intake | Speech-to-Text + Translation + Gemini |
-| Scheme-matching & entitlement routing | The core differentiator |
-| Constituency X-Ray (village coverage heatmap) | Hero screen, Maps Platform |
-| Transparent Need/Gap scoring | Auditable formula |
-| Silent-village (equity) detection | Need-weighted, not complaint-weighted |
-| Two-track recommendations (Unlock / Spend ₹5 cr) | OR-Tools budget optimisation |
-| Auto-drafted official letters & justification memos | Gemini |
-| Satellite "proof" for 2–3 hero villages | Earth Engine (depth, not breadth) |
-| *(Stretch)* Voice "ask your constituency" assistant | Gemini over BigQuery — demo flourish |
+| Floor | Feature | Notes |
+|---|---|---|
+| 1 | Multilingual (Tamil) voice/text/photo intake | Speech-to-Text + Translation + Gemini |
+| 1 | Recurring-theme detection | Embeddings clustering by volume + recency |
+| 1 | Demand hotspot map | Google Maps — where complaints concentrate |
+| 1 | Transparent ranked project list ("why this rank") | Demand × Need × Feasibility + Equity |
+| 1 | RAG over local development plan | Real proposed projects, not invented |
+| 2 | Scheme-matching & entitlement routing | The core differentiator |
+| 2 | Constituency X-Ray (village coverage heatmap) | Hero screen, Maps Platform |
+| 2 | Two-track recommendations (Unlock / Spend ₹5 cr) | OR-Tools budget optimisation |
+| 2 | Silent-village (equity) detection | Need-weighted, not complaint-weighted |
+| 2 | Anti-lobbying / astroturfing guard | Down-weight coordinated floods |
+| 2 | Auto-drafted official letters & justification memos | Gemini |
+| 2 | Close-the-loop citizen status updates | Trust + repeat usage |
+| 2 | Satellite "proof" for 2–3 hero villages | Earth Engine (depth, not breadth) |
+| 2 | *(Stretch)* Voice "ask your constituency" assistant | Gemini over BigQuery — demo flourish |
 
 ---
 
@@ -127,6 +141,35 @@ Cloud Run API (FastAPI)  →  Next.js dashboard (Google Maps Platform) + Gemini-
 **In:** one constituency (Dharmapuri); real Census + UDISE + 3–4 scheme datasets (PMAY-G, Jal Jeevan, MGNREGA, + one pension/PM-Kisan); Tamil intake (Tier 1 + Tier 2); scheme-matching; X-Ray; transparent scoring; two-track recommendations; auto-letters; ₹5 cr optimiser; silent detection; 2–3 satellite hero villages.
 
 **Out (stated honestly):** all 30+ schemes; live WhatsApp; statewide rollout; causal outcome/impact prediction.
+
+---
+
+## 8a. Submission deliverables (exactly what the hackathon requires)
+
+The hackathon requires **four** items — we will deliver all four:
+
+1. ☐ **Source code** — public / access-granted GitHub repository.
+2. ☐ **Demo video (3–5 min)** — product working end-to-end.
+3. ☐ **Pitch deck (10–12 slides)** — problem · solution · AI/technical approach · who it serves · why deployable · how it scales.
+4. ☐ **Deployed prototype link** — live on Cloud Run / Firebase.
+
+> Rule from the brief: the prototype **must utilise Google Cloud technologies** and show a **functioning end-to-end flow** for the core use case. Our architecture (§6) is GCP-native and end-to-end by design.
+
+## 8b. Requirements coverage — nothing missed
+
+| What the hackathon asks | Where we cover it |
+|---|---|
+| Citizens submit via **voice, text, photos, messaging apps** | Floor 1 intake (Tamil voice/text/photo) + Tier 2 messaging (Telegram); WhatsApp-ready |
+| **Analyze submissions** | Floor 1 step 1 (categorise) |
+| **Surface recurring themes** | Floor 1 step 2 (theme clustering) |
+| **Map demand hotspots** | Floor 1 step 3 (Google Maps hotspot view) |
+| **Combine with demographic data, infrastructure gaps, local development plans, public datasets** | Floor 1 step 4 (Census/NFHS/UDISE + infra + **RAG over local development plan**) |
+| **Recommend & rank high-priority works** | Floor 1 step 4 (ranked list) + Floor 2 (two-track recommendation) |
+| **Multilingual / low-literacy / low-connectivity** | Tamil voice-first; SMS/IVR fallback noted; Inclusivity 15% |
+| **Use Google Cloud** | Entire stack is GCP-native (§6) |
+| **Recommended tools** (Gemini, Vertex AI, Speech-to-Text, Translation, Maps, BigQuery, Firebase, Cloud Run, Earth Engine) | All used (§6) |
+| **Deployable in a real constituency in weeks; scalable** | Serverless; one MP → 39 MPs + 234 MLAs; rollout plan §10 |
+| **Non-technical MP gets value in 5 min** | Auto-justification memos + clean dashboard |
 
 ---
 
