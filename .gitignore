@@ -1,0 +1,8 @@
+# Local tooling / scratch — not for the repo
+.claude/
+.playwright-mcp/
+raw-fulltext.md
+verify-fulltext.md
+
+# Clickable prototype (kept local for now)
+prototype/
