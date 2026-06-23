@@ -135,11 +135,12 @@ BigQuery  ── demand records  +  public datasets (Census/UDISE/NFHS/PMAY/JJM/
         │     BigQuery GIS joins + transparent Need/Gap scoring + OR-Tools budget optimisation
         │            │
         ▼            ▼
-Cloud Run API (FastAPI)  →  Next.js dashboard (Maps Platform) + Gemini-drafted letters/memos
+Cloud Run API (FastAPI)  →  React web dashboard (Maps Platform) + Gemini-drafted letters/memos
+                          →  React Native citizen mobile app
                               Earth Engine imagery for hero villages
 ```
 
-All serverless, all on Google Cloud credits.
+**Stack:** React (web dashboard) · React Native (citizen mobile app) · FastAPI on Cloud Run (backend) · Cloud Functions (Telegram/SMS webhooks) · Vertex AI / Gemini · Cloud Speech-to-Text + Text-to-Speech · Translation API · BigQuery + BigQuery GIS · Firestore (real-time UI) · Cloud Storage · OR-Tools · Google Maps Platform · Earth Engine (light) · Firebase (auth/hosting). All serverless, all on Google Cloud credits.
 
 ---
 
