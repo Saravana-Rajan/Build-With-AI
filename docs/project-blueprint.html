@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Constituency Intelligence Engine — Project Blueprint</title>
+<style>
+  :root{
+    --bg:#0c1020; --panel:#141a30; --panel2:#1b2240; --ink:#e8ecf7; --muted:#9aa6c4;
+    --line:#27304f; --accent:#5b8cff; --accent2:#36d399; --warn:#ffb454; --bad:#ff6b6b;
+    --floor1:#5b8cff; --floor2:#a78bfa; --live:#36d399; --pre:#ffb454;
+    --chip:#222a4a; --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:radial-gradient(1200px 600px at 80% -10%,#1a2347 0,transparent 60%),var(--bg);
+    color:var(--ink);line-height:1.55;font-size:15px;
+  }
+  header.hero{
+    padding:34px 40px 22px;border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,rgba(91,140,255,.10),transparent);
+  }
+  .kicker{color:var(--accent);font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:12px}
+  h1{margin:6px 0 8px;font-size:30px;letter-spacing:-.02em}
+  .sub{color:var(--muted);max-width:880px}
+  .meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+  .meta span{background:var(--chip);border:1px solid var(--line);padding:5px 12px;border-radius:999px;font-size:12.5px;color:var(--muted)}
+  .meta b{color:var(--ink)}
+
+  /* Tabs */
+  nav.tabs{
+    position:sticky;top:0;z-index:20;display:flex;flex-wrap:wrap;gap:4px;
+    padding:10px 40px;background:rgba(12,16,32,.92);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  nav.tabs button{
+    appearance:none;border:1px solid transparent;background:transparent;color:var(--muted);
+    padding:9px 14px;border-radius:10px;cursor:pointer;font-size:13.5px;font-weight:600;transition:.15s;
+  }
+  nav.tabs button:hover{color:var(--ink);background:var(--panel)}
+  nav.tabs button.active{color:#fff;background:var(--accent);border-color:var(--accent)}
+
+  main{padding:28px 40px 80px;max-width:1180px;margin:0 auto}
+  .tab{display:none;animation:fade .25s ease}
+  .tab.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  h2{font-size:22px;margin:6px 0 4px;letter-spacing:-.01em}
+  h3{font-size:16px;margin:26px 0 10px;color:#fff}
+  .lead{color:var(--muted);margin:0 0 18px;max-width:900px}
+  p{margin:10px 0}
+  a{color:var(--accent)}
+
+  .grid{display:grid;gap:16px}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:880px){.g2,.g3{grid-template-columns:1fr}}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
+  .card h4{margin:0 0 8px;font-size:15px}
+  .card.accent{border-color:var(--accent)}
+  .card .big{font-size:26px;font-weight:800;letter-spacing:-.02em}
+
+  .pill{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;letter-spacing:.03em;text-transform:uppercase}
+  .p-live{background:rgba(54,211,153,.16);color:var(--live);border:1px solid rgba(54,211,153,.4)}
+  .p-pre{background:rgba(255,180,84,.14);color:var(--pre);border:1px solid rgba(255,180,84,.4)}
+  .p-f1{background:rgba(91,140,255,.16);color:var(--floor1);border:1px solid rgba(91,140,255,.4)}
+  .p-f2{background:rgba(167,139,250,.16);color:var(--floor2);border:1px solid rgba(167,139,250,.4)}
+
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--panel2);color:#fff;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+  tr:last-child td{border-bottom:none}
+  td code,p code,li code{background:#0a0e1c;border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:12.5px;color:#c9d6ff}
+
+  ul.clean{margin:8px 0;padding-left:20px}
+  ul.clean li{margin:5px 0}
+
+  .callout{border-left:3px solid var(--accent);background:rgba(91,140,255,.08);padding:12px 16px;border-radius:8px;margin:16px 0;color:#dbe4ff}
+  .callout.win{border-color:var(--accent2);background:rgba(54,211,153,.08)}
+  .callout.warn{border-color:var(--warn);background:rgba(255,180,84,.08)}
+
+  /* pipeline step */
+  .step{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);margin:14px 0;overflow:hidden}
+  .step-head{display:flex;align-items:center;gap:12px;padding:14px 18px;cursor:pointer;background:var(--panel2)}
+  .step-head:hover{background:#202a4e}
+  .step-num{flex:0 0 38px;height:38px;border-radius:10px;display:grid;place-items:center;font-weight:800;background:var(--accent);color:#fff}
+  .step-title{flex:1;font-weight:700;font-size:15px}
+  .step-toggle{color:var(--muted);font-size:20px;transition:.2s}
+  .step.open .step-toggle{transform:rotate(45deg)}
+  .step-body{display:none;padding:0 18px 18px}
+  .step.open .step-body{display:block}
+  .io{display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:0;margin-top:14px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  @media(max-width:880px){.io{grid-template-columns:1fr}}
+  .io>div{padding:12px 14px;border-right:1px solid var(--line)}
+  .io>div:last-child{border-right:none}
+  .io .lab{font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px}
+  .io .in .lab{color:var(--accent)} .io .pr .lab{color:var(--warn)} .io .out .lab{color:var(--accent2)}
+  .io ul{margin:0;padding-left:16px}.io li{margin:3px 0;font-size:13px}
+
+  pre{background:#070b18;border:1px solid var(--line);border-radius:10px;padding:14px;overflow:auto;font-size:12.5px;color:#cdd9ff;margin:12px 0}
+  .flow{display:flex;flex-direction:column;gap:0;margin:10px 0}
+  .flow .node{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:13.5px}
+  .flow .arrow{align-self:center;color:var(--muted);font-size:18px;line-height:1}
+  .tag{display:inline-block;background:var(--chip);border:1px solid var(--line);border-radius:7px;padding:3px 9px;font-size:12px;margin:3px 4px 0 0;color:#c9d6ff}
+  .foot{color:var(--muted);font-size:12.5px;border-top:1px solid var(--line);margin-top:30px;padding-top:14px}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin:10px 0 0;font-size:12.5px;color:var(--muted)}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .dot{width:10px;height:10px;border-radius:50%}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="kicker">Build with AI · Code for Communities · Track 1</div>
+  <h1>Constituency Intelligence Engine — Project Blueprint</h1>
+  <p class="sub">A multilingual civic-AI platform that turns scattered citizen demands + fragmented public data into a clear, defensible, village-level action plan for a Member of Parliament. The one job: <b>convert subjective political intuition into objective, data-backed constituency planning.</b></p>
+  <div class="meta">
+    <span>Demo constituency: <b>Dharmapuri, Tamil Nadu</b></span>
+    <span>Languages: <b>English · Tamil · Hindi</b></span>
+    <span>Build window: <b>29 Jun → 8 Jul 2026</b></span>
+    <span>Demo Day: <b>23 Jul · New Delhi</b></span>
+    <span>Stack: <b>Google Cloud native</b></span>
+  </div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button data-tab="idea" class="active">1 · The Idea</button>
+  <button data-tab="floors">2 · Two-Floor Model</button>
+  <button data-tab="complaints">3 · Complaint Types</button>
+  <button data-tab="intake">4 · Intake & Languages</button>
+  <button data-tab="data">5 · Data Sources</button>
+  <button data-tab="pipeline">6 · The 11-Step Pipeline</button>
+  <button data-tab="mapping">7 · Mapping & Data Flow</button>
+  <button data-tab="arch">8 · Architecture</button>
+  <button data-tab="scope">9 · Scope & Plan</button>
+  <button data-tab="demo">10 · Demo & Scoring</button>
+</nav>
+
+<main>
+
+<!-- ===================== 1 IDEA ===================== -->
+<section class="tab active" id="idea">
+  <h2>The problem, sharply framed</h2>
+  <p class="lead">An MP receives development requests through public meetings, letters, social media, grievance portals and direct reps — while the local development plan holds dozens of competing proposed projects. There is no objective way to consolidate feedback, spot recurring needs, and weigh proposals against real demand.</p>
+
+  <div class="grid g2">
+    <div class="card"><h4>What's broken today</h4>
+      <ul class="clean">
+        <li>Requests arrive through 5+ <b>siloed channels</b> — nothing is consolidated.</li>
+        <li>No way to <b>quantify demand</b> — is "10 asks" 10 people or a whole community?</li>
+        <li>Projects are weighed by <b>gut feel</b>, not data (school vs vocational centre).</li>
+        <li>Citizen asks are never <b>cross-referenced</b> with demographic / infrastructure reality.</li>
+        <li>Money goes to whoever <b>complains loudest</b>; silent, poor, remote areas are ignored.</li>
+      </ul>
+    </div>
+    <div class="card accent"><h4>The insight most teams miss</h4>
+      <p>An MP's own fund (<b>MPLADS ≈ ₹5 crore/year</b>) is tiny next to the <b>hundreds of crores</b> of existing schemes already meant for their constituents — PMAY-G, Jal Jeevan, MGNREGA, pensions.</p>
+      <p style="margin-bottom:0">Most citizen problems are <b>unfilled entitlements</b>, not requests for new money. The failure is <b>delivery & convergence</b>, not budget.</p>
+    </div>
+  </div>
+
+  <div class="callout win" style="font-size:16px">
+    <b>One-line pitch:</b> "We don't help an MP spend ₹5 crore. We help them unlock the ₹500 crore of schemes already meant for their people — and spend their own ₹5 crore only on the gaps nothing else covers."
+  </div>
+
+  <h3>The outcome we deliver</h3>
+  <div class="grid g3">
+    <div class="card"><div class="big" style="color:var(--floor1)">Route</div><p style="margin-bottom:0">Send every need to the scheme that <b>should already cover it</b>.</p></div>
+    <div class="card"><div class="big" style="color:var(--floor2)">X-Ray</div><p style="margin-bottom:0">Show, village-by-village, <b>where scheme money is failing to land</b>.</p></div>
+    <div class="card"><div class="big" style="color:var(--accent2)">Spend right</div><p style="margin-bottom:0">Use the ₹5 cr <b>only on true gaps</b> nothing else covers — fairly, silent majority included.</p></div>
+  </div>
+
+  <h3>Why it's defensible (a moat, not a feature)</h3>
+  <p>The differentiator is <b>domain insight + hard data integration</b>, not a copyable feature. It understands India's entitlement/scheme system and joins <b>real village-level scheme-coverage data</b> — work most teams won't know to do or can't assemble in time. A policy judge / MP instantly recognises a team that <b>understands how governance actually works</b>. We deliberately avoid fabricated "impact prediction" (e.g. "reduces dropout 12%") — every number we show is <b>computable and real</b>: people served, eligible-but-unserved counts, distance to nearest facility.</p>
+</section>
+
+<!-- ===================== 2 FLOORS ===================== -->
+<section class="tab" id="floors">
+  <h2>The engine — a deliberate two-floor model</h2>
+  <p class="lead">We build <b>both floors</b>. Floor 1 is exactly what the problem statement asks for (done solidly → full Problem-Solution-Fit marks). Floor 2 is the differentiator, built <b>on top of</b> Floor 1, never instead of it.</p>
+
+  <div class="callout"><b>The one-line logic:</b> Floor 1 finds <b>where people are shouting.</b> Floor 2 finds <b>where people are suffering in silence and are legally owed relief.</b></div>
+
+  <div class="grid g2">
+    <div class="card" style="border-color:var(--floor1)">
+      <span class="pill p-f1">Floor 1 · what judges expect</span>
+      <h4 style="margin-top:10px">Consolidate → Theme → Map → Rank</h4>
+      <ul class="clean">
+        <li><b>Analyse submissions</b> — Tamil voice/text/photo → structured demand record (Gemini + STT + Translation), auto-categorised.</li>
+        <li><b>Detect recurring themes</b> — embeddings cluster thousands of submissions by volume + recency. "Drinking water = 400 requests, biggest issue."</li>
+        <li><b>Map demand hotspots</b> — Google Maps "where the noise is" (Ward 3 = red, 250 road complaints).</li>
+        <li><b>Combine public data + rank</b> — fuse with Census/NFHS/UDISE + infra gaps + the local dev plan (RAG) → transparent ranked list with "why this rank".</li>
+      </ul>
+      <div class="callout warn" style="margin-bottom:0"><b>Most teams stop here.</b> Floor 1 alone won't win.</div>
+    </div>
+
+    <div class="card" style="border-color:var(--floor2)">
+      <span class="pill p-f2">Floor 2 · what wins</span>
+      <h4 style="margin-top:10px">Entitlement & equity layer</h4>
+      <ul class="clean">
+        <li><b>Scheme matching</b> — "whose money is this?" Route each need to PMAY-G / JJM / MGNREGA, or "no scheme → MPLADS".</li>
+        <li><b>Gap math</b> — <code>eligible − already-covered</code> = entitlements owed but undelivered.</li>
+        <li><b>Two-track output</b> — Track A (unlock ₹0, push officials) + Track B (spend ₹5 cr only on true gaps).</li>
+        <li><b>Silent-village detection</b> — high need, zero petitions → equity layer.</li>
+        <li><b>Anti-lobbying guard</b> — down-weight coordinated submission floods.</li>
+        <li><b>Close the loop</b> — citizen gets a status update when actioned.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout">
+    <b>Design rule (non-negotiable):</b> ranking is a <b>transparent weighted formula</b> — <code>Demand × Need × Feasibility + Equity-boost</code> — NOT a black box. Government only deploys what it can explain and audit.
+  </div>
+</section>
+
+<!-- ===================== 3 COMPLAINTS ===================== -->
+<section class="tab" id="complaints">
+  <h2>What kinds of complaints come in</h2>
+  <p class="lead">The full taxonomy below is for the pitch slide (shows we understand the domain). At <b>build time the classifier collapses to the top 8</b> categories + <code>other</code> with free text preserved — don't over-engineer the long tail.</p>
+
+  <div class="callout"><b>Build-time categories (Gemini picks ONE):</b>
+    <span class="tag">water</span><span class="tag">road</span><span class="tag">housing</span><span class="tag">education</span><span class="tag">health</span><span class="tag">jobs</span><span class="tag">pension</span><span class="tag">sanitation</span><span class="tag" style="opacity:.6">other</span>
+  </div>
+
+  <div class="grid g3">
+    <div class="card"><h4>💧 Water &amp; Sanitation</h4><ul class="clean"><li>No / irregular piped water supply</li><li>Borewell dry or broken</li><li>Open defecation — no toilets built</li><li>Sewage / drainage overflow</li></ul></div>
+    <div class="card"><h4>🛣 Infrastructure</h4><ul class="clean"><li>Road damage / no connectivity</li><li>Bridge missing or broken</li><li>Street lighting absent</li><li>Flood / waterlogging</li></ul></div>
+    <div class="card"><h4>🏠 Housing</h4><ul class="clean"><li>BPL but no house (PMAY-G eligible, not received)</li><li>House sanctioned but construction stalled</li><li>House damaged, needs repair</li></ul></div>
+    <div class="card"><h4>🎓 Education</h4><ul class="clean"><li>No school / too far</li><li>School but no teacher</li><li>Building damaged · midday meal not served</li><li>Dropout risk — children working</li></ul></div>
+    <div class="card"><h4>🩺 Health</h4><ul class="clean"><li>No PHC nearby / doctor absent</li><li>Medicine stock-out</li><li>Ambulance unreachable · no ASHA visits</li></ul></div>
+    <div class="card"><h4>💼 Livelihood &amp; Jobs</h4><ul class="clean"><li>MGNREGA job card not issued</li><li>Work demanded but not provided</li><li>Wages delayed · no skill centre</li></ul></div>
+    <div class="card"><h4>👵 Social Entitlements / Pensions</h4><ul class="clean"><li>Old-age / widow / disability pension not received</li><li>PM-Kisan payment not received</li><li>Ration card not issued / wrong category</li></ul></div>
+    <div class="card"><h4>🌾 Agriculture</h4><ul class="clean"><li>Irrigation canal not reaching village</li><li>Soil health card not issued</li><li>Crop damage — no compensation</li></ul></div>
+    <div class="card"><h4>🌳 Environment / Safety &amp; ⚖ Governance</h4><ul class="clean"><li>Illegal sand mining · factory pollution</li><li>Encroachment on common land</li><li>No official response · bribe demanded</li><li>Certificate (caste/income/domicile) not issued</li></ul></div>
+  </div>
+
+  <h3>Each complaint also carries</h3>
+  <div class="grid g3">
+    <div class="card"><h4>Urgency</h4><span class="tag">critical</span><span class="tag">high</span><span class="tag">medium</span><span class="tag">low</span><p style="margin-bottom:0">+ a one-line reason (e.g. "mentions children and summer").</p></div>
+    <div class="card"><h4>Beneficiary estimate</h4><p style="margin-bottom:0">How many people affected — integer or null.</p></div>
+    <div class="card"><h4>Location clues</h4><p style="margin-bottom:0">Village / area names exactly as mentioned → resolved to an LGD code in Step 2.</p></div>
+  </div>
+</section>
+
+<!-- ===================== 4 INTAKE ===================== -->
+<section class="tab" id="intake">
+  <h2>How citizens submit · and in what language</h2>
+  <p class="lead">Every channel feeds the <b>same backend pipeline</b> — no duplicate work. Two tiers built; the rest are "production-ready" pitch points.</p>
+
+  <h3>Intake mediums</h3>
+  <table>
+    <tr><th>Tier</th><th>Medium</th><th>Tech</th><th>Why</th></tr>
+    <tr><td><span class="pill p-live">Building</span></td><td><b>Web form + voice (mic/upload)</b></td><td>React + Firebase · Cloud STT</td><td>Reliable backbone, 100% in our control; DB pre-seeded so the dashboard looks alive.</td></tr>
+    <tr><td><span class="pill p-live">Building</span></td><td><b>Photo upload</b></td><td>Gemini multimodal</td><td>Identifies infrastructure issues from images (broken road, dry tap).</td></tr>
+    <tr><td><span class="pill p-live">Building</span></td><td><b>Telegram bot</b></td><td>Telegram API + Cloud Function</td><td>Free, no approval, accepts voice notes — the live "wow": a judge messages it on stage.</td></tr>
+    <tr><td><span class="pill p-pre">Pitch-only</span></td><td>WhatsApp / SMS-IVR / CM Helpline 1100 / CPGRAMS</td><td>Same webhook</td><td>Out of scope (approval/telecom/NIC access too slow). "Channel-agnostic — plugs in without a rebuild."</td></tr>
+  </table>
+  <div class="callout"><b>Pitch line:</b> "Intake is channel-agnostic. The same pipeline processes any channel. WhatsApp and CM Helpline plug in without rebuilding anything."</div>
+
+  <h3>Languages — English · Tamil · Hindi</h3>
+  <p>All three enter the <b>same pipeline</b>. Everything normalises to <b>English</b> (Translation API) before Gemini — processing is English-only. Replies go back in the citizen's original language.</p>
+  <table>
+    <tr><th>Layer</th><th>English</th><th>Tamil</th><th>Hindi</th></tr>
+    <tr><td>Voice intake (STT)</td><td><code>en-IN</code></td><td><code>ta-IN</code></td><td><code>hi-IN</code></td></tr>
+    <tr><td>Text input</td><td>✓</td><td>✓</td><td>✓</td></tr>
+    <tr><td>Gemini extraction</td><td colspan="3">Always English — translate first, then extract</td></tr>
+    <tr><td>Citizen acknowledgement</td><td>✓</td><td>✓ in Tamil</td><td>✓ in Hindi</td></tr>
+    <tr><td>UI labels (react-i18next)</td><td>default</td><td>✓ JSON locale</td><td>✓ JSON locale</td></tr>
+    <tr><td>MP dashboard · letters · memos</td><td colspan="3">English only</td></tr>
+  </table>
+  <div class="callout win"><b>Why this scores on Inclusivity (15%):</b> Tamil serves the demo constituency · Hindi shows national scalability · English drives the MP dashboard & official outputs · voice-first Tamil covers low-literacy citizens.</div>
+</section>
+
+<!-- ===================== 5 DATA ===================== -->
+<section class="tab" id="data">
+  <h2>What data makes this work</h2>
+  <p class="lead">Five families of data. <b>LGD codes are the skeleton</b> — every other dataset joins to a village/ward LGD code. Use best-available resolution and state it honestly in the pitch.</p>
+
+  <h3>A · Citizen-generated (we collect / synthesise)</h3>
+  <table>
+    <tr><th>Data</th><th>Source</th><th>Used in</th></tr>
+    <tr><td>Voice / text / photo submissions</td><td>Telegram · Web</td><td>Steps 0–3</td></tr>
+    <tr><td>Submission metadata (timestamp, channel, lat/lng)</td><td>System-generated</td><td>Steps 2, 6</td></tr>
+    <tr><td><b>Synthesised petitions (200–500)</b></td><td>Gemini-generated, realistic Tamil/Hindi/English, mapped to real Dharmapuri villages</td><td>Seeds the whole demo</td></tr>
+  </table>
+
+  <h3>B · Geographic / administrative (the join skeleton)</h3>
+  <table>
+    <tr><th>Data</th><th>Source</th><th>Resolution</th></tr>
+    <tr><td><b>LGD village master</b> (join key)</td><td>lgdirectory.nic.in</td><td>village / ward</td></tr>
+    <tr><td>Village boundaries (GeoJSON)</td><td>Bhuvan / GADM</td><td>polygon</td></tr>
+    <tr><td>Block / district hierarchy</td><td>LGD</td><td>all joins</td></tr>
+  </table>
+
+  <h3>C · Demographic &amp; socioeconomic</h3>
+  <table>
+    <tr><th>Data</th><th>Source</th><th>Used in</th></tr>
+    <tr><td>Population, households, age groups</td><td>Census 2011 (TN)</td><td>Gap math, eligibility</td></tr>
+    <tr><td>BPL households · SC/ST % · literacy</td><td>Census / SECC 2011</td><td>Eligibility, equity scoring, silent-village weighting</td></tr>
+    <tr><td>Health indicators</td><td>NFHS-5 (district)</td><td>Health need</td></tr>
+  </table>
+
+  <h3>D · Scheme coverage — the core of Floor 2</h3>
+  <table>
+    <tr><th>Scheme</th><th>Source</th><th>Measures</th></tr>
+    <tr><td>PMAY-G (housing)</td><td>pmayg.nic.in / AwaasSoft</td><td>sanctioned vs completed houses</td></tr>
+    <tr><td>Jal Jeevan (water)</td><td>ejalshakti.gov.in "Har Ghar Jal"</td><td>FHTCs sanctioned vs functional</td></tr>
+    <tr><td>MGNREGA (jobs)</td><td>nrega.nic.in</td><td>job cards vs demand met</td></tr>
+    <tr><td>PM-Kisan / NSAP (pensions)</td><td>pmkisan.gov.in · nsap.nic.in</td><td>registered / active beneficiaries</td></tr>
+    <tr><td>SBM-G (sanitation)</td><td>SBM rural dashboard</td><td>toilets built vs households</td></tr>
+  </table>
+
+  <h3>E · Infrastructure, dev-plan &amp; satellite</h3>
+  <table>
+    <tr><th>Data</th><th>Source</th><th>Used in</th></tr>
+    <tr><td>Schools — location, enrollment, teachers</td><td>UDISE+ (TN)</td><td>Education gap</td></tr>
+    <tr><td>PHC/CHC — doctors, beds</td><td>NHM / HMIS</td><td>Health gap</td></tr>
+    <tr><td>Road connectivity</td><td>PMGSY portal</td><td>Road gap</td></tr>
+    <tr><td>Distance to nearest facility</td><td>Computed via Maps API</td><td>Priority scoring</td></tr>
+    <tr><td><b>District development plan (PDF)</b></td><td>District Collector / state planning</td><td>RAG — map to real proposed projects, not invented ones</td></tr>
+    <tr><td>MPLADS works already sanctioned</td><td>mplads.gov.in (filter TN MP)</td><td>Anti-duplication</td></tr>
+    <tr><td>Satellite imagery (2–3 hero villages)</td><td>Google Earth Engine / Bhuvan</td><td>Visual proof in demo</td></tr>
+  </table>
+
+  <div class="callout warn"><b>Honesty notes (say these in the pitch):</b> real petition feeds (CM Helpline 1100, e-Sevai) aren't openly downloadable → petitions are synthesised (legitimate for a hackathon). Some scheme data is only block/district level → best-available resolution, stated openly. Satellite verification is deep for 2–3 hero villages, simulated for breadth.</div>
+
+  <h3>Build priority</h3>
+  <div class="grid g3">
+    <div class="card" style="border-color:var(--accent2)"><h4>Must have · Week 1</h4><ul class="clean"><li>LGD master</li><li>Census 2011 (TN villages)</li><li>PMAY-G + JJM + MGNREGA coverage</li><li>UDISE+ schools</li><li>Synthesised petitions</li></ul></div>
+    <div class="card" style="border-color:var(--warn)"><h4>Should have · Week 2</h4><ul class="clean"><li>NSAP + PM-Kisan</li><li>MPLADS works (anti-dup)</li><li>Village GeoJSON</li><li>Dev-plan PDF (RAG)</li></ul></div>
+    <div class="card"><h4>Nice to have</h4><ul class="clean"><li>PHC / HMIS</li><li>Earth Engine imagery (2–3 villages)</li><li>PMGSY road data</li></ul></div>
+  </div>
+</section>
+
+<!-- ===================== 6 PIPELINE ===================== -->
+<section class="tab" id="pipeline">
+  <h2>The end-to-end pipeline — input → process → output</h2>
+  <p class="lead">Twelve steps (0–11). Each card expands. The single most important build decision: <b>what runs LIVE vs PRECOMPUTED.</b></p>
+  <div class="legend">
+    <span><span class="dot" style="background:var(--live)"></span> LIVE (real-time per submission)</span>
+    <span><span class="dot" style="background:var(--pre)"></span> PRECOMPUTED (batch, cached in BigQuery)</span>
+    <span style="color:var(--ink)">Click any step to expand ▸</span>
+  </div>
+  <div class="callout"><b>Live critical path = Steps 0–3 + Step 10.</b> Everything else is a cached table the dashboard reads. If time slips, cut breadth — never the live intake moment or the X-Ray hero screen.</div>
+
+  <div id="steps">
+
+    <div class="step open">
+      <div class="step-head"><div class="step-num">0</div><div class="step-title">Citizen Submission (Intake) <span class="pill p-live">Live</span></div><div class="step-toggle">+</div></div>
+      <div class="step-body">
+        <div class="io">
+          <div class="in"><div class="lab">Input</div><ul><li>Tamil/Hindi/English voice note, text, or photo</li><li>Metadata: timestamp, channel, lat/lng (if consented)</li></ul></div>
+          <div class="pr"><div class="lab">Process</div><ul><li>Audio → Cloud Speech-to-Text (<code>ta/hi/en-IN</code>)</li><li>Translation API → English</li><li>Write raw record to Firestore <b>immediately</b>, return reference before any AI</li><li>Fire async task → Steps 1–3</li></ul></div>
+          <div class="out"><div class="lab">Output</div><ul><li>Firestore <code>submissions/{id}</code> raw record</li><li>Citizen sees: "Received. Reference #1042"</li></ul></div>
+        </div>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:0"><b>Demo shortcut:</b> pre-seed Firestore with the 200–500 synthesised petitions; live submissions are the delta on top. <b>Acceptance:</b> Tamil voice via Telegram → reference &lt; 3s → record visible with English translation.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-head"><div class="step-num">1</div><div class="step-title">Structured Extraction (Gemini) <span class="pill p-live">Live</span></div><div class="step-toggle">+</div></div>
+      <div class="step-body">
+        <div class="io">
+          <div class="in"><div class="lab">Input</div><ul><li>Raw English text</li><li>Photo description (Gemini multimodal, if image)</li></ul></div>
+          <div class="pr"><div class="lab">Process</div><ul><li>Gemini forced-JSON extraction prompt</li><li>Top-8 category + urgency + beneficiary + location clues</li><li><code>is_complaint</code> flag filters spam/test</li></ul></div>
+          <div class="out"><div class="lab">Output (JSON)</div><ul><li>category, need_detail, urgency(+reason)</li><li>beneficiary_estimate, location_clues[]</li></ul></div>
+        </div>
+        <pre>{ "need_category":"water", "need_detail":"No piped water for 3 months",
+  "urgency":"critical", "urgency_reason":"mentions children and summer",
+  "beneficiary_estimate":200, "location_clues":["Vellampatti","near the temple"] }</pre>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:0"><b>Acceptance:</b> 20 hand-written complaints (3 languages) → ≥18 correct category. Build a small eval set.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-head"><div class="step-num">2</div><div class="step-title">Geographic Resolution (LGD matching) <span class="pill p-live">Live</span></div><div class="step-toggle">+</div></div>
+      <div class="step-body">
+        <div class="io">
+          <div class="in"><div class="lab">Input</div><ul><li>location_clues from Step 1</li><li>lat/lng (if available)</li><li>LGD master in BigQuery</li></ul></div>
+          <div class="pr"><div class="lab">Process</div><ul><li>lat/lng → reverse geocode → point-in-polygon (BigQuery GIS)</li><li>Else fuzzy-match (SOUNDEX/trigram + alias table) Tamil + transliterated names</li><li>No signal → <code>location_unresolved</code>, bucket to constituency</li></ul></div>
+          <div class="out"><div class="lab">Output</div><ul><li>lgd_village_code, village, block, district</li><li>location_confidence (0–1)</li><li>Written to BigQuery <code>demand_records</code></li></ul></div>
+        </div>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:0"><b>Demo shortcut:</b> scope LGD + GeoJSON to Dharmapuri district only; hand-curate aliases for the ~10 demo villages so they always resolve. <b>Acceptance:</b> 5 demo villages resolve &gt; 0.8.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-head"><div class="step-num">3</div><div class="step-title">Scheme Matching — "Whose money is this?" <span class="pill p-live">Live</span></div><div class="step-toggle">+</div></div>
+      <div class="step-body">
+        <div class="io">
+          <div class="in"><div class="lab">Input</div><ul><li>need_category + lgd_village_code</li><li>Static scheme routing table</li><li>Scheme coverage lookup</li></ul></div>
+          <div class="pr"><div class="lab">Process</div><ul><li>Rule match: category → scheme</li><li>Gemini eligibility check (Yes/No/Partial)</li><li>Covered-but-failing → <code>delivery_failure</code>; not covered → <code>coverage_gap</code>; no scheme → <code>mplads_candidate</code></li></ul></div>
+          <div class="out"><div class="lab">Output</div><ul><li>matched_scheme, match_type, track (A/B)</li><li>Completes the live path → shows on dashboard with scheme tag</li></ul></div>
+        </div>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:0"><b>Routing:</b> water→JJM · housing→PMAY-G · jobs→MGNREGA · sanitation→SBM-G · health→NHM · education→Samagra Shiksha · pension→NSAP · (none)→MPLADS.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-head"><div class="step-num">4</div><div class="step-title">Demand Aggregation &amp; Theme Detection <span class="pill p-pre">Precomputed</span></div><div class="step-toggle">+</div></div>
+      <div class="step-body">
+        <div class="io">
+          <div class="in"><div class="lab">Input</div><ul><li>All demand_records</li><li>Run nightly / on-demand button</li></ul></div>
+          <div class="pr"><div class="lab">Process</div><ul><li>Embed need_detail (Vertex text-embeddings)</li><li>Cluster (DBSCAN/k-means) → theme per village</li><li>Recency weight (last 7d × 2)</li><li><b>Dedup</b> same submitter+issue; <b>anti-lobbying</b>: &gt;80% similar from different users in 24h → down-weight 0.3×</li></ul></div>
+          <div class="out"><div class="lab">Output</div><ul><li>BigQuery <code>theme_clusters</code>: label, volume, recency, coordinated_flag</li></ul></div>
+        </div>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:0"><b>Acceptance:</b> "drinking water" emerges as top theme by volume — matches the demo narrative.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-head"><div class="step-num">5</div><div class="step-title">Gap Math (Entitlement Engine) <span class="pill p-pre">Precomputed</span></div><div class="step-toggle">+</div></div>
+      <div class="step-body">
+        <div class="io">
+          <div class="in"><div class="lab">Input</div><ul><li>Census (eligible population)</li><li>Scheme MIS (covered)</li><li>Per-unit values (auditable table)</li></ul></div>
+          <div class="pr"><div class="lab">Process (per scheme per village)</div><ul><li><code>gap = eligible − covered</code></li><li><code>gap_value = gap × per_unit_value</code> (PMAY-G ≈ ₹1.2L/house)</li><li>BigQuery SQL join on lgd_village_code</li></ul></div>
+          <div class="out"><div class="lab">Output</div><ul><li>BigQuery <code>scheme_gaps</code></li><li>Headline = SUM(gap_value) → "₹148 Cr owed but undelivered"</li></ul></div>
+        </div>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:0"><b>Acceptance:</b> constituency headline ₹ renders; Vellampatti shows a large defensible PMAY-G/JJM gap.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-head"><div class="step-num">6</div><div class="step-title">Silent Village Detection <span class="pill p-pre">Precomputed</span></div><div class="step-toggle">+</div></div>
+      <div class="step-body">
+        <div class="io">
+          <div class="in"><div class="lab">Input</div><ul><li>Petition counts per village</li><li>scheme_gaps + Census deprivation</li></ul></div>
+          <div class="pr"><div class="lab">Process</div><ul><li><code>silent_score = need_score × (1/log(petition_count+1))</code></li><li>petition_count = 0 AND need_score &gt; threshold → <code>silent_flag</code></li></ul></div>
+          <div class="out"><div class="lab">Output</div><ul><li>BigQuery <code>silent_villages</code></li><li>Equity hero feature</li></ul></div>
+        </div>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:0"><b>Demo shortcut:</b> ensure Vellampatti = 0 petitions, need_score ~0.91, silent_flag TRUE — the mic-drop moment.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-head"><div class="step-num">7</div><div class="step-title">Priority Scoring &amp; Ranking (+ RAG) <span class="pill p-pre">Precomputed</span></div><div class="step-toggle">+</div></div>
+      <div class="step-body">
+        <div class="io">
+          <div class="in"><div class="lab">Input</div><ul><li>theme_clusters + scheme_gaps + silent flags</li><li>Dev-plan PDF indexed in Vertex AI Search</li></ul></div>
+          <div class="pr"><div class="lab">Process — transparent formula</div><ul><li><code>Priority = (W1·Demand + W2·Need + W3·Feasibility + W4·Equity) × Scheme_Deduction</code></li><li>W1=.30 · W2=.35 · W3=.20 · W4=.15 (tunable)</li><li>RAG: map to existing proposed project — don't invent</li></ul></div>
+          <div class="out"><div class="lab">Output</div><ul><li>BigQuery <code>ranked_projects</code> with <code>why_json</code> factor breakdown for the UI</li></ul></div>
+        </div>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:0"><b>Acceptance:</b> top-4 list matches narrative; each row expands to factor contributions; weights live in config (show "what if equity mattered more?").</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-head"><div class="step-num">8</div><div class="step-title">Budget Optimiser — Track B <span class="pill p-pre">Precomputed</span></div><div class="step-toggle">+</div></div>
+      <div class="step-body">
+        <div class="io">
+          <div class="in"><div class="lab">Input</div><ul><li>ranked_projects WHERE track='B'</li><li>₹5 cr cap · PWD/CPWD cost estimates</li></ul></div>
+          <div class="pr"><div class="lab">Process</div><ul><li>OR-Tools knapsack: maximise Σ priority s.t. Σ cost ≤ ₹5 cr</li></ul></div>
+          <div class="out"><div class="lab">Output</div><ul><li><code>mplads_portfolio</code>: selected projects, cost+score each, total used, contingency</li></ul></div>
+        </div>
+        <pre>Road Vellampatti–Pennagaram ₹1.8 Cr (74) · School Karimangalam ₹1.2 Cr (68)
+Community hall Palacode ₹0.9 Cr (61) · Drainage Harur ₹0.8 Cr (58)
+Total 4.7 / 5.0 Cr · Remaining ₹0.3 Cr contingency</pre>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-head"><div class="step-num">9</div><div class="step-title">Auto-Generated Outputs (Gemini) <span class="pill p-live">Live on click</span></div><div class="step-toggle">+</div></div>
+      <div class="step-body">
+        <div class="io">
+          <div class="in"><div class="lab">Input</div><ul><li>Track A items (scheme, dept, village, gap, gap value)</li><li>Track B optimised portfolio · MP &amp; dept details</li></ul></div>
+          <div class="pr"><div class="lab">Process</div><ul><li>Gemini drafts formal letter per Track A item</li><li>Render to PDF (WeasyPrint/ReportLab) → GCS signed URL</li></ul></div>
+          <div class="out"><div class="lab">Output</div><ul><li>Track A: official letters per department (PDF)</li><li>Track B: constituency dev-plan PDF</li><li>2–3 line plain-language justification memo</li></ul></div>
+        </div>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:0"><b>Acceptance:</b> "generate letter" → downloadable, correctly-populated PDF in &lt; 5s.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-head"><div class="step-num">10</div><div class="step-title">MP Dashboard — 5 screens <span class="pill p-live">Live (reads)</span></div><div class="step-toggle">+</div></div>
+      <div class="step-body">
+        <table style="margin-top:14px">
+          <tr><th>Screen</th><th>Source</th><th>Key element</th></tr>
+          <tr><td>1 · Citizen Intake (live feed)</td><td>Firestore</td><td>recent submissions, category + scheme tag, status</td></tr>
+          <tr><td>2 · Priorities</td><td>theme_clusters, ranked_projects</td><td>top themes, hotspot choropleth, ranked list + "why"</td></tr>
+          <tr><td>3 · Constituency X-Ray <b>(hero)</b></td><td>scheme_gaps</td><td>village coverage heatmap, "₹148 Cr owed" headline</td></tr>
+          <tr><td>4 · Act</td><td>ranked_projects, mplads_portfolio</td><td>Track A letters · Track B ₹5 cr cart → PDF</td></tr>
+          <tr><td>5 · Forgotten Villages</td><td>silent_villages</td><td>silent + high-need alert cards, "add to plan"</td></tr>
+        </table>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:0"><b>Demo shortcut:</b> polish Screen 3 most. Screen 1 must visibly update when the judge's Telegram lands (Firestore real-time listener).</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-head"><div class="step-num">11</div><div class="step-title">Close the Loop <span class="pill p-live">Live on click</span></div><div class="step-toggle">+</div></div>
+      <div class="step-body">
+        <div class="io">
+          <div class="in"><div class="lab">Input</div><ul><li>Staff marks item "letter sent" / "approved"</li></ul></div>
+          <div class="pr"><div class="lab">Process</div><ul><li>Firestore update → Cloud Function trigger</li><li>Query submissions matching village + need</li><li>Send Telegram/SMS in citizen's original language</li></ul></div>
+          <div class="out"><div class="lab">Output</div><ul><li>"Your concern about water in Vellampatti has been raised with the District Collector. Ref #1042"</li></ul></div>
+        </div>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:0"><b>Acceptance:</b> marking the demo water item actioned → judge's Telegram receives a Tamil confirmation referencing their submission.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===================== 7 MAPPING ===================== -->
+<section class="tab" id="mapping">
+  <h2>Mapping &amp; data flow</h2>
+  <p class="lead">How a single citizen voice note travels through the system, and how everything joins on the <b>LGD code</b>.</p>
+
+  <h3>End-to-end flow</h3>
+  <div class="flow">
+    <div class="node"><span class="pill p-live">0</span> Citizen input (voice / text / photo) → raw capture in Firestore</div><div class="arrow">↓</div>
+    <div class="node"><span class="pill p-live">1</span> Gemini extraction → structured JSON (category, urgency, location clues)</div><div class="arrow">↓</div>
+    <div class="node"><span class="pill p-live">2</span> LGD geo-resolution (BigQuery GIS) → village code + confidence</div><div class="arrow">↓</div>
+    <div class="node"><span class="pill p-live">3</span> Scheme matching → Track A (delivery failure / coverage gap) or Track B (MPLADS)</div><div class="arrow">↓</div>
+    <div class="node"><span class="pill p-pre">4</span> Theme clustering (embeddings) + dedup + anti-lobbying</div><div class="arrow">↓</div>
+    <div class="node"><span class="pill p-pre">5</span> Gap math: Census × scheme MIS → ₹ owed-but-undelivered</div><div class="arrow">↓</div>
+    <div class="node"><span class="pill p-pre">6</span> Silent-village detection (need ÷ petitions)</div><div class="arrow">↓</div>
+    <div class="node"><span class="pill p-pre">7</span> Priority scoring + RAG over dev plan</div><div class="arrow">↓</div>
+    <div class="node"><span class="pill p-pre">8</span> OR-Tools ₹5 cr budget optimisation</div><div class="arrow">↓</div>
+    <div class="node"><span class="pill p-live">9</span> Gemini auto-letters + memos + PDF plan</div><div class="arrow">↓</div>
+    <div class="node"><span class="pill p-live">10</span> MP dashboard — 5 screens (live reads)</div><div class="arrow">↓</div>
+    <div class="node"><span class="pill p-live">11</span> Close-the-loop citizen notification</div>
+  </div>
+
+  <h3>The join model — everything hangs off the LGD code</h3>
+  <p>Geo-resolution (Step 2) is the hinge. Once a submission carries an <code>lgd_village_code</code>, it joins to every public dataset at village level.</p>
+  <pre>          ┌──────────────── Census 2011 (eligible population, BPL, SC/ST, literacy)
+          ├──────────────── PMAY-G MIS (sanctioned vs completed)
+lgd_village_code ─┼──────────────── Jal Jeevan (FHTC functional)
+   (the skeleton) ├──────────────── MGNREGA / NSAP / PM-Kisan (coverage)
+          ├──────────────── UDISE+ schools · NHM PHCs · PMGSY roads
+          ├──────────────── Village GeoJSON (for the Maps choropleth)
+          └──────────────── demand_records (citizen petitions)</pre>
+
+  <h3>Data stores (decided)</h3>
+  <table>
+    <tr><th>Store</th><th>Holds</th><th>Steps</th></tr>
+    <tr><td><b>Firestore</b></td><td>Live submissions, real-time UI feed, status updates</td><td>0, 10, 11</td></tr>
+    <tr><td><b>BigQuery (+ GIS)</b></td><td>Analytical tables + public datasets + geo joins</td><td>2, 4–8</td></tr>
+    <tr><td><b>Cloud Storage</b></td><td>Raw audio, photos, generated PDFs</td><td>0, 9</td></tr>
+    <tr><td><b>Vertex AI</b></td><td>Gemini (extract/letters), embeddings (cluster), Vertex AI Search (RAG)</td><td>1, 4, 7, 9</td></tr>
+  </table>
+
+  <h3>Geo-mapping mechanics (Step 2 detail)</h3>
+  <div class="grid g3">
+    <div class="card"><h4>Has lat/lng</h4><p style="margin-bottom:0">Reverse geocode → point-in-polygon against village GeoJSON → confidence ≈ 0.9.</p></div>
+    <div class="card"><h4>Only text clues</h4><p style="margin-bottom:0">Fuzzy match (SOUNDEX / trigram) Tamil + transliterated names against LGD + alias table → best score.</p></div>
+    <div class="card"><h4>No signal</h4><p style="margin-bottom:0">Flag <code>location_unresolved</code>, bucket to constituency level — still counted, not lost.</p></div>
+  </div>
+
+  <h3>The two output maps</h3>
+  <div class="grid g2">
+    <div class="card" style="border-color:var(--floor1)"><span class="pill p-f1">Floor 1 map</span><h4 style="margin-top:8px">Demand hotspot</h4><p style="margin-bottom:0">Choropleth of <b>where complaints concentrate</b> — "where the noise is." Driven by demand_records counts per village.</p></div>
+    <div class="card" style="border-color:var(--floor2)"><span class="pill p-f2">Floor 2 map</span><h4 style="margin-top:8px">Constituency X-Ray (hero)</h4><p style="margin-bottom:0">Choropleth of <b>scheme-coverage %</b> — "where money is failing to land." Driven by scheme_gaps. Click a village → gap breakdown by scheme.</p></div>
+  </div>
+</section>
+
+<!-- ===================== 8 ARCH ===================== -->
+<section class="tab" id="arch">
+  <h2>Architecture — Google Cloud native, all serverless</h2>
+  <pre>Citizen (Tier 1 web voice  /  Tier 2 Telegram voice)
+        │
+        ▼
+Cloud Function / Cloud Run webhook (intake)
+        │
+   Speech-to-Text (ta/hi/en) → Translation API
+        │
+   Gemini (Vertex AI): extract need + scheme match → structured JSON
+        │
+        ▼
+BigQuery ── demand records + public datasets (Census/UDISE/NFHS/PMAY-G/JJM/MGNREGA), joined on LGD codes
+        │            │
+        │     BigQuery GIS joins + transparent Need/Gap score + OR-Tools budget optimisation
+        │            │
+        ▼            ▼
+Cloud Run API (FastAPI) → React web dashboard (Maps Platform) + Gemini-drafted letters
+                        → React Native citizen mobile app
+                           Earth Engine imagery (hero villages)</pre>
+
+  <h3>Service map (one line)</h3>
+  <p><code>Telegram/Web → Cloud Run (FastAPI) → Speech-to-Text → Translation → Gemini → Firestore (live) + BigQuery (analytics) → React dashboard / React Native app</code></p>
+
+  <h3>Full stack</h3>
+  <div class="grid g3">
+    <div class="card"><h4>Frontend</h4><span class="tag">React (web dashboard)</span><span class="tag">React Native (citizen app)</span><span class="tag">Google Maps Platform</span><span class="tag">react-i18next</span><span class="tag">Firebase Hosting/Auth</span></div>
+    <div class="card"><h4>Backend / compute</h4><span class="tag">FastAPI on Cloud Run</span><span class="tag">Cloud Functions (webhooks)</span><span class="tag">Cloud Tasks (async)</span><span class="tag">Cloud Storage</span></div>
+    <div class="card"><h4>AI / data</h4><span class="tag">Vertex AI / Gemini</span><span class="tag">Speech-to-Text + TTS</span><span class="tag">Translation API</span><span class="tag">Text embeddings</span><span class="tag">Vertex AI Search (RAG)</span><span class="tag">BigQuery + GIS</span><span class="tag">Firestore</span><span class="tag">OR-Tools</span><span class="tag">Earth Engine (light)</span></div>
+  </div>
+
+  <div class="callout win"><b>Why this scores on Deployability (25%):</b> entirely serverless on GCP credits, real TN data sources referenced, end-to-end functioning flow. Scaling one MP → 39 TN MPs + 234 MLAs is <b>configuration, not a rebuild.</b></div>
+</section>
+
+<!-- ===================== 9 SCOPE ===================== -->
+<section class="tab" id="scope">
+  <h2>Scope &amp; build plan — depth over breadth</h2>
+
+  <div class="grid g2">
+    <div class="card" style="border-color:var(--accent2)"><h4>✅ In scope</h4><ul class="clean">
+      <li>One constituency (Dharmapuri)</li>
+      <li>Real Census + UDISE + 3–4 scheme datasets (PMAY-G, JJM, MGNREGA + one pension/PM-Kisan)</li>
+      <li>Tamil/Hindi/English intake — Tier 1 web/voice + Tier 2 Telegram</li>
+      <li>Scheme-matching · X-Ray · two-track recommendations · transparent scoring</li>
+      <li>Auto-letters · ₹5 cr optimiser · silent-village detection</li>
+      <li>2–3 satellite "proof" hero villages</li>
+    </ul></div>
+    <div class="card" style="border-color:var(--bad)"><h4>⛔ Out (say so honestly)</h4><ul class="clean">
+      <li>All 30+ schemes</li>
+      <li>Live WhatsApp integration</li>
+      <li>Statewide rollout</li>
+      <li>Causal outcome / impact prediction (we do diagnosis + gap, not prediction)</li>
+    </ul></div>
+  </div>
+
+  <h3>What runs LIVE vs PRECOMPUTED</h3>
+  <table>
+    <tr><th>Steps</th><th>Mode</th><th>Why</th></tr>
+    <tr><td>0–3 · Intake → Extract → Geo → Scheme-match</td><td><span class="pill p-live">Live</span></td><td>The on-stage wow: Tamil voice note → auto-matched on dashboard in ~5s</td></tr>
+    <tr><td>4–8 · Cluster → Gap → Silent → Rank → Optimise</td><td><span class="pill p-pre">Precomputed</span></td><td>Heavy joins over static data; cached in BigQuery, "Recompute" button optional</td></tr>
+    <tr><td>9 · Auto-letters/memos</td><td><span class="pill p-live">Live on click</span></td><td>Fast single Gemini call; feels live, low risk</td></tr>
+    <tr><td>10 · Dashboard · 11 · Close-the-loop</td><td><span class="pill p-live">Live</span></td><td>Reads Firestore/BigQuery; one notification send</td></tr>
+  </table>
+
+  <h3>9-day build sequence (29 Jun → 8 Jul)</h3>
+  <table>
+    <tr><th>Days</th><th>Focus</th><th>Steps</th></tr>
+    <tr><td>29 Jun–1 Jul</td><td>Data acquisition + BigQuery schema; <b>seed synthesised petitions</b></td><td>Tables 2/5</td></tr>
+    <tr><td>1–3 Jul</td><td>Live intake pipeline (web + Telegram) → STT → Translation → Gemini → Firestore</td><td>0–3</td></tr>
+    <tr><td>2–5 Jul</td><td><b>The hard data joins:</b> scheme coverage, gap math, silent detection</td><td>3, 5, 6</td></tr>
+    <tr><td>4–6 Jul</td><td>Batch jobs: clustering, ranking + RAG, OR-Tools optimiser</td><td>4, 7, 8</td></tr>
+    <tr><td>5–7 Jul</td><td>Dashboard 5 screens (X-Ray hero first) + citizen app</td><td>10</td></tr>
+    <tr><td>6–7 Jul</td><td>Auto-letters/memos + PDF; close-the-loop notify</td><td>9, 11</td></tr>
+    <tr><td>7 Jul</td><td>Deploy to Cloud Run / Firebase; end-to-end rehearsal</td><td>all</td></tr>
+    <tr><td>8 Jul</td><td><b>Submit:</b> source code · demo video · pitch deck · live link</td><td>—</td></tr>
+  </table>
+
+  <h3>Deliverables (all four required)</h3>
+  <div class="grid g2">
+    <div class="card">☐ <b>Source code</b> — public / access-granted GitHub repo</div>
+    <div class="card">☐ <b>Demo video</b> — 3–5 min, product working end-to-end</div>
+    <div class="card">☐ <b>Pitch deck</b> — 10–12 slides</div>
+    <div class="card">☐ <b>Deployed prototype link</b> — live on Cloud Run / Firebase</div>
+  </div>
+
+  <h3>Production rollout (the "what's next")</h3>
+  <div class="grid g3">
+    <div class="card"><h4>Phase 1 · Pilot (90d)</h4><p style="margin-bottom:0">One constituency · data-sharing MoU · connect one real channel · measure petitions processed, ₹ unlocked, villages reached.</p></div>
+    <div class="card"><h4>Phase 2 · Harden (3–6mo)</h4><p style="margin-bottom:0">Privacy & security to govt standard (consent, minimal PII, GIGW); integrate CM Helpline 1100 / e-Sevai / CPGRAMS.</p></div>
+    <div class="card"><h4>Phase 3 · Scale (6–18mo)</h4><p style="margin-bottom:0">TN's 39 MPs + 234 MLAs → other states. Owner = state e-gov agency / DPC. Serverless ⇒ low run cost.</p></div>
+  </div>
+</section>
+
+<!-- ===================== 10 DEMO ===================== -->
+<section class="tab" id="demo">
+  <h2>Demo script &amp; how we score</h2>
+
+  <h3>5-minute demo flow</h3>
+  <table>
+    <tr><th>Time</th><th>Beat</th><th>What happens</th></tr>
+    <tr><td>0:30</td><td>Hook</td><td>"TN MPs sit on hundreds of crores their people are owed but not getting. Watch."</td></tr>
+    <tr><td>0:45</td><td>Citizen</td><td>Judge sends a Tamil voice note (Telegram) → appears on dashboard, auto-matched to PMAY-G.</td></tr>
+    <tr><td>1:30</td><td>X-Ray <b>(hero)</b></td><td>Constituency heatmap; "₹148 Cr owed-but-undelivered"; scheme gaps.</td></tr>
+    <tr><td>1:00</td><td>Forgotten village</td><td>Vellampatti — 0 petitions, worst indicators. <b>Mic-drop.</b></td></tr>
+    <tr><td>1:15</td><td>Two tracks</td><td>Unlock ~17,900 people for ₹0; spend ₹5 cr only on true gaps; auto-letter + PDF plan.</td></tr>
+    <tr><td>0:20</td><td>Close</td><td>"Deployable for any of TN's 39 MPs + 234 MLAs."</td></tr>
+  </table>
+
+  <h3>Judging rubric alignment</h3>
+  <table>
+    <tr><th>Criterion</th><th>Weight</th><th>How we score it</th></tr>
+    <tr><td>AI / Technical Execution</td><td>25%</td><td>Real pipeline: Tamil STT → Gemini scheme-matching → BigQuery joins → embeddings clustering → OR-Tools optimisation</td></tr>
+    <tr><td>Deployability & Scalability</td><td>25%</td><td>Real TN data, GCP-serverless, 1 MP → 39 MPs + 234 MLAs by config</td></tr>
+    <tr><td>Problem–Solution Fit</td><td>20%</td><td>Solves the real convergence/entitlement problem — not a complaint inbox</td></tr>
+    <tr><td>Inclusivity & Accessibility</td><td>15%</td><td>Tamil voice-first, low-literacy, silent-majority detection</td></tr>
+    <tr><td>Impact Potential</td><td>10%</td><td>Unlocks ₹100s of Cr of existing entitlements; framed at scale</td></tr>
+    <tr><td>Presentation & Clarity</td><td>5%</td><td>Auto-justification memos a non-technical office reads in 30s</td></tr>
+  </table>
+
+  <h3>Honest risks &amp; rebuttals</h3>
+  <div class="grid g2">
+    <div class="card"><h4>"Idea is graspable once spoken"</h4><p style="margin-bottom:0">Protect with <b>execution depth</b> (real data). Don't over-explain the concept publicly before submission.</p></div>
+    <div class="card"><h4>"This is just convergence / DPC planning"</h4><p style="margin-bottom:0">"Yes — and it fails because nobody joins the data at village level. <b>We did.</b>"</p></div>
+    <div class="card"><h4>"Hardest work = messy data joins"</h4><p style="margin-bottom:0">Tamil → LGD codes → scheme coverage. Front-load it; budget time here, not on UI.</p></div>
+    <div class="card"><h4>The real goal</h4><p style="margin-bottom:0">"Unique" is not the bar — <b>"an MP would use this Monday morning"</b> is.</p></div>
+  </div>
+</section>
+
+<div class="foot">
+  Constituency Intelligence Engine · Track 1 — Build with AI: Code for Communities · Demo: Dharmapuri, Tamil Nadu · Window 29 Jun → 8 Jul 2026.
+  Companion docs: <a href="track1-proposal.md">track1-proposal.md</a> · <a href="track1-design-spec.md">track1-design-spec.md</a> · <a href="track1-build-plan.md">track1-build-plan.md</a>
+</div>
+
+</main>
+
+<script>
+  // Tab switching
+  const tabs = document.querySelectorAll('#tabs button');
+  const panels = document.querySelectorAll('.tab');
+  tabs.forEach(btn=>btn.addEventListener('click',()=>{
+    tabs.forEach(b=>b.classList.remove('active'));
+    panels.forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }));
+  // Collapsible pipeline steps
+  document.querySelectorAll('.step-head').forEach(h=>h.addEventListener('click',()=>{
+    h.parentElement.classList.toggle('open');
+  }));
+</script>
+</body>
+</html>
