@@ -1,0 +1,18 @@
+[
+  { "id": "V-1", "name": "Madukkarai", "lgd_code": null, "block": "Madukkarai", "assembly_segment": "Coimbatore South", "urban": false, "approx_lat": 10.9070, "approx_lng": 76.9560, "coord_source": "approx" },
+  { "id": "V-2", "name": "Sulur", "lgd_code": null, "block": "Sulur", "assembly_segment": "Sulur", "urban": false, "approx_lat": 11.0250, "approx_lng": 77.1250, "coord_source": "approx" },
+  { "id": "V-3", "name": "Thondamuthur", "lgd_code": null, "block": "Thondamuthur", "assembly_segment": "Coimbatore West", "urban": false, "approx_lat": 10.9990, "approx_lng": 76.8480, "coord_source": "approx" },
+  { "id": "V-4", "name": "Perianaickenpalayam", "lgd_code": null, "block": "Perianaickenpalayam", "assembly_segment": "Coimbatore North", "urban": false, "approx_lat": 11.1150, "approx_lng": 76.9430, "coord_source": "approx" },
+  { "id": "V-5", "name": "Karamadai", "lgd_code": null, "block": "Karamadai", "assembly_segment": null, "urban": false, "approx_lat": 11.2400, "approx_lng": 76.9600, "coord_source": "approx" },
+  { "id": "V-6", "name": "Kinathukadavu", "lgd_code": null, "block": "Kinathukadavu", "assembly_segment": null, "urban": false, "approx_lat": 10.8000, "approx_lng": 77.0400, "coord_source": "approx" },
+  { "id": "V-7", "name": "Annur", "lgd_code": null, "block": "Annur", "assembly_segment": null, "urban": false, "approx_lat": 11.2330, "approx_lng": 77.1050, "coord_source": "approx" },
+  { "id": "V-8", "name": "Irugur", "lgd_code": null, "block": "Sulur", "assembly_segment": "Sulur", "urban": false, "approx_lat": 11.0150, "approx_lng": 77.0680, "coord_source": "approx" },
+  { "id": "V-9", "name": "Vellalore", "lgd_code": null, "block": "Sulur", "assembly_segment": "Singanallur", "urban": false, "approx_lat": 10.9600, "approx_lng": 77.0200, "coord_source": "approx" },
+  { "id": "V-10", "name": "Alandurai", "lgd_code": null, "block": "Thondamuthur", "assembly_segment": "Coimbatore West", "urban": false, "approx_lat": 10.9500, "approx_lng": 76.8300, "coord_source": "approx" },
+  { "id": "V-11", "name": "Pooluvapatti", "lgd_code": null, "block": "Thondamuthur", "assembly_segment": "Coimbatore West", "urban": false, "approx_lat": 10.9700, "approx_lng": 76.8900, "coord_source": "approx" },
+  { "id": "V-12", "name": "Vedapatti", "lgd_code": null, "block": "Thondamuthur", "assembly_segment": "Coimbatore West", "urban": false, "approx_lat": 10.9700, "approx_lng": 76.9100, "coord_source": "approx" },
+  { "id": "V-13", "name": "Chettipalayam", "lgd_code": null, "block": "Sulur", "assembly_segment": "Sulur", "urban": false, "approx_lat": 10.9200, "approx_lng": 77.0300, "coord_source": "approx" },
+  { "id": "V-14", "name": "Madvarayanpatti", "lgd_code": null, "block": "Sulur", "assembly_segment": "Sulur", "urban": false, "approx_lat": 11.0400, "approx_lng": 77.1100, "coord_source": "approx" },
+  { "id": "V-15", "name": "Ettimadai", "lgd_code": null, "block": "Madukkarai", "assembly_segment": "Coimbatore South", "urban": false, "approx_lat": 10.8700, "approx_lng": 76.9000, "coord_source": "approx" },
+  { "id": "V-16", "name": "Narasimhanaickenpalayam", "lgd_code": null, "block": "Perianaickenpalayam", "assembly_segment": "Coimbatore North", "urban": false, "approx_lat": 11.0900, "approx_lng": 76.9300, "coord_source": "approx" }
+]
