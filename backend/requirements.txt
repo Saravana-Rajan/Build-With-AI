@@ -21,6 +21,9 @@ ortools==9.11.4210
 numpy==2.2.1
 pandas==2.2.3
 
+# Gemini (Developer API, multimodal + embeddings)
+google-genai>=1.0.0
+
 # Public data ingestion
 datagovindia==0.3.2
 

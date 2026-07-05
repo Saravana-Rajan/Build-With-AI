@@ -6,6 +6,7 @@
  * Every call is typed against src/types.ts.
  */
 import type {
+  DemandRecord,
   DemandRow,
   RankedProject,
   SchemeGap,
@@ -13,6 +14,13 @@ import type {
   StatsResponse,
   UnifiedIssue,
 } from "./types";
+
+/** POST /api/intake response — a citizen ack + the structured record. */
+export interface IntakeResponse {
+  reference: string;
+  ack: string;
+  record: DemandRecord;
+}
 
 export const API_URL =
   import.meta.env.VITE_API_URL?.replace(/\/$/, "") ?? "http://localhost:8000";
@@ -60,5 +68,38 @@ export const api = {
   unifiedIssues: (limit = 100) =>
     get<UnifiedIssue[]>(`/api/unified-issues?limit=${limit}`),
 };
+
+/**
+ * Submit a scanned/photographed petition (image/PDF/audio) for multimodal
+ * extraction. Sends multipart/form-data to POST /api/intake and returns the
+ * citizen ack plus the structured DemandRecord.
+ */
+export async function submitIntake(
+  file: File,
+  language: string,
+  source: string,
+): Promise<IntakeResponse> {
+  const form = new FormData();
+  form.append("file", file);
+  form.append("language", language);
+  form.append("source", source);
+
+  const res = await fetch(`${API_URL}/api/intake`, {
+    method: "POST",
+    headers: { Accept: "application/json" },
+    body: form,
+  });
+  if (!res.ok) {
+    let detail = `Intake failed (${res.status})`;
+    try {
+      const body = (await res.json()) as { detail?: string };
+      if (body?.detail) detail = body.detail;
+    } catch {
+      /* non-JSON error body — keep the generic message */
+    }
+    throw new ApiError(res.status, detail);
+  }
+  return (await res.json()) as IntakeResponse;
+}
 
 export default api;

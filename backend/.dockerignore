@@ -1,0 +1,12 @@
+# Never ship secrets or local cruft into the image
+.env
+.env.*
+secrets/
+*.json.key
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+app/analytics/tests/

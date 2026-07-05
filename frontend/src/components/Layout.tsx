@@ -7,6 +7,7 @@ interface NavItem {
 }
 
 const NAV: NavItem[] = [
+  { to: "/scan", label: "Scan Petition", hint: "AI reads a letter" },
   { to: "/intake", label: "Intake", hint: "Live feed" },
   { to: "/priorities", label: "Priorities", hint: "Themes + ranked list" },
   { to: "/x-ray", label: "Constituency X-Ray", hint: "Coverage + ₹ owed" },

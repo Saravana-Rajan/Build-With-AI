@@ -5,6 +5,7 @@ import Priorities from "./screens/Priorities";
 import ConstituencyXRay from "./screens/ConstituencyXRay";
 import Act from "./screens/Act";
 import ForgottenVillages from "./screens/ForgottenVillages";
+import ScanPetition from "./screens/ScanPetition";
 
 export const router = createBrowserRouter([
   {
@@ -13,6 +14,7 @@ export const router = createBrowserRouter([
     children: [
       // Constituency X-Ray is the hero — land there by default.
       { index: true, element: <Navigate to="/x-ray" replace /> },
+      { path: "scan", element: <ScanPetition /> },
       { path: "intake", element: <IntakeFeed /> },
       { path: "priorities", element: <Priorities /> },
       { path: "x-ray", element: <ConstituencyXRay /> },

@@ -645,3 +645,150 @@ body {
   padding: 6px 10px;
   font-size: 13px;
 }
+.btn--primary {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #fff;
+  font-weight: 600;
+}
+.btn--primary:hover:not(:disabled) {
+  background: #1a4368;
+  border-color: #1a4368;
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Scan Petition ──────────────────────────────────────────────────────── */
+.scan-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 960px) {
+  .scan-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.scan-uploader {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+  padding: 40px 20px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  background: var(--bg);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.dropzone:hover {
+  border-color: var(--brand);
+}
+.dropzone--active {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+}
+.dropzone--filled {
+  border-style: solid;
+  border-color: var(--accent);
+  background: var(--surface);
+}
+.dropzone__name {
+  word-break: break-all;
+}
+
+.scan-controls {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.scan-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.scan-field__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+.scan-select {
+  font: inherit;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+}
+.scan-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.scan-result__stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ack-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #eafaf1;
+  border: 1px solid #cdeede;
+  border-radius: var(--radius);
+  padding: 16px 18px;
+}
+.ack-card__text {
+  margin: 0;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.record-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 20px;
+  margin: 0;
+}
+@media (max-width: 560px) {
+  .record-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.record-grid__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.record-grid__label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--muted);
+}
+.record-grid__value {
+  margin: 0;
+  color: var(--ink);
+}
+
+.scan-transcript {
+  margin: 0;
+  white-space: pre-wrap;
+  color: var(--ink-soft);
+}
