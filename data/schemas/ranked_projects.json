@@ -1,0 +1,13 @@
+[
+  {"name": "rank", "type": "INTEGER", "mode": "REQUIRED"},
+  {"name": "area_id", "type": "STRING", "mode": "REQUIRED"},
+  {"name": "place_name", "type": "STRING", "mode": "REQUIRED"},
+  {"name": "title", "type": "STRING", "mode": "REQUIRED"},
+  {"name": "category", "type": "STRING", "mode": "REQUIRED"},
+  {"name": "track", "type": "STRING", "mode": "REQUIRED"},
+  {"name": "priority_score", "type": "FLOAT", "mode": "REQUIRED"},
+  {"name": "why", "type": "JSON", "mode": "NULLABLE"},
+  {"name": "estimated_cost", "type": "FLOAT", "mode": "NULLABLE"},
+  {"name": "beneficiaries", "type": "INTEGER", "mode": "NULLABLE"},
+  {"name": "matched_scheme", "type": "STRING", "mode": "NULLABLE"}
+]

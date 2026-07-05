@@ -1,0 +1,32 @@
+{
+  "_meta": {
+    "description": "Category -> responsible government scheme routing table, split urban/rural, with realistic per-unit values in INR. Categories with no scheme are MPLADS candidates (Track B).",
+    "currency": "INR",
+    "track_legend": {
+      "A": "unlock existing entitlement (scheme money, ~0 MPLADS spend)",
+      "B": "spend MPLADS (no scheme owns it)"
+    }
+  },
+  "urban": {
+    "housing":    {"scheme": "PMAY-U",          "per_unit_value": 250000, "unit": "house",      "track": "A"},
+    "water":      {"scheme": "AMRUT",           "per_unit_value": 15000,  "unit": "connection", "track": "A"},
+    "jobs":       {"scheme": "NULM",            "per_unit_value": 20000,  "unit": "person",     "track": "A"},
+    "sanitation": {"scheme": "SBM-U",           "per_unit_value": 12000,  "unit": "toilet",     "track": "A"},
+    "education":  {"scheme": "Samagra Shiksha", "per_unit_value": 8000,   "unit": "student",    "track": "A"},
+    "health":     {"scheme": "NHM",             "per_unit_value": 5000,   "unit": "person",     "track": "A"},
+    "pension":    {"scheme": "NSAP",            "per_unit_value": 6000,   "unit": "person/yr",  "track": "A"},
+    "road":       {"scheme": null,              "per_unit_value": 0,      "unit": "work",       "track": "B"},
+    "other":      {"scheme": null,              "per_unit_value": 0,      "unit": "work",       "track": "B"}
+  },
+  "rural": {
+    "housing":    {"scheme": "PMAY-G",          "per_unit_value": 120000, "unit": "house",      "track": "A"},
+    "water":      {"scheme": "JJM",             "per_unit_value": 18000,  "unit": "connection", "track": "A"},
+    "jobs":       {"scheme": "MGNREGA",         "per_unit_value": 25000,  "unit": "person/yr",  "track": "A"},
+    "sanitation": {"scheme": "SBM-G",           "per_unit_value": 12000,  "unit": "toilet",     "track": "A"},
+    "education":  {"scheme": "Samagra Shiksha", "per_unit_value": 8000,   "unit": "student",    "track": "A"},
+    "health":     {"scheme": "NHM",             "per_unit_value": 5000,   "unit": "person",     "track": "A"},
+    "pension":    {"scheme": "NSAP",            "per_unit_value": 6000,   "unit": "person/yr",  "track": "A"},
+    "road":       {"scheme": null,              "per_unit_value": 0,      "unit": "work",       "track": "B"},
+    "other":      {"scheme": null,              "per_unit_value": 0,      "unit": "work",       "track": "B"}
+  }
+}

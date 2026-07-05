@@ -1,0 +1,12 @@
+[
+  {"name": "area_id", "type": "STRING", "mode": "REQUIRED"},
+  {"name": "place_name", "type": "STRING", "mode": "REQUIRED"},
+  {"name": "urban", "type": "BOOLEAN", "mode": "REQUIRED"},
+  {"name": "scheme", "type": "STRING", "mode": "REQUIRED"},
+  {"name": "eligible", "type": "INTEGER", "mode": "REQUIRED"},
+  {"name": "covered", "type": "INTEGER", "mode": "REQUIRED"},
+  {"name": "gap", "type": "INTEGER", "mode": "REQUIRED"},
+  {"name": "per_unit_value", "type": "FLOAT", "mode": "REQUIRED"},
+  {"name": "gap_value", "type": "FLOAT", "mode": "REQUIRED"},
+  {"name": "data_source", "type": "STRING", "mode": "NULLABLE"}
+]

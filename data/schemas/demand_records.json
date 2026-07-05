@@ -1,0 +1,22 @@
+[
+  {"name": "id", "type": "STRING", "mode": "REQUIRED"},
+  {"name": "source", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "language", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "raw_text", "type": "STRING", "mode": "REQUIRED"},
+  {"name": "translated_text", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "category", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "need_detail", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "urgency", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "urgency_reason", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "beneficiary_estimate", "type": "INTEGER", "mode": "NULLABLE"},
+  {"name": "place_name", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "area_id", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "urban", "type": "BOOLEAN", "mode": "NULLABLE"},
+  {"name": "lgd_or_ward_code", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "location_confidence", "type": "FLOAT", "mode": "NULLABLE"},
+  {"name": "matched_scheme", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "match_type", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "track", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "created_at", "type": "TIMESTAMP", "mode": "REQUIRED"},
+  {"name": "synthetic", "type": "BOOLEAN", "mode": "NULLABLE"}
+]

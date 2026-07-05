@@ -1,0 +1,10 @@
+[
+  {"name": "id", "type": "STRING", "mode": "REQUIRED"},
+  {"name": "source", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "language_hint", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "raw_text", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "voice_path", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "photo_path", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "created_at", "type": "TIMESTAMP", "mode": "REQUIRED"},
+  {"name": "synthetic", "type": "BOOLEAN", "mode": "NULLABLE"}
+]

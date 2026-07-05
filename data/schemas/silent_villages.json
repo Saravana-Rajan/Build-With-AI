@@ -1,0 +1,8 @@
+[
+  {"name": "area_id", "type": "STRING", "mode": "REQUIRED"},
+  {"name": "place_name", "type": "STRING", "mode": "REQUIRED"},
+  {"name": "need_score", "type": "FLOAT", "mode": "REQUIRED"},
+  {"name": "petition_count", "type": "INTEGER", "mode": "REQUIRED"},
+  {"name": "silent_score", "type": "FLOAT", "mode": "REQUIRED"},
+  {"name": "flagged", "type": "BOOLEAN", "mode": "REQUIRED"}
+]
