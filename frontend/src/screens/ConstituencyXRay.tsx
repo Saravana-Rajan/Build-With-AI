@@ -1,11 +1,16 @@
+import { useMemo, useState } from "react";
+import { Search } from "lucide-react";
 import Page from "../components/Page";
 import MapPlaceholder from "../components/MapPlaceholder";
 import type { AreaCell } from "../components/MapPlaceholder";
 import StateBlock from "../components/StateBlock";
+import Pagination, { usePagination } from "../components/Pagination";
 import { api } from "../api";
 import { useFetch } from "../useFetch";
 import { formatCrore } from "../format";
 import type { SchemeGap } from "../types";
+
+const PAGE_SIZE = 12;
 
 /** Turn scheme gaps into map cells: coverage ratio drives the red→green shade. */
 function gapsToCells(gaps: SchemeGap[]): AreaCell[] {
@@ -18,7 +23,26 @@ function gapsToCells(gaps: SchemeGap[]): AreaCell[] {
 
 export default function ConstituencyXRay() {
   const stats = useFetch(() => api.stats(), () => false);
-  const gaps = useFetch(() => api.schemeGaps(100));
+  const gaps = useFetch(() => api.schemeGaps(300));
+  const [query, setQuery] = useState("");
+
+  const rows: SchemeGap[] = gaps.status === "ready" ? gaps.data : [];
+
+  // Filter by scheme (or place) text, then sort by gap value (largest owed first).
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const matched = q
+      ? rows.filter(
+          (g) =>
+            g.scheme.toLowerCase().includes(q) ||
+            g.place_name.toLowerCase().includes(q),
+        )
+      : rows;
+    return [...matched].sort((a, b) => b.gap_value - a.gap_value);
+  }, [rows, query]);
+
+  const { page, pageCount, pageItems, total, from, to, setPage } =
+    usePagination(filtered, PAGE_SIZE);
 
   return (
     <Page
@@ -53,7 +77,14 @@ export default function ConstituencyXRay() {
 
         <div className="card">
           <div className="card__head">
-            <h2 className="section-title">Biggest gaps</h2>
+            <h2 className="section-title">
+              Biggest gaps
+              {gaps.status === "ready" && (
+                <span className="count-badge">
+                  {filtered.length.toLocaleString("en-IN")}
+                </span>
+              )}
+            </h2>
           </div>
 
           {gaps.status === "loading" && (
@@ -67,22 +98,58 @@ export default function ConstituencyXRay() {
           )}
 
           {gaps.status === "ready" && (
-            <ul className="gap-list">
-              {gaps.data.map((g) => (
-                <li key={`${g.area_id}-${g.scheme}`} className="gap-list__item">
-                  <div>
-                    <strong>{g.place_name}</strong>
-                    <span className="muted"> · {g.scheme}</span>
-                    <div className="muted gap-list__sub">
-                      {g.covered.toLocaleString("en-IN")} /{" "}
-                      {g.eligible.toLocaleString("en-IN")} covered
-                      {g.data_source ? ` · ${g.data_source}` : ""}
-                    </div>
-                  </div>
-                  <div className="gap-list__value">{formatCrore(g.gap_value)}</div>
-                </li>
-              ))}
-            </ul>
+            <>
+              <div className="toolbar">
+                <div className="search-box">
+                  <Search className="search-box__icon" size={15} />
+                  <input
+                    className="search-box__input"
+                    type="search"
+                    placeholder="Filter by scheme or place…"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    aria-label="Filter scheme gaps"
+                  />
+                </div>
+              </div>
+
+              {filtered.length === 0 ? (
+                <StateBlock
+                  variant="empty"
+                  title="No matching gaps"
+                  detail={`Nothing matches “${query}”.`}
+                />
+              ) : (
+                <>
+                  <ul className="gap-list">
+                    {pageItems.map((g) => (
+                      <li key={`${g.area_id}-${g.scheme}`} className="gap-list__item">
+                        <div>
+                          <strong>{g.place_name}</strong>
+                          <span className="muted"> · {g.scheme}</span>
+                          <div className="muted gap-list__sub">
+                            {g.covered.toLocaleString("en-IN")} /{" "}
+                            {g.eligible.toLocaleString("en-IN")} covered
+                            {g.data_source ? ` · ${g.data_source}` : ""}
+                          </div>
+                        </div>
+                        <div className="gap-list__value">{formatCrore(g.gap_value)}</div>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Pagination
+                    page={page}
+                    pageCount={pageCount}
+                    from={from}
+                    to={to}
+                    total={total}
+                    onPageChange={setPage}
+                    noun="gaps"
+                  />
+                </>
+              )}
+            </>
           )}
         </div>
       </section>

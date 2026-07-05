@@ -1,9 +1,12 @@
 import Page from "../components/Page";
 import StateBlock from "../components/StateBlock";
+import Pagination, { usePagination } from "../components/Pagination";
 import { api } from "../api";
 import { useFetch } from "../useFetch";
 import { formatInr } from "../format";
-import type { UnifiedIssue } from "../types";
+import type { RankedProject, UnifiedIssue } from "../types";
+
+const PAGE_SIZE = 12;
 
 /** "N raw → M issues, duplicates merged" from the unified-issues clusters. */
 function headline(issues: UnifiedIssue[]): string {
@@ -31,8 +34,20 @@ function whyFactors(why: Record<string, number> | null | undefined) {
 }
 
 export default function Priorities() {
-  const issues = useFetch(() => api.unifiedIssues(100));
-  const projects = useFetch(() => api.rankedProjects(50));
+  const issues = useFetch(() => api.unifiedIssues(300));
+  const projects = useFetch(() => api.rankedProjects(300));
+
+  const projectRows: RankedProject[] =
+    projects.status === "ready" ? projects.data : [];
+  const {
+    page,
+    pageCount,
+    pageItems,
+    total,
+    from,
+    to,
+    setPage,
+  } = usePagination(projectRows, PAGE_SIZE);
 
   return (
     <Page
@@ -52,7 +67,12 @@ export default function Priorities() {
         </span>
       </section>
 
-      <h2 className="section-title">Ranked projects</h2>
+      <h2 className="section-title">
+        Ranked projects
+        {projects.status === "ready" && (
+          <span className="count-badge">{projectRows.length.toLocaleString("en-IN")}</span>
+        )}
+      </h2>
 
       {projects.status === "loading" && (
         <StateBlock
@@ -73,9 +93,10 @@ export default function Priorities() {
       )}
 
       {projects.status === "ready" && (
-        <ul className="ranked-list">
-          {projects.data.map((p) => (
-            <li key={p.rank} className="ranked-item">
+        <>
+          <ul className="ranked-list">
+            {pageItems.map((p) => (
+              <li key={p.rank} className="ranked-item">
               <div className="ranked-item__rank">{p.rank}</div>
               <div className="ranked-item__body">
                 <div className="ranked-item__head">
@@ -92,9 +113,20 @@ export default function Priorities() {
               <div className="ranked-item__score num">
                 {p.priority_score.toFixed(2)}
               </div>
-            </li>
-          ))}
-        </ul>
+              </li>
+            ))}
+          </ul>
+
+          <Pagination
+            page={page}
+            pageCount={pageCount}
+            from={from}
+            to={to}
+            total={total}
+            onPageChange={setPage}
+            noun="projects"
+          />
+        </>
       )}
     </Page>
   );
