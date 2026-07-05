@@ -34,6 +34,8 @@ def health():
     }
 
 
-# Pipeline routers are mounted here as they are built:
-# from app.pipeline import intake
-# app.include_router(intake.router, prefix="/api")
+from app.pipeline import intake
+from app import api
+
+app.include_router(intake.router, prefix="/api")
+app.include_router(api.router, prefix="/api")
