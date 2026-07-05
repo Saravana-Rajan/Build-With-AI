@@ -24,9 +24,6 @@ pandas==2.2.3
 # Gemini (Developer API, multimodal + embeddings)
 google-genai>=1.0.0
 
-# Public data ingestion
-datagovindia==0.3.2
-
 # PDF letter generation
 reportlab==4.2.5
 
