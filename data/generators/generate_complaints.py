@@ -33,57 +33,76 @@ FALLBACK_FRINGE = [
     "Kinathukadavu", "Annur", "Madvarayanpatti",
 ]
 
-# ── Category templates: (english, tamil) with {place} slot ───────────────────
+# ── Category templates: (english, tamil, hindi) with {place} slot ────────────
 TEMPLATES = {
     "water": [
         ("No drinking water in {place} for the last 3 days.",
-         "{place}ல மூணு நாளா குடிக்க தண்ணி வரலை."),
+         "{place}ல மூணு நாளா குடிக்க தண்ணி வரலை.",
+         "{place} में पिछले 3 दिनों से पीने का पानी नहीं आ रहा है।"),
         ("The public tap in {place} has been dry for weeks.",
-         "{place} பொது குழாயில வாரக்கணக்கா தண்ணி இல்லை."),
+         "{place} பொது குழாயில வாரக்கணக்கா தண்ணி இல்லை.",
+         "{place} का सार्वजनिक नल कई हफ्तों से सूखा पड़ा है।"),
     ],
     "road": [
         ("The road in {place} is full of potholes, accidents happen daily.",
-         "{place} ரோட்ல முழுக்க பள்ளம், தினமும் விபத்து."),
+         "{place} ரோட்ல முழுக்க பள்ளம், தினமும் விபத்து.",
+         "{place} की सड़क गड्ढों से भरी है, रोज़ दुर्घटनाएँ होती हैं।"),
         ("No proper road connectivity to {place}, buses can't come.",
-         "{place}க்கு ஒழுங்கான ரோடு இல்லை, பஸ் வர முடியலை."),
+         "{place}க்கு ஒழுங்கான ரோடு இல்லை, பஸ் வர முடியலை.",
+         "{place} तक ठीक सड़क नहीं है, बसें नहीं आ पातीं।"),
     ],
     "housing": [
         ("We are eligible for a housing scheme but haven't received a house in {place}.",
-         "{place}ல வீட்டு திட்டத்துக்கு தகுதி இருந்தும் வீடு கிடைக்கலை."),
+         "{place}ல வீட்டு திட்டத்துக்கு தகுதி இருந்தும் வீடு கிடைக்கலை.",
+         "{place} में हम आवास योजना के पात्र हैं पर घर नहीं मिला।"),
         ("House sanctioned in {place} but construction stalled for a year.",
-         "{place}ல வீடு அனுமதி ஆனா ஒரு வருஷமா வேலை நிக்குது."),
+         "{place}ல வீடு அனுமதி ஆனா ஒரு வருஷமா வேலை நிக்குது.",
+         "{place} में घर स्वीकृत हुआ पर निर्माण एक साल से रुका है।"),
     ],
     "education": [
         ("The government school in {place} has a leaking roof and no teachers.",
-         "{place} அரசு பள்ளியில கூரை ஒழுகுது, ஆசிரியர்களும் இல்லை."),
+         "{place} அரசு பள்ளியில கூரை ஒழுகுது, ஆசிரியர்களும் இல்லை.",
+         "{place} के सरकारी स्कूल की छत टपकती है और शिक्षक नहीं हैं।"),
         ("Children in {place} travel 8 km to reach the nearest school.",
-         "{place} குழந்தைகள் 8 கிமீ போய் பள்ளிக்கு போறாங்க."),
+         "{place} குழந்தைகள் 8 கிமீ போய் பள்ளிக்கு போறாங்க.",
+         "{place} के बच्चे नज़दीकी स्कूल के लिए 8 किमी चलते हैं।"),
     ],
     "health": [
         ("No PHC near {place}, ambulance takes over an hour.",
-         "{place} பக்கத்துல ஆரம்ப சுகாதார நிலையம் இல்லை, ஆம்புலன்ஸ் ஒரு மணி நேரம் ஆகுது."),
+         "{place} பக்கத்துல ஆரம்ப சுகாதார நிலையம் இல்லை, ஆம்புலன்ஸ் ஒரு மணி நேரம் ஆகுது.",
+         "{place} के पास कोई पीएचसी नहीं, एम्बुलेंस एक घंटे से ज़्यादा लेती है।"),
         ("Medicine stock-out at the {place} health centre.",
-         "{place} சுகாதார நிலையத்தில மருந்து இல்லை."),
+         "{place} சுகாதார நிலையத்தில மருந்து இல்லை.",
+         "{place} स्वास्थ्य केंद्र में दवाइयाँ खत्म हैं।"),
     ],
     "jobs": [
         ("MGNREGA work demanded in {place} but not provided for months.",
-         "{place}ல வேலை கேட்டும் பல மாசமா கொடுக்கலை."),
+         "{place}ல வேலை கேட்டும் பல மாசமா கொடுக்கலை.",
+         "{place} में मनरेगा काम माँगा पर महीनों से नहीं मिला।"),
         ("Job card not issued to families in {place}.",
-         "{place} குடும்பங்களுக்கு வேலை அட்டை கொடுக்கலை."),
+         "{place} குடும்பங்களுக்கு வேலை அட்டை கொடுக்கலை.",
+         "{place} के परिवारों को जॉब कार्ड नहीं मिला।"),
     ],
     "pension": [
         ("Old-age pension not received in {place} for 6 months.",
-         "{place}ல ஆறு மாசமா முதியோர் ஓய்வூதியம் வரலை."),
+         "{place}ல ஆறு மாசமா முதியோர் ஓய்வூதியம் வரலை.",
+         "{place} में 6 महीने से वृद्धावस्था पेंशन नहीं आई।"),
         ("Widow pension application from {place} pending for a year.",
-         "{place} விதவை ஓய்வூதிய விண்ணப்பம் ஒரு வருஷமா நிலுவையில."),
+         "{place} விதவை ஓய்வூதிய விண்ணப்பம் ஒரு வருஷமா நிலுவையில.",
+         "{place} का विधवा पेंशन आवेदन एक साल से लंबित है।"),
     ],
     "sanitation": [
         ("Sewage overflowing on the streets of {place}.",
-         "{place} தெருக்களில கழிவுநீர் வழிஞ்சு ஓடுது."),
+         "{place} தெருக்களில கழிவுநீர் வழிஞ்சு ஓடுது.",
+         "{place} की गलियों में सीवेज बह रहा है।"),
         ("No toilets built in {place}, open defecation continues.",
-         "{place}ல கழிப்பறை கட்டலை, திறந்தவெளி கழிப்பு தொடருது."),
+         "{place}ல கழிப்பறை கட்டலை, திறந்தவெளி கழிப்பு தொடருது.",
+         "{place} में शौचालय नहीं बने, खुले में शौच जारी है।"),
     ],
 }
+
+# Index of each language within a template tuple
+LANG_INDEX = {"en": 0, "ta": 1, "hi": 2}
 
 URGENCIES = ["critical", "high", "medium", "low"]
 CHANNELS = ["web", "telegram", "phone", "meeting"]
@@ -117,15 +136,11 @@ def generate(n: int, seed: int = 42):
         is_urban = rng.random() < 0.65
         place = rng.choice(urban if is_urban else fringe)
         category = rng.choice(cats)
-        en, ta = rng.choice(TEMPLATES[category])
-        # language mix: 55% Tamil, 30% English, 15% Tanglish(mark as ta)
+        tpl = rng.choice(TEMPLATES[category])
+        # language mix: 40% Tamil, 30% Hindi, 30% English
         r = rng.random()
-        if r < 0.55:
-            lang, text = "ta", ta.format(place=place)
-        elif r < 0.85:
-            lang, text = "en", en.format(place=place)
-        else:
-            lang, text = "ta", ta.format(place=place)  # Tanglish bucket → ta pipeline
+        lang = "ta" if r < 0.40 else ("hi" if r < 0.70 else "en")
+        text = tpl[LANG_INDEX[lang]].format(place=place)
         ts = now - timedelta(days=rng.randint(0, 21), hours=rng.randint(0, 23))
         out.append({
             "id": f"SYN-{i+1:04d}",
