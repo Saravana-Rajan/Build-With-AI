@@ -1,0 +1,101 @@
+<!-- @dsCard group="Floor 1 — Required basics" -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/>
+<title>Priorities — themes, hotspots, ranked list</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  :root{--ink:#0c1f33;--ink2:#14304b;--paper:#f6f1e7;--paper2:#fffdf8;--line:#e4dccb;--marigold:#e8853a;--marigold2:#c96a26;--saffron:#f2a93b;--green:#2f8a5b;--green-s:#e3f1e8;--red:#c8453b;--red-s:#fbe7e4;--muted:#6b7585;--amber-s:#fbf0d8;--blue:#3b6fb5;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Plus Jakarta Sans','Noto Sans Tamil',sans-serif;background:var(--paper);color:var(--ink);width:1440px;height:900px;display:grid;grid-template-columns:248px 1fr;overflow:hidden}
+  .mono{font-family:'DM Mono',monospace}
+  .sb{background:var(--ink);color:#cdd8e6;padding:22px 16px;display:flex;flex-direction:column;gap:5px;position:relative;overflow:hidden}
+  .sb::after{content:"";position:absolute;inset:0;background:radial-gradient(420px 200px at 10% -8%,rgba(242,169,59,.18),transparent 60%);pointer-events:none}
+  .brand{display:flex;align-items:center;gap:11px;margin-bottom:24px;z-index:1}
+  .mark{width:40px;height:40px;border-radius:11px;background:linear-gradient(150deg,var(--saffron),var(--marigold2));display:grid;place-items:center;color:#fff;font-weight:800;font-size:17px;font-family:'Bricolage Grotesque'}
+  .brand h1{font-size:16px;color:#fff;font-weight:700}.brand .s{font-size:10px;color:#7e93ad;letter-spacing:.14em;text-transform:uppercase;margin-top:3px}
+  .nl{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#5f7591;margin:14px 8px 6px;z-index:1}
+  .ni{display:flex;align-items:center;gap:11px;padding:10px 13px;border-radius:10px;font-size:13px;font-weight:500;color:#bcccdd;z-index:1}
+  .ni .i{font-size:16px;width:18px;text-align:center}
+  .ni.on{background:linear-gradient(100deg,rgba(242,169,59,.22),rgba(242,169,59,.05));color:#fff;border:1px solid rgba(242,169,59,.35)}
+  .foot{margin-top:auto;z-index:1;padding-top:16px;border-top:1px solid rgba(255,255,255,.08);font-size:11px;color:#8ea2bb;line-height:1.6}.foot b{color:#fff}
+  .main{overflow:hidden;display:flex;flex-direction:column}
+  .top{background:var(--paper2);border-bottom:1px solid var(--line);padding:16px 30px;display:flex;align-items:center;justify-content:space-between}
+  .top .cr{font-size:12px;color:var(--muted)}.top .cr b{color:var(--ink)}
+  .top h2{font-size:20px;font-weight:700;margin-top:2px}
+  .pill{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:600;color:var(--blue);background:#e9f0fa;border:1px solid #cadcf2;padding:6px 13px;border-radius:30px}
+  .body{padding:22px 30px;overflow:hidden;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto 1fr;gap:18px}
+  .card{background:var(--paper2);border:1px solid var(--line);border-radius:15px;padding:18px 20px;box-shadow:0 16px 36px -24px rgba(12,31,51,.5)}
+  .card h3{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+  .span2{grid-column:1 / -1}
+  /* themes */
+  .theme{margin-bottom:13px}.theme:last-child{margin-bottom:0}
+  .th{display:flex;justify-content:space-between;font-size:13.5px;font-weight:600;margin-bottom:5px}
+  .th .n{display:flex;align-items:center;gap:8px}.th .v{font-family:'DM Mono';color:var(--muted)}
+  .tbar{height:9px;border-radius:6px;background:#ece4d3;overflow:hidden}.tbar i{display:block;height:100%;border-radius:6px}
+  .c1{background:linear-gradient(90deg,#4f8fd6,#3b6fb5)}.c2{background:linear-gradient(90deg,var(--saffron),var(--marigold2))}.c3{background:linear-gradient(90deg,#5bb98c,#2f8a5b)}.c4{background:linear-gradient(90deg,#e57f76,#c8453b)}
+  /* hotspot mini map */
+  .mapc{background:radial-gradient(120% 120% at 0% 0%,#16324d,#0c1f33 70%);border-radius:12px;padding:14px;position:relative;height:230px;border:1px solid #0a1828}
+  .mt{color:#9fb4cd;font-size:10px;letter-spacing:.16em;text-transform:uppercase}.mt b{color:#fff}
+  .vs{position:relative;height:170px;margin-top:6px}
+  .vil{position:absolute;border-radius:50%;border:2px solid rgba(255,255,255,.2)}
+  .ward{position:absolute;font-size:9px;color:#cdd8e6;font-family:'DM Mono'}
+  /* ranked list */
+  .rank{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--line)}.rank:last-child{border:none}
+  .rk{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-family:'Bricolage Grotesque';font-weight:800;color:#fff;flex:0 0 30px}
+  .r1{background:var(--green)}.r2{background:var(--saffron)}.r3{background:var(--blue)}.r4{background:var(--muted)}
+  .rinfo{flex:1}.rinfo .rn{font-weight:600;font-size:14px}.rinfo .rw{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .score{font-family:'Bricolage Grotesque';font-weight:800;font-size:22px}
+  .why{font-size:10.5px;color:var(--marigold2);font-weight:600;margin-top:2px}
+</style></head>
+<body>
+  <aside class="sb">
+    <div class="brand"><div class="mark">CI</div><div><h1>Constituency&nbsp;IQ</h1><div class="s">name TBD</div></div></div>
+    <div class="nl">Floor 1 · basics</div>
+    <div class="ni"><span class="i">💬</span> Citizen intake</div>
+    <div class="ni on"><span class="i">📊</span> Priorities</div>
+    <div class="nl">Floor 2 · differentiator</div>
+    <div class="ni"><span class="i">🩻</span> Constituency X-Ray</div>
+    <div class="ni"><span class="i">⚖️</span> Unlock / Spend</div>
+    <div class="ni"><span class="i">🔇</span> Forgotten villages</div>
+    <div class="foot"><b>Dharmapuri</b> · Lok Sabha<br/>2,940 submissions analysed<br/>last 30 days</div>
+  </aside>
+  <main class="main">
+    <div class="top">
+      <div><div class="cr">Tamil Nadu · <b>Dharmapuri (DPR)</b></div><h2>Priorities — what people are asking for</h2></div>
+      <span class="pill">📊 2,940 submissions · 4 languages</span>
+    </div>
+    <div class="body">
+      <div class="card">
+        <h3>🔁 Recurring themes (by volume)</h3>
+        <div class="theme"><div class="th"><div class="n">🚰 Drinking water</div><div class="v">1,250</div></div><div class="tbar"><i class="c1" style="width:100%"></i></div></div>
+        <div class="theme"><div class="th"><div class="n">🛣️ Roads</div><div class="v">980</div></div><div class="tbar"><i class="c2" style="width:78%"></i></div></div>
+        <div class="theme"><div class="th"><div class="n">🏫 Schools</div><div class="v">720</div></div><div class="tbar"><i class="c3" style="width:58%"></i></div></div>
+        <div class="theme"><div class="th"><div class="n">🏥 Healthcare</div><div class="v">450</div></div><div class="tbar"><i class="c4" style="width:36%"></i></div></div>
+        <div class="theme"><div class="th"><div class="n">💡 Street lighting</div><div class="v">210</div></div><div class="tbar"><i class="c2" style="width:17%"></i></div></div>
+      </div>
+      <div class="card">
+        <h3>📍 Demand hotspots (where complaints concentrate)</h3>
+        <div class="mapc">
+          <div class="mt">DHARMAPURI · <b>complaint density</b></div>
+          <div class="vs">
+            <div class="vil" style="left:14%;top:18%;width:18px;height:18px;background:rgba(59,111,181,.5)"></div>
+            <div class="vil" style="left:40%;top:30%;width:30px;height:30px;background:rgba(232,133,58,.6)"></div>
+            <div class="ward" style="left:38%;top:62%">Ward 2 · 20</div>
+            <div class="vil" style="left:62%;top:46%;width:60px;height:60px;background:rgba(200,69,59,.7)"></div>
+            <div class="ward" style="left:64%;top:80%">Ward 3 · 250 🔴</div>
+            <div class="vil" style="left:24%;top:64%;width:14px;height:14px;background:rgba(59,111,181,.45)"></div>
+            <div class="ward" style="left:13%;top:30%">Ward 1 · 10</div>
+          </div>
+        </div>
+        <p style="font-size:11.5px;color:var(--muted);margin-top:8px">Ward 3 is the clear road-complaint hotspot — but volume alone doesn't decide funding (see ranking →).</p>
+      </div>
+      <div class="card span2">
+        <h3>🏆 Ranked development works — citizen demand × real need (transparent score)</h3>
+        <div class="rank"><div class="rk r1">1</div><div class="rinfo"><div class="rn">School upgrade — Nallampalli cluster</div><div class="rw">732 requests · serves 2,100 students · nearest school 8 km · infra rated poor</div><div class="why">Why #1: high demand + worst infra gap + equity uplift</div></div><div class="score" style="color:var(--green)">95</div></div>
+        <div class="rank"><div class="rk r2">2</div><div class="rinfo"><div class="rn">Drinking water project — Vellampatti</div><div class="rw">silent village · 0% tap coverage · 2,340 people · groundwater low</div><div class="why">Why #2: critical need despite low complaint volume</div></div><div class="score" style="color:var(--marigold2)">90</div></div>
+        <div class="rank"><div class="rk r3">3</div><div class="rinfo"><div class="rn">Road repair — Ward 3</div><div class="rw">250 requests · already well-served ward · moderate real gap</div><div class="why">Why #3: loud demand, but objective need is lower</div></div><div class="score" style="color:var(--blue)">75</div></div>
+        <div class="rank"><div class="rk r4">4</div><div class="rinfo"><div class="rn">Vocational centre — Harur</div><div class="rw">past plan proposal · low current demand · feasibility moderate</div><div class="why">Why #4: weak demand + limited measured need</div></div><div class="score" style="color:var(--muted)">50</div></div>
+      </div>
+    </div>
+  </main>
+</body></html>

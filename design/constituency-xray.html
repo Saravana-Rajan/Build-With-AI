@@ -1,0 +1,97 @@
+<!-- @dsCard group="Floor 2 — Differentiator" -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/>
+<title>Constituency X-Ray</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  :root{--ink:#0c1f33;--ink2:#14304b;--paper:#f6f1e7;--paper2:#fffdf8;--line:#e4dccb;--marigold:#e8853a;--marigold2:#c96a26;--saffron:#f2a93b;--green:#2f8a5b;--green-s:#e3f1e8;--red:#c8453b;--red-s:#fbe7e4;--muted:#6b7585;--amber-s:#fbf0d8;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Plus Jakarta Sans','Noto Sans Tamil',sans-serif;background:var(--paper);color:var(--ink);width:1440px;height:900px;display:grid;grid-template-columns:248px 1fr;overflow:hidden}
+  .mono{font-family:'DM Mono',monospace}.display{font-family:'Bricolage Grotesque',sans-serif;letter-spacing:-.02em}
+  /* sidebar */
+  .sb{background:var(--ink);color:#cdd8e6;padding:22px 16px;display:flex;flex-direction:column;gap:5px;position:relative;overflow:hidden}
+  .sb::after{content:"";position:absolute;inset:0;background:radial-gradient(420px 200px at 10% -8%,rgba(242,169,59,.18),transparent 60%);pointer-events:none}
+  .brand{display:flex;align-items:center;gap:11px;margin-bottom:24px;z-index:1}
+  .mark{width:40px;height:40px;border-radius:11px;background:linear-gradient(150deg,var(--saffron),var(--marigold2));display:grid;place-items:center;color:#fff;font-weight:800;font-size:17px;font-family:'Bricolage Grotesque'}
+  .brand h1{font-size:16px;color:#fff;font-weight:700}.brand .s{font-size:10px;color:#7e93ad;letter-spacing:.14em;text-transform:uppercase;margin-top:3px}
+  .nl{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#5f7591;margin:14px 8px 6px;z-index:1}
+  .ni{display:flex;align-items:center;gap:11px;padding:10px 13px;border-radius:10px;font-size:13px;font-weight:500;color:#bcccdd;z-index:1}
+  .ni .i{font-size:16px;width:18px;text-align:center}
+  .ni.on{background:linear-gradient(100deg,rgba(242,169,59,.22),rgba(242,169,59,.05));color:#fff;border:1px solid rgba(242,169,59,.35)}
+  .foot{margin-top:auto;z-index:1;padding-top:16px;border-top:1px solid rgba(255,255,255,.08);font-size:11px;color:#8ea2bb;line-height:1.6}.foot b{color:#fff}
+  /* main */
+  .main{overflow:hidden;display:flex;flex-direction:column}
+  .top{background:var(--paper2);border-bottom:1px solid var(--line);padding:16px 30px;display:flex;align-items:center;justify-content:space-between}
+  .top .cr{font-size:12px;color:var(--muted)}.top .cr b{color:var(--ink)}
+  .top h2{font-size:20px;font-weight:700;margin-top:2px}
+  .pill{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:600;color:var(--green);background:var(--green-s);border:1px solid #c4e3d0;padding:6px 13px;border-radius:30px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
+  .body{padding:24px 30px;overflow:hidden}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}
+  .stat{background:var(--paper2);border:1px solid var(--line);border-radius:15px;padding:16px 18px;box-shadow:0 16px 36px -24px rgba(12,31,51,.5)}
+  .stat h3{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:6px}
+  .stat .b{font-family:'Bricolage Grotesque';font-size:27px;font-weight:700}.stat .u{font-size:13px;color:var(--muted);font-weight:500}
+  .stat .sub{font-size:11px;color:var(--muted);margin-top:3px}
+  .grid{display:grid;grid-template-columns:1.15fr .85fr;gap:18px}
+  .mapc{background:radial-gradient(120% 120% at 0% 0%,#16324d,#0c1f33 70%);border-radius:15px;padding:20px;position:relative;border:1px solid #0a1828;height:430px}
+  .mt{color:#9fb4cd;font-size:11px;letter-spacing:.16em;text-transform:uppercase}.mt b{color:#fff}
+  .vil{position:absolute;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:11px;border:2px solid rgba(255,255,255,.25);color:#fff}
+  .g{background:rgba(47,138,91,.85)}.y{background:rgba(217,154,42,.9)}.r{background:rgba(200,69,59,.92)}
+  .sil{background:rgba(200,69,59,.92);box-shadow:0 0 0 4px rgba(232,133,58,.45)}
+  .vs{position:relative;height:330px;margin-top:10px}
+  .leg{display:flex;gap:14px;flex-wrap:wrap;position:relative;margin-top:6px}
+  .leg span{display:flex;align-items:center;gap:6px;font-size:10.5px;color:#b9c8da}.leg i{width:10px;height:10px;border-radius:50%}
+  .card{background:var(--paper2);border:1px solid var(--line);border-radius:15px;padding:20px;box-shadow:0 16px 36px -24px rgba(12,31,51,.5)}
+  .card h3{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:14px}
+  .gap{padding:13px 0;border-bottom:1px solid var(--line)}.gap:last-child{border:none}
+  .gt{display:flex;align-items:center;justify-content:space-between}
+  .gn{display:flex;align-items:center;gap:9px;font-weight:600;font-size:14px}.gn .e{font-size:17px}
+  .tag{font-size:10.5px;font-weight:600;color:var(--red);background:var(--red-s);padding:3px 9px;border-radius:20px}
+  .bar{height:8px;border-radius:6px;background:#ece4d3;margin:10px 0 5px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--saffron),var(--marigold2))}
+  .gm{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted)}.gm .lk{color:var(--marigold2);font-weight:600}
+</style></head>
+<body>
+  <aside class="sb">
+    <div class="brand"><div class="mark">CI</div><div><h1>Constituency&nbsp;IQ</h1><div class="s">name TBD</div></div></div>
+    <div class="nl">Floor 1 · basics</div>
+    <div class="ni"><span class="i">💬</span> Citizen intake</div>
+    <div class="ni"><span class="i">📊</span> Priorities</div>
+    <div class="nl">Floor 2 · differentiator</div>
+    <div class="ni on"><span class="i">🩻</span> Constituency X-Ray</div>
+    <div class="ni"><span class="i">⚖️</span> Unlock / Spend</div>
+    <div class="ni"><span class="i">🔇</span> Forgotten villages</div>
+    <div class="foot"><b>Dharmapuri</b> · Lok Sabha<br/>6 segments · 1,043 villages<br/>MPLADS FY26 · <b>₹5.00 Cr</b></div>
+  </aside>
+  <main class="main">
+    <div class="top">
+      <div><div class="cr">Tamil Nadu · <b>Dharmapuri (DPR)</b></div><h2>Constituency X-Ray</h2></div>
+      <span class="pill"><span class="dot"></span> Live data sync</span>
+    </div>
+    <div class="body">
+      <div class="stats">
+        <div class="stat"><h3>🏛️ Scheme money in play</h3><div class="b">₹612<span class="u"> Cr</span></div><div class="sub">flowing into Dharmapuri/yr</div></div>
+        <div class="stat"><h3>💸 Owed but undelivered</h3><div class="b" style="color:var(--red)">₹148<span class="u"> Cr</span></div><div class="sub">entitlements stuck — unlockable</div></div>
+        <div class="stat"><h3>🔇 Forgotten villages</h3><div class="b">37</div><div class="sub">high need · zero petitions</div></div>
+        <div class="stat"><h3>💰 ₹5 Cr — true gaps</h3><div class="b" style="color:var(--marigold2)">11</div><div class="sub">works nothing else covers</div></div>
+      </div>
+      <div class="grid">
+        <div class="mapc">
+          <div class="mt">DHARMAPURI · <b>scheme coverage heatmap</b></div>
+          <div class="vs">
+            <div class="vil g" style="left:16%;top:10%"></div><div class="vil g" style="left:33%;top:7%"></div><div class="vil y" style="left:52%;top:13%"></div><div class="vil r" style="left:70%;top:8%"></div><div class="vil y" style="left:85%;top:17%"></div>
+            <div class="vil y" style="left:9%;top:33%"></div><div class="vil r" style="left:28%;top:29%"></div><div class="vil r" style="left:45%;top:38%"></div><div class="vil g" style="left:61%;top:30%"></div><div class="vil r" style="left:79%;top:40%"></div>
+            <div class="vil g" style="left:13%;top:58%"></div><div class="vil sil" style="left:30%;top:62%">🔇</div><div class="vil y" style="left:49%;top:54%"></div><div class="vil r" style="left:65%;top:60%"></div><div class="vil g" style="left:83%;top:64%"></div>
+            <div class="vil r" style="left:22%;top:81%"></div><div class="vil g" style="left:41%;top:85%"></div><div class="vil y" style="left:59%;top:78%"></div><div class="vil sil" style="left:75%;top:86%">🔇</div><div class="vil g" style="left:89%;top:80%"></div>
+          </div>
+          <div class="leg"><span><i style="background:#2f8a5b"></i> Well-served</span><span><i style="background:#d99a2a"></i> Partial</span><span><i style="background:#c8453b"></i> Major gaps</span><span><i style="background:#c8453b;box-shadow:0 0 0 3px rgba(232,133,58,.5)"></i> Silent + needy</span></div>
+        </div>
+        <div class="card">
+          <h3>Scheme gaps · ranked by people affected</h3>
+          <div class="gap"><div class="gt"><div class="gn"><span class="e">🏠</span> PMAY-G Housing</div><span class="tag">1,400 owed</span></div><div class="bar"><i style="width:68%"></i></div><div class="gm"><span>68% saturation · Rural Dev Dept</span><span class="lk">View families ▾</span></div></div>
+          <div class="gap"><div class="gt"><div class="gn"><span class="e">🚰</span> Jal Jeevan — Tap Water</div><span class="tag">12 villages 0%</span></div><div class="bar"><i style="width:54%"></i></div><div class="gm"><span>54% saturation · TWAD Board</span><span class="lk">View villages ▾</span></div></div>
+          <div class="gap"><div class="gt"><div class="gn"><span class="e">💼</span> MGNREGA — Work demand</div><span class="tag">8 panchayats</span></div><div class="bar"><i style="width:82%"></i></div><div class="gm"><span>82% saturation · BDO offices</span><span class="lk">View panchayats ▾</span></div></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</body></html>
