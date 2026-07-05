@@ -5,12 +5,16 @@ import MapPlaceholder from "../components/MapPlaceholder";
 import type { AreaCell } from "../components/MapPlaceholder";
 import StateBlock from "../components/StateBlock";
 import Pagination, { usePagination } from "../components/Pagination";
+import HBarChart from "../components/HBarChart";
+import ProvenanceChip from "../components/Provenance";
 import { api } from "../api";
 import { useFetch } from "../useFetch";
-import { formatCrore } from "../format";
+import { formatCrore, formatCroreShort } from "../format";
+import { departmentFor, departmentColor } from "../lib/departments";
 import type { SchemeGap } from "../types";
 
 const PAGE_SIZE = 12;
+const ALL = "__all__";
 
 /** Turn scheme gaps into map cells: coverage ratio drives the red→green shade. */
 function gapsToCells(gaps: SchemeGap[]): AreaCell[] {
@@ -25,21 +29,43 @@ export default function ConstituencyXRay() {
   const stats = useFetch(() => api.stats(), () => false);
   const gaps = useFetch(() => api.schemeGaps(300));
   const [query, setQuery] = useState("");
+  const [dept, setDept] = useState<string>(ALL);
 
   const rows: SchemeGap[] = gaps.status === "ready" ? gaps.data : [];
 
-  // Filter by scheme (or place) text, then sort by gap value (largest owed first).
+  // Distinct departments present in the data, for the filter dropdown.
+  const departments = useMemo(() => {
+    const set = new Set<string>();
+    for (const g of rows) set.add(departmentFor(g.scheme, g.department));
+    return Array.from(set).sort();
+  }, [rows]);
+
+  // Filter by department + free text, then sort by gap value (largest owed first).
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    const matched = q
-      ? rows.filter(
-          (g) =>
-            g.scheme.toLowerCase().includes(q) ||
-            g.place_name.toLowerCase().includes(q),
-        )
-      : rows;
+    const matched = rows.filter((g) => {
+      if (dept !== ALL && departmentFor(g.scheme, g.department) !== dept) return false;
+      if (!q) return true;
+      return (
+        g.scheme.toLowerCase().includes(q) || g.place_name.toLowerCase().includes(q)
+      );
+    });
     return [...matched].sort((a, b) => b.gap_value - a.gap_value);
-  }, [rows, query]);
+  }, [rows, query, dept]);
+
+  // Heatmap cells respect the department filter so the gradient reflects the view.
+  const cells = useMemo(() => gapsToCells(filtered), [filtered]);
+
+  // Top 10 gaps by ₹ for the bar chart.
+  const chartData = useMemo(
+    () =>
+      filtered.slice(0, 10).map((g) => ({
+        name: `${g.place_name} · ${g.scheme}`,
+        value: g.gap_value,
+        color: departmentColor(departmentFor(g.scheme, g.department)),
+      })),
+    [filtered],
+  );
 
   const { page, pageCount, pageItems, total, from, to, setPage } =
     usePagination(filtered, PAGE_SIZE);
@@ -70,9 +96,7 @@ export default function ConstituencyXRay() {
             <h2 className="section-title">Coverage heatmap</h2>
             <span className="muted">By ward (urban) and village (rural)</span>
           </div>
-          <MapPlaceholder
-            cells={gaps.status === "ready" ? gapsToCells(gaps.data) : undefined}
-          />
+          <MapPlaceholder cells={gaps.status === "ready" ? cells : undefined} />
         </div>
 
         <div className="card">
@@ -111,13 +135,26 @@ export default function ConstituencyXRay() {
                     aria-label="Filter scheme gaps"
                   />
                 </div>
+                <select
+                  className="scan-select"
+                  value={dept}
+                  onChange={(e) => setDept(e.target.value)}
+                  aria-label="Filter by department"
+                >
+                  <option value={ALL}>All departments</option>
+                  {departments.map((d) => (
+                    <option key={d} value={d}>
+                      {d}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {filtered.length === 0 ? (
                 <StateBlock
                   variant="empty"
                   title="No matching gaps"
-                  detail={`Nothing matches “${query}”.`}
+                  detail="Nothing matches the current filters."
                 />
               ) : (
                 <>
@@ -129,8 +166,8 @@ export default function ConstituencyXRay() {
                           <span className="muted"> · {g.scheme}</span>
                           <div className="muted gap-list__sub">
                             {g.covered.toLocaleString("en-IN")} /{" "}
-                            {g.eligible.toLocaleString("en-IN")} covered
-                            {g.data_source ? ` · ${g.data_source}` : ""}
+                            {g.eligible.toLocaleString("en-IN")} covered{" "}
+                            <ProvenanceChip kind={g.data_source === "real" ? "real" : "modelled"} />
                           </div>
                         </div>
                         <div className="gap-list__value">{formatCrore(g.gap_value)}</div>
@@ -153,6 +190,18 @@ export default function ConstituencyXRay() {
           )}
         </div>
       </section>
+
+      {gaps.status === "ready" && filtered.length > 0 && (
+        <div className="card" style={{ marginTop: 20 }}>
+          <div className="card__head">
+            <h2 className="section-title">Top gaps by ₹ owed</h2>
+            <span className="muted">
+              {dept === ALL ? "All departments" : dept} · top {chartData.length}
+            </span>
+          </div>
+          <HBarChart data={chartData} format={formatCroreShort} labelWidth={210} />
+        </div>
+      )}
     </Page>
   );
 }

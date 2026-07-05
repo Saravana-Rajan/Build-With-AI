@@ -1,81 +1,94 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap");
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Sarvik shadcn palette (ported from source globals.css) ───────────── */
+/* ─── Sarvik theme — "Sabha": ink-navy civic palette w/ saffron accent ──── */
 @layer base {
   :root {
-    --background: 240 7% 98%;
-    --foreground: 240 5% 11%;
+    /* Typefaces */
+    --font-sans: "IBM Plex Sans", ui-sans-serif, sans-serif;
+    --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+
+    /* Warm ivory paper base + deep navy ink */
+    --background: 40 33% 98%;
+    --foreground: 213 43% 16%;
 
     --card: 0 0% 100%;
-    --card-foreground: 240 5% 11%;
+    --card-foreground: 213 43% 16%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 240 5% 11%;
+    --popover-foreground: 213 43% 16%;
 
-    /* Primary = Sarvik violet #7C5CFA */
-    --primary: 252 94% 67%;
-    --primary-foreground: 0 0% 100%;
+    /* Primary = deep authoritative navy #1A3560 */
+    --primary: 213 58% 24%;
+    --primary-foreground: 40 33% 98%;
 
-    --secondary: 240 9% 96%;
-    --secondary-foreground: 240 5% 20%;
+    --secondary: 210 24% 95%;
+    --secondary-foreground: 213 40% 24%;
 
-    --muted: 240 9% 96%;
-    --muted-foreground: 240 4% 45%;
+    --muted: 210 24% 95%;
+    --muted-foreground: 213 14% 40%;
 
-    --accent: 252 94% 95%;
-    --accent-foreground: 252 94% 35%;
+    /* Accent = warm saffron/amber tint (sparing emphasis) */
+    --accent: 38 92% 92%;
+    --accent-foreground: 28 78% 26%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 4 68% 46%;
+    --destructive-foreground: 40 33% 98%;
 
-    --border: 240 5% 90%;
-    --input: 240 5% 90%;
-    --ring: 252 94% 67%;
+    --border: 214 22% 88%;
+    --input: 214 22% 88%;
+    --ring: 213 58% 24%;
 
-    --radius: 0.875rem;
+    --radius: 0.625rem;
 
-    /* Positive / money accent (emerald) */
-    --success: 160 84% 33%;
+    /* Positive / money (deep emerald) */
+    --success: 158 64% 30%;
 
-    /* Sarvik brand tokens */
-    --spark-violet: 252 94% 67%;
-    --spark-indigo: 244 75% 59%;
+    /* Sharp saffron accent + data-viz ramp */
+    --saffron: 38 92% 50%;
+    --chart-1: 213 58% 30%; /* navy   */
+    --chart-2: 187 62% 34%; /* teal   */
+    --chart-3: 38 92% 50%; /* saffron */
+    --chart-4: 213 18% 55%; /* slate  */
   }
 
   .dark {
-    --background: 240 18% 8%;
-    --foreground: 240 7% 95%;
+    --background: 213 38% 9%;
+    --foreground: 40 30% 94%;
 
-    --card: 240 16% 12%;
-    --card-foreground: 240 7% 95%;
+    --card: 213 32% 13%;
+    --card-foreground: 40 30% 94%;
 
-    --popover: 240 16% 12%;
-    --popover-foreground: 240 7% 95%;
+    --popover: 213 32% 13%;
+    --popover-foreground: 40 30% 94%;
 
-    --primary: 252 94% 72%;
-    --primary-foreground: 240 18% 8%;
+    --primary: 38 90% 55%;
+    --primary-foreground: 213 45% 12%;
 
-    --secondary: 240 12% 18%;
-    --secondary-foreground: 240 7% 95%;
+    --secondary: 213 24% 20%;
+    --secondary-foreground: 40 30% 94%;
 
-    --muted: 240 12% 16%;
-    --muted-foreground: 240 5% 65%;
+    --muted: 213 24% 18%;
+    --muted-foreground: 213 12% 66%;
 
-    --accent: 252 50% 24%;
-    --accent-foreground: 252 94% 90%;
+    --accent: 213 40% 24%;
+    --accent-foreground: 38 90% 78%;
 
-    --destructive: 0 70% 55%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 4 62% 52%;
+    --destructive-foreground: 40 30% 94%;
 
-    --border: 240 12% 22%;
-    --input: 240 12% 22%;
-    --ring: 252 94% 72%;
+    --border: 213 22% 24%;
+    --input: 213 22% 24%;
+    --ring: 38 90% 55%;
 
-    --success: 160 70% 45%;
+    --success: 158 56% 46%;
+
+    --saffron: 38 90% 55%;
+    --chart-1: 213 60% 62%;
+    --chart-2: 187 60% 52%;
+    --chart-3: 38 90% 55%;
+    --chart-4: 213 16% 60%;
   }
 }
 
@@ -91,24 +104,50 @@
   }
   body {
     margin: 0;
-    background: hsl(var(--background));
     color: hsl(var(--foreground));
-    font-family: "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    font-family: var(--font-sans);
     font-size: 15px;
     line-height: 1.5;
-    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Calm layered mesh over warm ivory — very low opacity */
+    background-color: hsl(var(--background));
+    background-image: radial-gradient(
+        1100px 620px at 100% -8%,
+        hsl(var(--primary) / 0.05),
+        transparent 60%
+      ),
+      radial-gradient(
+        820px 520px at -8% 108%,
+        hsl(var(--saffron) / 0.04),
+        transparent 60%
+      );
+    background-attachment: fixed;
+  }
+  /* Display face for headings + tabular numerals for data */
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+  .num,
+  [class*="__value"],
+  [class*="__val"],
+  [class*="__count"],
+  [class*="__score"],
+  table td {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
   }
 }
 
 /* Sarvik gradient helpers */
 .spark-gradient {
-  background: linear-gradient(135deg, #7c5cfa 0%, #4f46e5 100%);
+  background: linear-gradient(135deg, hsl(213 58% 30%) 0%, hsl(213 62% 18%) 100%);
 }
 .spark-wordmark {
-  font-family: "Inter", system-ui, sans-serif;
-  font-weight: 900;
+  font-family: var(--font-display);
+  font-weight: 700;
   letter-spacing: -0.01em;
 }
 
@@ -124,7 +163,7 @@
 }
 
 .sidebar {
-  background: #f8f8fe;
+  background: hsl(210 28% 97%);
   border-right: 1px solid hsl(var(--border));
   display: flex;
   flex-direction: column;
@@ -146,11 +185,11 @@
   flex-shrink: 0;
 }
 .brand-text strong {
-  font-family: "Inter", system-ui, sans-serif;
-  font-weight: 900;
+  font-family: var(--font-display);
+  font-weight: 700;
   letter-spacing: -0.01em;
-  font-size: 20px;
-  color: #0f0f17;
+  font-size: 21px;
+  color: hsl(var(--foreground));
 }
 
 .nav {
@@ -208,7 +247,7 @@
 .nav-link--active {
   background: #ffffff;
   color: hsl(var(--primary));
-  box-shadow: 0 2px 8px -2px rgba(104, 114, 255, 0.18);
+  box-shadow: 0 2px 8px -2px hsl(var(--primary) / 0.2);
 }
 .nav-link--active svg,
 .nav-link--active .nav-link__hint {
@@ -349,7 +388,7 @@
 .chip--track-B {
   background: hsl(var(--accent));
   color: hsl(var(--accent-foreground));
-  border-color: hsl(252 94% 90%);
+  border-color: hsl(38 80% 82%);
 }
 
 /* ── State blocks ──────────────────────────────────────────────────────── */
@@ -397,7 +436,7 @@
 }
 .feed-item:hover {
   border-color: hsl(var(--primary) / 0.35);
-  box-shadow: 0 2px 10px -4px rgba(124, 92, 250, 0.18);
+  box-shadow: 0 2px 10px -4px hsl(var(--primary) / 0.18);
 }
 .feed-item__top {
   display: flex;
@@ -483,12 +522,13 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  background: linear-gradient(135deg, #7c5cfa 0%, #4f46e5 100%);
+  background: linear-gradient(135deg, hsl(213 58% 26%) 0%, hsl(213 64% 16%) 100%);
   color: #fff;
   border-radius: var(--radius);
+  border-top: 3px solid hsl(var(--saffron));
   padding: 24px 28px;
   margin-bottom: 24px;
-  box-shadow: 0 8px 24px -12px rgba(124, 92, 250, 0.5);
+  box-shadow: 0 10px 30px -14px hsl(213 60% 20% / 0.55);
 }
 .headline__label {
   font-size: 12px;
@@ -694,7 +734,7 @@
 }
 .ranked-item:hover {
   border-color: hsl(var(--primary) / 0.35);
-  box-shadow: 0 2px 10px -4px rgba(124, 92, 250, 0.18);
+  box-shadow: 0 2px 10px -4px hsl(var(--primary) / 0.18);
 }
 .ranked-item__rank {
   font-weight: 700;
@@ -1079,4 +1119,299 @@
 }
 .data-table .num .th-sort {
   flex-direction: row-reverse;
+}
+
+/* ── Departments (whose-job-is-it panels) ──────────────────────────────── */
+.dept-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+.dept-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+.dept-panel:hover {
+  border-color: hsl(var(--primary) / 0.35);
+  box-shadow: 0 8px 24px -14px hsl(var(--primary) / 0.3);
+  transform: translateY(-2px);
+}
+.dept-panel__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.dept-panel__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+.dept-panel__title h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: hsl(var(--foreground));
+}
+.dept-panel__title .muted {
+  font-size: 12px;
+}
+.dept-panel__owed {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 10px 0;
+  border-top: 1px solid hsl(var(--border));
+  border-bottom: 1px solid hsl(var(--border));
+}
+.dept-panel__owed-val {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.dept-panel__section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.dept-panel__label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: hsl(var(--muted-foreground));
+}
+.dept-panel__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.dept-panel__areas {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.dept-panel__areas li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+}
+.dept-panel__area-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  color: hsl(var(--foreground));
+}
+.dept-panel__area-name svg {
+  color: hsl(var(--muted-foreground));
+  flex-shrink: 0;
+}
+.dept-panel__area-val {
+  font-weight: 600;
+  color: hsl(var(--success));
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+.dept-panel__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 4px;
+}
+.dept-panel__act {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: hsl(var(--primary));
+  text-decoration: none;
+}
+.dept-panel__act:hover {
+  text-decoration: underline;
+}
+
+/* ── Act: collapsible department sections ──────────────────────────────── */
+.dept-section {
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  background: hsl(var(--card));
+  margin-bottom: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.03);
+}
+.dept-section__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition: background 0.12s ease;
+}
+.dept-section__head:hover {
+  background: hsl(var(--secondary) / 0.5);
+}
+.dept-section__chevron {
+  color: hsl(var(--muted-foreground));
+  transition: transform 0.15s ease;
+  flex-shrink: 0;
+}
+.dept-section__chevron--open {
+  transform: rotate(90deg);
+}
+.dept-section__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.dept-section__name {
+  font-weight: 700;
+  font-size: 14px;
+  color: hsl(var(--foreground));
+}
+.dept-section__meta {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+}
+.dept-section__owed {
+  font-weight: 700;
+  color: hsl(var(--success));
+  font-variant-numeric: tabular-nums;
+}
+.dept-section__body {
+  padding: 0 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ── Score-distribution spark (Priorities) ─────────────────────────────── */
+.score-spark {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 44px;
+  padding: 4px 0;
+}
+.score-spark__bar {
+  flex: 1;
+  min-width: 3px;
+  background: hsl(var(--primary) / 0.75);
+  border-radius: 2px 2px 0 0;
+  transition: background 0.15s ease;
+}
+.score-spark__bar:hover {
+  background: hsl(var(--primary));
+}
+.spark-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 16px;
+}
+.spark-card__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 160px;
+}
+
+/* ── Provenance chips (data credibility) ───────────────────────────────── */
+.prov {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.prov::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: currentColor;
+}
+.prov--real {
+  background: hsl(160 84% 96%);
+  color: hsl(var(--success));
+  border-color: hsl(160 60% 85%);
+}
+.prov--synthetic {
+  background: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+  border-color: hsl(38 80% 82%);
+}
+.prov--computed {
+  background: hsl(var(--secondary));
+  color: hsl(var(--muted-foreground));
+  border-color: hsl(var(--border));
+}
+
+/* ── Two-floor explainer strip (Dashboard) ─────────────────────────────── */
+.two-floor {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 720px) {
+  .two-floor {
+    grid-template-columns: 1fr;
+  }
+}
+.floor-card {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  padding: 16px;
+  background: hsl(var(--card));
+}
+.floor-card__num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  font-weight: 800;
+  font-size: 14px;
+  flex-shrink: 0;
 }

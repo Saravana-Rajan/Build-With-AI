@@ -3,6 +3,7 @@ import { Search } from "lucide-react";
 import Page from "../components/Page";
 import StateBlock from "../components/StateBlock";
 import Pagination, { usePagination } from "../components/Pagination";
+import ProvenanceChip from "../components/Provenance";
 import { api } from "../api";
 import { useFetch } from "../useFetch";
 import type { DemandRow } from "../types";
@@ -32,8 +33,13 @@ export default function IntakeFeed() {
   return (
     <Page
       title="Intake"
-      subtitle="Live feed of incoming demands as they are structured and geo-resolved."
-      actions={<span className="badge badge--live">Live</span>}
+      subtitle="Where staff triage incoming demands as they are structured and geo-resolved."
+      actions={
+        <div className="flex items-center gap-2">
+          <ProvenanceChip kind="synthetic" />
+          <span className="badge badge--live">Live</span>
+        </div>
+      }
     >
       {state.status === "loading" && (
         <StateBlock

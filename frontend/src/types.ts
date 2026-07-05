@@ -79,6 +79,7 @@ export interface SchemeGap {
   per_unit_value: number;
   gap_value: number; // gap * per_unit_value (₹)
   data_source: "real" | "modelled";
+  department?: string | null; // owning line department (added by backend)
 }
 
 export interface RankedProject {
@@ -93,6 +94,19 @@ export interface RankedProject {
   estimated_cost: number | null; // ₹, Track B only
   beneficiaries: number | null;
   matched_scheme: string | null;
+  department?: string | null; // owning line department (added by backend)
+}
+
+/**
+ * GET /api/departments — one panel per line department. This is the MP's
+ * "whose job is it" view: what each department owes, across which areas/schemes.
+ */
+export interface Department {
+  department: string;
+  total_gap_value: number; // ₹ owed, summed across the department's schemes
+  issue_count: number;
+  top_areas: string[];
+  schemes: string[];
 }
 
 export interface SilentVillage {

@@ -8,6 +8,7 @@
 import type {
   DemandRecord,
   DemandRow,
+  Department,
   RankedProject,
   SchemeGap,
   SilentVillage,
@@ -67,6 +68,13 @@ export const api = {
   /** Deduplicated issue clusters (Priorities headline). */
   unifiedIssues: (limit = 100) =>
     get<UnifiedIssue[]>(`/api/unified-issues?limit=${limit}`),
+
+  /**
+   * Per-department rollup — ₹ owed, issue count, top areas + schemes.
+   * "Whose job is it" view. May 404 until the backend endpoint ships;
+   * callers fall back to deriving departments from scheme gaps.
+   */
+  departments: () => get<Department[]>("/api/departments"),
 };
 
 /**

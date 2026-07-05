@@ -11,6 +11,13 @@ export function formatCrore(value: number | null | undefined): string {
   return `₹${(value / CRORE).toFixed(1)} crore`;
 }
 
+/** Compact crore label for dense UI (axes, chips): "₹5.2 Cr". */
+export function formatCroreShort(value: number | null | undefined): string {
+  if (value == null || Number.isNaN(value)) return "₹—";
+  const cr = value / CRORE;
+  return `₹${cr >= 10 ? cr.toFixed(0) : cr.toFixed(1)} Cr`;
+}
+
 /** Plain Indian-grouped rupee amount, e.g. "₹12,50,000". */
 export function formatInr(value: number | null | undefined): string {
   if (value == null || Number.isNaN(value)) return "₹—";

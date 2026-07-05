@@ -3,6 +3,7 @@ import { ArrowUpDown } from "lucide-react";
 import Page from "../components/Page";
 import StateBlock from "../components/StateBlock";
 import Pagination, { usePagination } from "../components/Pagination";
+import ProvenanceChip from "../components/Provenance";
 import { api } from "../api";
 import { useFetch } from "../useFetch";
 import type { SilentVillage } from "../types";
@@ -51,12 +52,13 @@ export default function ForgottenVillages() {
   return (
     <Page
       title="Forgotten Villages"
-      subtitle="Areas with high estimated need but few or no petitions — the silent constituents."
+      subtitle="Villages that never asked — high estimated need but few or no petitions. The silent constituents you'd otherwise miss."
       actions={
         state.status === "ready" ? (
-          <span className="count-badge">
-            {rows.length.toLocaleString("en-IN")} areas
-          </span>
+          <div className="flex items-center gap-2">
+            <ProvenanceChip kind="computed" />
+            <span className="count-badge">{rows.length.toLocaleString("en-IN")} areas</span>
+          </div>
         ) : undefined
       }
     >
