@@ -1,5 +1,4 @@
-# Constituency Intelligence Engine
-*(working title — final product name TBD)*
+# Sarvik
 
 **Build with AI: Code for Communities (Google Cloud) · Track 1 — People's Priorities**
 Demo constituency: **Coimbatore, Tamil Nadu** (urban wards + rural fringe)

@@ -1,4 +1,4 @@
-# Architecture — Constituency Intelligence Engine
+# Architecture — Sarvik
 
 Track 1 · Build with AI: Code for Communities · Demo constituency: **Coimbatore, Tamil Nadu**.
 

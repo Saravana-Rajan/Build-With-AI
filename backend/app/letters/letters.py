@@ -132,7 +132,7 @@ def render_pdf(text: str, out_path: str) -> str:
         rightMargin=2.5 * cm,
         topMargin=2.5 * cm,
         bottomMargin=2.5 * cm,
-        title="Constituency Intelligence Engine — Document",
+        title="Sarvik — Document",
     )
 
     styles = getSampleStyleSheet()

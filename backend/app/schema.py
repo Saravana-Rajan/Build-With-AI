@@ -1,5 +1,5 @@
 """
-Canonical data contract for the Constituency Intelligence Engine.
+Canonical data contract for Sarvik.
 
 EVERY module (pipeline, analytics, letters, ingestion, frontend types) builds
 against these shapes. Do not redefine these fields elsewhere — import from here.

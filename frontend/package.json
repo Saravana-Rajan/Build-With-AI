@@ -1,9 +1,9 @@
 {
-  "name": "constituency-intelligence-dashboard",
+  "name": "sarvik",
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "MP-facing dashboard for the Constituency Intelligence Engine",
+  "description": "MP-facing dashboard for Sarvik",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

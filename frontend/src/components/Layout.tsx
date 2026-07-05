@@ -21,11 +21,10 @@ export default function Layout() {
       <aside className="sidebar">
         <div className="brand">
           <div className="brand-mark" aria-hidden="true">
-            CIE
+            SK
           </div>
           <div className="brand-text">
-            <strong>Constituency</strong>
-            <span>Intelligence Engine</span>
+            <strong>Sarvik</strong>
           </div>
         </div>
 
@@ -46,7 +45,7 @@ export default function Layout() {
 
         <div className="sidebar-footer">
           <span>MP dashboard</span>
-          <span className="muted">Working title — name TBD</span>
+          <span className="muted">Sarvik</span>
         </div>
       </aside>
 

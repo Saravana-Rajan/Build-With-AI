@@ -1,4 +1,4 @@
-# Demo Script — Constituency Intelligence Engine (Track 1)
+# Demo Script — Sarvik (Track 1)
 
 **Demo constituency:** Coimbatore · **Runtime:** 5 minutes · **Presenters:** 1 driver + 1 narrator
 

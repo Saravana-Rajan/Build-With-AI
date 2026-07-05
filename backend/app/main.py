@@ -1,5 +1,5 @@
 """
-Constituency Intelligence Engine — FastAPI service.
+Sarvik — FastAPI service.
 Track 1 · Build with AI: Code for Communities · Coimbatore.
 
 Entry point. The 12-step pipeline lives under app/pipeline/ (added incrementally).
@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 
 app = FastAPI(
-    title="Constituency Intelligence Engine",
+    title="Sarvik",
     description="AI decision-support for constituency development planning (Coimbatore).",
     version="0.1.0",
 )

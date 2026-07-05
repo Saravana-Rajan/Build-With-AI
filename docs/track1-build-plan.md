@@ -1,4 +1,4 @@
-# Constituency Intelligence Engine — Detailed Per-Step Build Plan
+# Sarvik — Detailed Per-Step Build Plan
 
 **Companion to:** [track1-proposal.md](track1-proposal.md) · [track1-design-spec.md](track1-design-spec.md)
 **Window:** 29 Jun → 8 Jul 2026 (~9 days) · **Demo:** 23 Jul, New Delhi

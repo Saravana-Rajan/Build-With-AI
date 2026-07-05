@@ -1,5 +1,5 @@
 # Track 1 — Risk & Mitigation Checklist
-**Constituency Intelligence Engine · Coimbatore · Build with AI: Code for Communities**
+**Sarvik · Coimbatore · Build with AI: Code for Communities**
 
 **Submission deadline: 8 July 2026** · Demo Day: 23 July, New Delhi
 **Working days left to submit: ~3 (5 → 8 Jul).** Triage hard. Protect the live path, cut everything else calmly.

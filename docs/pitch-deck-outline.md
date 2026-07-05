@@ -1,11 +1,11 @@
-# Pitch Deck Outline — Constituency Intelligence Engine (Track 1)
+# Pitch Deck Outline — Sarvik (Track 1)
 
 Audience: government / MP office. Tone: honest, no fabricated impact numbers. 12 slides, one paragraph + suggested visual each.
 
 ---
 
 ### Slide 1 — Title / Frame
-Constituency Intelligence Engine. Demo constituency: Coimbatore. The one line that frames everything: "We don't help an MP spend ₹5 crore. We help unlock the hundreds of crores already owed to their people — and spend the ₹5 crore only on gaps nothing else covers." Track 1 submission.
+Sarvik. Demo constituency: Coimbatore. The one line that frames everything: "We don't help an MP spend ₹5 crore. We help unlock the hundreds of crores already owed to their people — and spend the ₹5 crore only on gaps nothing else covers." Track 1 submission.
 *Visual:* Product name over the Constituency X-Ray dashboard hero, "₹463 crore owed to Coimbatore" faint in the background.
 
 ### Slide 2 — The problem

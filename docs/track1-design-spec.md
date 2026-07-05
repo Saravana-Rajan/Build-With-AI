@@ -1,5 +1,4 @@
-# Constituency Intelligence Engine — Design Spec
-*(working title — final product name TBD)*
+# Sarvik — Design Spec
 
 **Hackathon:** Build with AI: Code for Communities (Google Cloud) · **Track 1 — People's Priorities (AI for Constituency Development Planning)**
 **Demo constituency:** Dharmapuri (Lok Sabha), Tamil Nadu
@@ -21,7 +20,7 @@ But the deeper, real problem most teams miss: an MP's ₹5 cr is tiny next to th
 
 > **"We don't help an MP spend ₹5 crore. We help them unlock the ₹500 crore of schemes already meant for their people — and spend their own ₹5 crore only on the gaps nothing else covers."**
 
-**Working name:** TBD — to be decided. (Referred to here as the "Constituency Intelligence Engine".)
+**Product name:** Sarvik — an AI decision-support platform for constituency development planning.
 
 ### What makes it defensible (not just unique)
 The differentiator is **domain insight + hard data integration**, not a copyable feature:

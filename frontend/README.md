@@ -1,4 +1,4 @@
-# Constituency Intelligence Engine — Frontend
+# Sarvik — Frontend
 
 MP-facing dashboard (Vite + React + TypeScript). Five screens behind a left-nav
 layout, wired to the FastAPI backend.
