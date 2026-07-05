@@ -70,8 +70,11 @@ class SchemeGap(BaseModel):
     place_name: str
     urban: bool
     scheme: str
+    department: str = ""                          # responsible department
+    category: str = ""                            # need type this gap addresses
     eligible: int
     covered: int
+    coverage: float = Field(0.0, description="covered / eligible, 0..1")
     gap: int = Field(..., description="eligible - covered")
     per_unit_value: float
     gap_value: float = Field(..., description="gap * per_unit_value (₹)")
@@ -90,6 +93,7 @@ class RankedProject(BaseModel):
     estimated_cost: Optional[float] = None       # ₹, Track B only
     beneficiaries: Optional[int] = None
     matched_scheme: Optional[str] = None
+    department: Optional[str] = None             # responsible department
 
 
 class SilentVillage(BaseModel):
@@ -99,3 +103,11 @@ class SilentVillage(BaseModel):
     petition_count: int
     silent_score: float
     flagged: bool
+
+
+class DepartmentSummary(BaseModel):
+    department: str
+    total_gap_value: float                       # Σ gap_value across the dept's schemes
+    issue_count: int                             # number of (area, scheme) gaps owned
+    top_areas: list                              # highest-owed place names
+    schemes: list                                # distinct schemes in this department

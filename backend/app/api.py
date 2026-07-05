@@ -53,6 +53,17 @@ def silent_villages(limit: int = Query(50, le=500)):
         f"ORDER BY silent_score DESC LIMIT {limit}")
 
 
+@router.get("/departments")
+def departments(limit: int = Query(50, le=500)):
+    """Per-department accountability summary, biggest ₹ gap first."""
+    try:
+        return bq.query(
+            f"SELECT * FROM `{DS}.department_summary` "
+            f"ORDER BY total_gap_value DESC LIMIT {limit}")
+    except Exception:
+        return []
+
+
 @router.get("/unified-issues")
 def unified_issues(limit: int = Query(100, le=500)):
     """Deduplicated issues (may be empty until the dedup job runs)."""

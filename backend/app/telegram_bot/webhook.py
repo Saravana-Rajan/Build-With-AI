@@ -170,7 +170,9 @@ async def set_webhook(request: Request) -> dict:
     if not BOT_TOKEN:
         return {"ok": False, "error": "TELEGRAM_BOT_TOKEN not configured"}
 
-    base = str(request.base_url).rstrip("/")
+    # Cloud Run terminates TLS at its proxy, so request.base_url reports http://.
+    # Telegram requires https, so force the scheme.
+    base = str(request.base_url).rstrip("/").replace("http://", "https://", 1)
     webhook_url = f"{base}/telegram/webhook"
     async with httpx.AsyncClient(timeout=30.0) as client:
         resp = await client.post(
