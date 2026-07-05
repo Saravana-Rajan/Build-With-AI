@@ -12,4 +12,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY backend/ ./
 
+# Runtime data files. Modules resolve these via parents[3]/data/... which,
+# with backend/ copied to /app, evaluates to /data inside the container.
+COPY data /data
+
 CMD exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8080}
