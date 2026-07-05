@@ -1,0 +1,31 @@
+# Web framework
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+pydantic==2.10.4
+pydantic-settings==2.7.1
+python-dotenv==1.0.1
+httpx==0.28.1
+python-multipart==0.0.20
+
+# Google Cloud
+google-cloud-aiplatform==1.75.0
+google-cloud-bigquery==3.27.0
+google-cloud-firestore==2.19.0
+google-cloud-speech==2.29.0
+google-cloud-translate==3.19.0
+google-cloud-storage==2.19.0
+
+# Analytics / optimisation
+scikit-learn==1.6.0
+ortools==9.11.4210
+numpy==2.2.1
+pandas==2.2.3
+
+# Public data ingestion
+datagovindia==0.3.2
+
+# PDF letter generation
+reportlab==4.2.5
+
+# Telegram bot
+python-telegram-bot==21.9

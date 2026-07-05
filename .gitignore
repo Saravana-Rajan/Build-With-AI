@@ -1,8 +1,50 @@
-# Local tooling / scratch — not for the repo
+# ── Secrets & credentials — NEVER commit (govt submission) ─────────────
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*key*.json
+*credentials*.json
+service-account*.json
+gcp-*.json
+adc.json
+
+# ── Local tooling / scratch ────────────────────────────────────────────
 .claude/
 .playwright-mcp/
 raw-fulltext.md
 verify-fulltext.md
-
-# Clickable prototype (kept local for now)
 prototype/
+
+# ── Python ─────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# ── Node / frontend ────────────────────────────────────────────────────
+node_modules/
+dist/
+build/
+.vite/
+*.local
+
+# ── Data — large/generated artifacts stay out of git ───────────────────
+data/raw/
+data/generated/
+*.parquet
+*.sqlite
+*.db
+
+# ── OS / editor ────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+.vscode/
