@@ -11,7 +11,8 @@ class Settings(BaseSettings):
 
     # Vertex AI / Gemini
     vertex_location: str = "asia-south1"
-    gemini_model: str = "gemini-2.0-flash"
+    gemini_model: str = "gemini-2.5-flash"
+    gemini_api_key: str = ""
 
     # Data stores
     bq_dataset: str = "constituency"
