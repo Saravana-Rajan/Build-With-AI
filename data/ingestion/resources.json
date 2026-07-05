@@ -1,0 +1,106 @@
+[
+  {
+    "key": "census2011_tn_pca",
+    "resource_id": "6cc9e9e8-222a-4ed4-8bf0-b14d092c61f4",
+    "title": "Primary Census Abstract 2011 - Tamil Nadu",
+    "resolution": "district",
+    "state_field": null,
+    "notes": "CONFIRMED via live api.data.gov.in query. Already TN-scoped (state_code '33'), so no state filter needed. Has a 'level' field (STATE/DISTRICT/SUB-DISTRICT/TOWN/VILLAGE) and PCA columns (households, pop, SC/ST, literacy, workers), but the OGD resource only exposes total=99 rows i.e. an aggregate extract, NOT the full ~15k-village table. For true village/town rows use the per-district PCA resources (e.g. census2001_coimbatore_pca) or the ejalshakti/censusindia bulk CSVs. No per-district *2011* village/town PCA resource was found for TN on the OGD API (only 2001 exists per-district)."
+  },
+  {
+    "key": "census2011_coimbatore_village_amenities",
+    "resource_id": "94551028-58cb-4ffd-b60b-4905fa4cbf93",
+    "title": "Village Amenities for Coimbatore District of Tamil Nadu, 2011",
+    "resolution": "village",
+    "state_field": "state_name",
+    "notes": "CONFIRMED via live query. HERO village-level dataset: total=237 villages, keyed by village_code/village_name + gram_panchayat + cd_block. Hundreds of amenity columns (tap water treated/untreated, wells, hand pumps, PHC/CHC/sub-centre, schools, ICDS/anganwadi, roads, power hours, PDS, banks). Already Coimbatore-scoped; state_name='Tamil Nadu', district_name available if needed. Directly usable for constituency dev-planning gap analysis."
+  },
+  {
+    "key": "census2001_coimbatore_pca",
+    "resource_id": "81472a06-f5c1-450f-b89b-a2f46534c6f6",
+    "title": "Primary Census Abstract for Coimbatore District of Tamil Nadu, 2001",
+    "resolution": "village",
+    "state_field": null,
+    "notes": "CONFIRMED via live query. total=1759 rows with a 'level' field (village/town/ward) and 'total__rural__urban' — a genuine village/town-level PCA for Coimbatore. Caveat: 2001 census, not 2011. Already Coimbatore-scoped (state_code '33', district_code '12'). Use for the clean rural-fringe village join when 2011 village PCA is unavailable via API."
+  },
+  {
+    "key": "pmay_gramin_state",
+    "resource_id": "62ba3fe3-b360-40f0-98d5-03dd70c4a094",
+    "title": "State/UT-wise Number of Houses Constructed under PMAY-Gramin (PMAY-G) as on 17-03-2025",
+    "resolution": "state",
+    "state_field": "state_ut",
+    "notes": "CONFIRMED via live query. total=33, one row per State/UT. Filter TN with filters[state_ut]=Tamil Nadu. Columns: target_allocated_by_the_ministry, houses_completed. State-level only — no village/GP breakdown on the OGD API (village PMAY-G lists live on pmayg.nic.in AwaasSoft, HTML scrape). Many alternate year-cut PMAY-G resources exist (funds/targets/achievements) if a different metric is needed."
+  },
+  {
+    "key": "pmay_urban_state",
+    "resource_id": "67239577-75ba-49d1-b283-8e98222a661a",
+    "title": "State/UT-wise Central Assistance Released under PMAY-Urban (PMAY-U) 2021 to 2025",
+    "resolution": "state",
+    "state_field": "state_ut",
+    "notes": "CONFIRMED via live query. total=37, one row per State/UT (state_ut, central_assistance_released). Filter filters[state_ut]=Tamil Nadu. State-level only; no ward/ULB detail. For houses-sanctioned counts see sibling resource 8f2e1d3c-2382-453c-afbe-1b7777880ec9."
+  },
+  {
+    "key": "mgnrega_state",
+    "resource_id": "349279f2-8bd6-4e89-8741-f676c22b2275",
+    "title": "State/UT-wise Employment Generated and Wage Expenditure under MGNREGA during 2020-21",
+    "resolution": "state",
+    "state_field": "state_ut_wise",
+    "notes": "CONFIRMED via live query. total=35. NOTE the state field id is 'state_ut_wise' (not state_ut). Columns: persondays_generated__in_lakh_, wage_expenditure__in_rs__lakh_. State-level only; village/GP MGNREGA MIS is on nrega.nic.in. ~88 other MGNREGA state-wise resources (wage rates, funds, FTOs) available if needed."
+  },
+  {
+    "key": "jal_jeevan_state",
+    "resource_id": "ffd71fb9-e712-478f-bc2c-22b600f08e3a",
+    "title": "State/UT-wise Fund Allocation under Jal Jeevan Mission during 2020-21",
+    "resolution": "state",
+    "state_field": "state_ut",
+    "notes": "CONFIRMED via live query. total=32 (state_ut, fund_allocation). Filter filters[state_ut]=Tamil Nadu. IMPORTANT: OGD only has JJM at state level (funds) plus a few single-block financial-progress resources for OTHER states — no TN per-village FHTC table on the API. Real village-level JJM (functional household tap connections) must come from ejalshakti.gov.in exports, per SOURCES.md."
+  },
+  {
+    "key": "nsap_state",
+    "resource_id": "97173864-ed78-4d65-90f2-cdf4ec9a5f8e",
+    "title": "State/NE/UT-wise Details of Beneficiaries under National Social Assistance Programme (NSAP) 2024-25",
+    "resolution": "state",
+    "state_field": "state_ne_state_ut",
+    "notes": "CONFIRMED via live query. total=37. NOTE state field id is 'state_ne_state_ut'. Per-pension beneficiary counts (IGNOAPS, IGNWPS, IGNDPS, NFBS, Annapurna, total). State-level only. Sub-state NSAP data is on nsap.nic.in."
+  },
+  {
+    "key": "pmkisan_state",
+    "resource_id": "994c0b92-ca70-4f19-87d4-cc3197f2bfe5",
+    "title": "State/UT-wise Number of Farmers Registered and Benefited under PM-KISAN as on 30-01-2024",
+    "resolution": "state",
+    "state_field": "state_ut",
+    "notes": "CONFIRMED via live query. total=37 (state_ut + per-instalment beneficiary counts, instalment_1..N). Filter filters[state_ut]=Tamil Nadu. State-level on OGD; village-level PM-Kisan beneficiary lists exist only on pmkisan.gov.in. (SOURCES.md noted some village PM-Kisan data — that is portal-side, not this API resource.)"
+  },
+  {
+    "key": "udise_tn_schools",
+    "resource_id": "595cfc95-1bce-4ecd-847a-ea032bc66ef7",
+    "title": "SSA, Tamil Nadu : Statistics on Schools by School Category",
+    "resolution": "district",
+    "state_field": null,
+    "notes": "CONFIRMED via live query. Already TN-scoped; rows keyed by 'district' with school counts by category (primary_school, etc.). District resolution, not school/village. Per-district UDISE+ infrastructure resources also exist (e.g. Salem ca57b5f9-678e-43cb-8208-b652f5cf93a5) but none named Coimbatore surfaced in the top matches; search 'UDISE Coimbatore' on the lists API if a Coimbatore-district file is required. Full school-point UDISE+ is on udiseplus.gov.in."
+  },
+  {
+    "key": "coimbatore_educational_institutions",
+    "resource_id": "d8c785ef-5b32-4c09-96d7-322edfb0ad78",
+    "title": "Educational Institutions in Coimbatore",
+    "resolution": "town",
+    "state_field": null,
+    "notes": "Real resource_id from the data.gov.in Coimbatore (Smart Cities) catalog, returned by the authoritative /lists API (index_name). One of several Coimbatore-city resources under ministrydepartment/Coimbatore (others: Road Data c832bcaf-4d2c-40b9-8e49-80ed1fef0d10, Diseases Data 2015-18 cb9fdfad-99a7-4804-8b9a-ba5765278ff6, Street Light Data 423213d0-0084-44f9-93b5-2e5cfccd116b, Indicator-wise monthly dataset 69a58bf8-f6f7-4294-b944-11a5f7835a26). City/point level, not ward-boundaried. Column schema not individually field-verified."
+  },
+  {
+    "key": "coimbatore_city_profile_catalog",
+    "resource_id": null,
+    "title": "City Profile - Coimbatore (catalog)",
+    "resolution": "town",
+    "state_field": null,
+    "notes": "resource_id NULL on purpose. The UUID scraped from the catalog page (8e8466a6-b589-4da4-a11c-461967c65055) is a CATALOG uuid, NOT a queryable resource index_name — a direct /resource/{id} query returned empty (title None, total 0). The same trap applies to crimes-coimbatore (615c16c3-...). Usable data lives in the child resources listed under coimbatore_educational_institutions above. Do not pass catalog UUIDs to DataGovClient."
+  },
+  {
+    "key": "ccmc_wards_github",
+    "resource_id": null,
+    "title": "thejeshgn/ccmc - Coimbatore City Municipal Data scraper (GitHub)",
+    "resolution": "town",
+    "state_field": null,
+    "notes": "source=github (https://github.com/thejeshgn/ccmc), not a data.gov.in resource, so resource_id is null. CAVEAT for planning: despite the repo name it is NOT ward-boundary/polygon data. README shows it scrapes Coimbatore City property-tax 'zone-wise assessee details' (payment.ccmc.gov.in) into SQLite/CSV/JSON; code also references IMD reservoir scraping. Marginal use as a property-tax-by-zone signal; last activity is old (2014-era). For CCMC 100-ward polygons use DataMeet/OpenCity per SOURCES.md, not this repo."
+  }
+]
