@@ -19,7 +19,7 @@
  * VITE_MAPS_API_KEY. Until then, we render a static grid stand-in below.
  */
 
-interface AreaCell {
+export interface AreaCell {
   id: string;
   label: string;
   /** 0 (no coverage) .. 1 (full coverage) — drives the heat shade. */
@@ -48,18 +48,27 @@ function heatColor(coverage: number): string {
   return `hsl(${hue}, 45%, 82%)`;
 }
 
-export default function MapPlaceholder() {
+interface MapPlaceholderProps {
+  /** Real coverage cells (from scheme gaps). Falls back to demo cells. */
+  cells?: AreaCell[];
+}
+
+export default function MapPlaceholder({ cells }: MapPlaceholderProps) {
+  const data = cells && cells.length > 0 ? cells : DEMO_CELLS;
+  const live = Boolean(cells && cells.length > 0);
   return (
-    <div className="map-placeholder" aria-label="Constituency coverage heatmap (placeholder)">
+    <div className="map-placeholder" aria-label="Constituency coverage heatmap">
       <div className="map-placeholder__banner">
-        <span className="badge">Map placeholder</span>
+        <span className="badge">{live ? "Coverage by gap" : "Map placeholder"}</span>
         <span className="muted">
-          Real heatmap renders here once VITE_MAPS_API_KEY is set.
+          {live
+            ? "Cells shaded red→green by scheme coverage (red = biggest gap)."
+            : "Real heatmap renders here once VITE_MAPS_API_KEY is set."}
         </span>
       </div>
 
       <div className="map-grid" role="img" aria-label="Coverage by area">
-        {DEMO_CELLS.map((cell) => (
+        {data.map((cell) => (
           <div
             key={cell.id}
             className="map-cell"

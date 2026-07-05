@@ -34,8 +34,9 @@ def health():
     }
 
 
-from app.pipeline import intake
+from app.pipeline import intake, closeloop
 from app import api
 
 app.include_router(intake.router, prefix="/api")
+app.include_router(closeloop.router, prefix="/api")
 app.include_router(api.router, prefix="/api")

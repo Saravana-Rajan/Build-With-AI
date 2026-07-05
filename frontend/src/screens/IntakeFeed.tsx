@@ -1,12 +1,10 @@
 import Page from "../components/Page";
 import StateBlock from "../components/StateBlock";
-import type { DemandRecord } from "../types";
-
-// Placeholder rows — real data comes from api.demands() later.
-const DEMO: DemandRecord[] = [];
+import { api } from "../api";
+import { useFetch } from "../useFetch";
 
 export default function IntakeFeed() {
-  const loading = DEMO.length === 0;
+  const state = useFetch(() => api.demands(50));
 
   return (
     <Page
@@ -14,25 +12,46 @@ export default function IntakeFeed() {
       subtitle="Live feed of incoming demands as they are structured and geo-resolved."
       actions={<span className="badge badge--live">Live</span>}
     >
-      {loading ? (
+      {state.status === "loading" && (
         <StateBlock
           variant="loading"
           title="Waiting for submissions…"
           detail="New demands will stream in here (web, Telegram, phone, meetings)."
         />
-      ) : (
+      )}
+
+      {state.status === "empty" && (
+        <StateBlock
+          variant="empty"
+          title="No demands yet"
+          detail="Once submissions arrive they appear here newest-first."
+        />
+      )}
+
+      {state.status === "error" && (
+        <StateBlock variant="error" title="Could not load intake" detail={state.error} />
+      )}
+
+      {state.status === "ready" && (
         <ul className="feed">
-          {DEMO.map((d) => (
+          {state.data.map((d) => (
             <li key={d.id} className="feed-item">
               <div className="feed-item__top">
-                <span className={`chip chip--${d.urgency}`}>{d.urgency}</span>
-                <span className="chip chip--muted">{d.category}</span>
-                <span className="chip chip--muted">{d.source}</span>
+                {d.language && (
+                  <span className="chip chip--muted">{d.language.toUpperCase()}</span>
+                )}
+                {d.true_category && (
+                  <span className="chip chip--muted">{d.true_category}</span>
+                )}
+                {d.channel && <span className="chip chip--muted">{d.channel}</span>}
                 {d.place_name && (
-                  <span className="feed-item__place">{d.place_name}</span>
+                  <span className="feed-item__place">
+                    {d.place_name}
+                    {d.urban ? " · urban" : " · rural"}
+                  </span>
                 )}
               </div>
-              <p className="feed-item__text">{d.need_detail || d.raw_text}</p>
+              <p className="feed-item__text">{d.raw_text || "(no text)"}</p>
             </li>
           ))}
         </ul>

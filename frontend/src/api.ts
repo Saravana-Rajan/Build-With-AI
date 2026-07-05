@@ -1,15 +1,17 @@
 /**
- * Minimal fetch client for the FastAPI backend.
+ * Minimal fetch client for the FastAPI dashboard read-API.
  * Base URL comes from VITE_API_URL (defaults to http://localhost:8000).
  *
- * Endpoint paths below are best-guess placeholders — adjust to match the
- * backend routes when wiring is done. Every call is typed against src/types.ts.
+ * Paths below match backend/app/api.py exactly (all mounted under /api).
+ * Every call is typed against src/types.ts.
  */
 import type {
-  DemandRecord,
+  DemandRow,
   RankedProject,
   SchemeGap,
   SilentVillage,
+  StatsResponse,
+  UnifiedIssue,
 } from "./types";
 
 export const API_URL =
@@ -37,17 +39,26 @@ async function get<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  /** Live intake feed — most recent structured demands. */
-  demands: () => get<DemandRecord[]>("/demands"),
+  /** Headline numbers for the dashboard hero. */
+  stats: () => get<StatsResponse>("/api/stats"),
 
-  /** Ranked project list (Priorities screen). */
-  rankedProjects: () => get<RankedProject[]>("/priorities"),
+  /** Live intake feed — most recent raw demands. */
+  demands: (limit = 50) => get<DemandRow[]>(`/api/demands?limit=${limit}`),
 
   /** Per-area scheme coverage gaps (Constituency X-Ray). */
-  schemeGaps: () => get<SchemeGap[]>("/scheme-gaps"),
+  schemeGaps: (limit = 100) => get<SchemeGap[]>(`/api/scheme-gaps?limit=${limit}`),
+
+  /** Ranked project list (Priorities + Act). */
+  rankedProjects: (limit = 50) =>
+    get<RankedProject[]>(`/api/ranked-projects?limit=${limit}`),
 
   /** Silent / under-petitioning areas (Forgotten Villages). */
-  silentVillages: () => get<SilentVillage[]>("/silent-villages"),
+  silentVillages: (limit = 50) =>
+    get<SilentVillage[]>(`/api/silent-villages?limit=${limit}`),
+
+  /** Deduplicated issue clusters (Priorities headline). */
+  unifiedIssues: (limit = 100) =>
+    get<UnifiedIssue[]>(`/api/unified-issues?limit=${limit}`),
 };
 
 export default api;

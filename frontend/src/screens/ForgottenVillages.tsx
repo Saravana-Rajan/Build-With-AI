@@ -1,25 +1,31 @@
 import Page from "../components/Page";
 import StateBlock from "../components/StateBlock";
-import type { SilentVillage } from "../types";
-
-// Placeholder — real data from api.silentVillages().
-const DEMO: SilentVillage[] = [];
+import { api } from "../api";
+import { useFetch } from "../useFetch";
 
 export default function ForgottenVillages() {
-  const loading = DEMO.length === 0;
+  const state = useFetch(() => api.silentVillages(50));
 
   return (
     <Page
       title="Forgotten Villages"
       subtitle="Areas with high estimated need but few or no petitions — the silent constituents."
     >
-      {loading ? (
+      {state.status === "loading" && (
         <StateBlock
           variant="loading"
           title="Scanning for silent areas…"
           detail="High need + low petition volume surfaces the places going unheard."
         />
-      ) : (
+      )}
+      {state.status === "empty" && (
+        <StateBlock variant="empty" title="No silent villages flagged" />
+      )}
+      {state.status === "error" && (
+        <StateBlock variant="error" title="Could not load silent villages" detail={state.error} />
+      )}
+
+      {state.status === "ready" && (
         <table className="data-table">
           <thead>
             <tr>
@@ -31,7 +37,7 @@ export default function ForgottenVillages() {
             </tr>
           </thead>
           <tbody>
-            {DEMO.map((v) => (
+            {state.data.map((v) => (
               <tr key={v.area_id}>
                 <td>{v.place_name}</td>
                 <td className="num">{v.need_score.toFixed(1)}</td>

@@ -103,3 +103,40 @@ export interface SilentVillage {
   silent_score: number;
   flagged: boolean;
 }
+
+// ── Read-API response shapes (GET /api/*) ────────────────────────────────────
+// These mirror the exact columns the dashboard endpoints return (SELECT * from
+// the BigQuery analytics tables). Kept separate from the pipeline models above.
+
+/** GET /api/stats */
+export interface StatsResponse {
+  constituency: string;
+  complaints: number;
+  rupees_owed: number | null; // ₹, may be null when no gaps computed yet
+  silent_villages: number;
+  real_villages: number;
+}
+
+/** GET /api/demands — one raw complaint row for the live intake feed. */
+export interface DemandRow {
+  id: string;
+  raw_text: string | null;
+  place_name: string | null;
+  urban: boolean;
+  true_category: string | null;
+  channel: string | null; // web | telegram | phone | meeting | import
+  language: string | null; // ta | en | hi
+  created_at: string;
+}
+
+/** GET /api/unified-issues — deduplicated / merged issue clusters. */
+export interface UnifiedIssue {
+  issue_id: string;
+  category: string;
+  place_name: string | null;
+  report_count: number;
+  channels: string[] | string | null;
+  languages: string[] | string | null;
+  coordinated_flag: boolean;
+  sample_text: string | null;
+}
