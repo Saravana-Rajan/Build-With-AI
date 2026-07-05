@@ -28,7 +28,7 @@ def health():
     """Liveness probe for Cloud Run."""
     return {
         "status": "ok",
-        "service": "constituency-intelligence-engine",
+        "service": "sarvik",
         "constituency": settings.constituency,
         "project": settings.gcp_project_id,
     }
@@ -36,11 +36,15 @@ def health():
 
 from app.pipeline import intake, closeloop
 from app import api
+from app.letters import routes as letter_routes
+from app.ask import routes as ask_routes
 from app.telegram_bot import webhook
 
 app.include_router(intake.router, prefix="/api")
 app.include_router(closeloop.router, prefix="/api")
 app.include_router(api.router, prefix="/api")
+app.include_router(letter_routes.router, prefix="/api")
+app.include_router(ask_routes.router, prefix="/api")
 
 # Telegram webhook — NO /api prefix (Telegram posts to /telegram/webhook).
 app.include_router(webhook.router)

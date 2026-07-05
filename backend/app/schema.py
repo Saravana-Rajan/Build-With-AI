@@ -95,6 +95,15 @@ class RankedProject(BaseModel):
     matched_scheme: Optional[str] = None
     department: Optional[str] = None             # responsible department
 
+    # Need-justification by proximity (jobs/justify.py). The AI gives a REASON
+    # per request from real facility presence + haversine distance, so one
+    # complaint is never trusted blindly.
+    verdict: Optional[str] = None                # served | watch | genuine_gap | not_assessed
+    nearest_km: Optional[float] = None           # km to nearest area WITH the facility
+    nearest_area: Optional[str] = None           # that area's name
+    justification: Optional[str] = None          # short human sentence
+    need_justification: Optional[dict] = None     # {verdict, nearest_facility_km, nearest_area, reason}
+
 
 class SilentVillage(BaseModel):
     area_id: str

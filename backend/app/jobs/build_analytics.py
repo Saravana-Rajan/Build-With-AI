@@ -41,6 +41,7 @@ from typing import Dict, List, Optional
 
 from ..schema import DepartmentSummary, RankedProject, SchemeGap, SilentVillage
 from ..store import bq
+from . import justify
 from ..analytics import (
     compute_gap,
     knapsack_select,
@@ -516,6 +517,14 @@ def main() -> None:
     ranked = build_ranked(areas, complaints)
     departments = build_department_summary(scheme_gaps)
 
+    # Need-justification by proximity: give every ranked project a verdict +
+    # reason from real facility presence (Census) and haversine distance.
+    jindex = justify.enrich_ranked(ranked, census)
+    _v = {}
+    for p in ranked:
+        _v[p.verdict] = _v.get(p.verdict, 0) + 1
+    print(f"  need-justification verdicts: {_v}")
+
     # Track-B ₹5cr MPLADS optimiser selection.
     track_b = [
         {"id": p.area_id, "priority_score": p.priority_score,
@@ -566,6 +575,20 @@ def main() -> None:
         cost = f"₹{p.estimated_cost:,.0f}" if p.estimated_cost else "Track A (entitlement)"
         print(f"  {p.rank:>2}. {p.title[:60]:<60} "
               f"score={p.priority_score:.3f}  {cost}")
+
+    # Need-justification demo highlights (served with a nearby facility + a gap).
+    served_demo = next(
+        (p for p in ranked if p.verdict == "served" and (p.nearest_km or 0) > 0), None
+    )
+    gap_demo = max(
+        (p for p in ranked if p.verdict == "genuine_gap" and p.nearest_km is not None),
+        key=lambda p: p.nearest_km,
+        default=None,
+    )
+    print("\nNeed-justification demo:")
+    for tag, p in (("SERVED", served_demo), ("GENUINE GAP", gap_demo)):
+        if p:
+            print(f"  [{tag}] {p.place_name} ({p.category}): {p.justification}")
 
     print("\nDepartment summary (by ₹ owed):")
     for d in departments:
