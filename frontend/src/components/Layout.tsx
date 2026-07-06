@@ -8,7 +8,6 @@ import {
   Building2,
   VolumeX,
   Megaphone,
-  ScanLine,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
@@ -37,7 +36,6 @@ const NAV: NavItem[] = [
   { to: "/departments", label: "Departments", icon: Building2, group: "intel" },
   { to: "/forgotten", label: "Forgotten Villages", icon: VolumeX, group: "intel" },
   { to: "/act", label: "Act", icon: Megaphone, group: "ops" },
-  { to: "/scan", label: "Scan Petition", icon: ScanLine, group: "ops" },
 ];
 
 const GROUP_LABEL: Record<NavItem["group"], string> = {
@@ -57,7 +55,6 @@ export const ROUTE_TITLE: Record<string, string> = {
   "/departments": "Departments",
   "/forgotten": "Forgotten Villages",
   "/act": "Act",
-  "/scan": "Scan Petition",
 };
 
 // ── Sidebar ──────────────────────────────────────────────────────────────────

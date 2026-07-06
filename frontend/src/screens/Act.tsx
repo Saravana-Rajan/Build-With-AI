@@ -28,9 +28,11 @@ import {
 } from "../lib/departments";
 import type { DepartmentsResult } from "../lib/departments";
 import { schemeInfo } from "../lib/schemeMeta";
+import { logAction } from "../lib/actions";
+import Tracker from "./Tracker";
 import type { Department, RankedProject } from "../types";
 
-type Tab = "A" | "B";
+type Tab = "A" | "B" | "T";
 
 const MPLADS_BUDGET = 5_00_00_000; // ₹5 crore annual allocation.
 
@@ -315,6 +317,23 @@ export default function Act() {
       return next;
     });
 
+  const [funded, setFunded] = useState(false);
+  const fundSelected = () => {
+    candidates
+      .filter((c) => cart.has(c.id))
+      .forEach((c) =>
+        logAction({
+          id: `work:${c.id}`,
+          kind: "work",
+          title: candidateTitle(c),
+          place: c.place_name,
+          rupees: c.cost,
+          beneficiaries: c.beneficiaries,
+        }),
+      );
+    setFunded(true);
+  };
+
   const pct = Math.min(100, (committed / MPLADS_BUDGET) * 100);
   const over = committed > MPLADS_BUDGET;
   const remaining = MPLADS_BUDGET - committed;
@@ -410,15 +429,25 @@ export default function Act() {
           Track B · ₹5 Cr cart ({candidates.length})
         </button>
         <InfoTip term="Track B" className="self-center" />
+        <button
+          role="tab"
+          aria-selected={tab === "T"}
+          className={tab === "T" ? "tab tab--active" : "tab"}
+          onClick={() => setTab("T")}
+        >
+          Tracker
+        </button>
       </div>
 
-      {projects.status === "loading" && (
+      {tab === "T" && <Tracker />}
+
+      {tab !== "T" && projects.status === "loading" && (
         <StateBlock variant="loading" title="Loading projects…" />
       )}
-      {projects.status === "empty" && (
+      {tab !== "T" && projects.status === "empty" && (
         <StateBlock variant="empty" title="No projects to act on yet" />
       )}
-      {projects.status === "error" && (
+      {tab !== "T" && projects.status === "error" && (
         <StateBlock
           variant="error"
           title="Could not load projects"
@@ -485,6 +514,25 @@ export default function Act() {
             </div>
           </div>
 
+          <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "0 0 14px" }}>
+            <button
+              type="button"
+              className="btn btn--primary"
+              disabled={cart.size === 0 || over}
+              onClick={fundSelected}
+            >
+              <CheckCircle2 size={15} /> Fund selected works ({cart.size})
+            </button>
+            {funded && (
+              <span
+                className="chip chip--track-A"
+                style={{ display: "inline-flex", alignItems: "center", gap: 5 }}
+              >
+                <CheckCircle2 size={13} /> Added to Tracker
+              </span>
+            )}
+          </div>
+
           {candidates.length === 0 ? (
             <StateBlock
               variant="empty"
@@ -541,9 +589,16 @@ export default function Act() {
                 <button
                   type="button"
                   className="btn btn--primary"
-                  onClick={() =>
-                    setSent((prev) => new Set(prev).add(modal.dept))
-                  }
+                  onClick={() => {
+                    setSent((prev) => new Set(prev).add(modal.dept));
+                    logAction({
+                      id: `letter:${modal.dept}`,
+                      kind: "letter",
+                      title: `Entitlement letter to ${modal.dept}`,
+                      department: modal.dept,
+                      rupees: modal.rupees ?? null,
+                    });
+                  }}
                 >
                   <Send size={15} /> Send to department
                 </button>

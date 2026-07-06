@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Search, X, MapPin, Radio, Languages, Tag, Clock, Hash } from "lucide-react";
+import { Search, X, MapPin, Radio, Languages, Tag, Clock, Hash, AlertTriangle } from "lucide-react";
 import Page from "../components/Page";
 import StateBlock from "../components/StateBlock";
 import Pagination, { usePagination } from "../components/Pagination";
 import ProvenanceChip from "../components/Provenance";
+import ScanPetition from "./ScanPetition";
 import { api } from "../api";
 import { useFetch } from "../useFetch";
 import type { DemandRow } from "../types";
@@ -30,23 +31,67 @@ function fmtDate(s: string | null | undefined): string {
     : d.toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" });
 }
 
+// ── Urgency triage — surface critical/high complaints first ──────────────────
+const URGENCY_RANK: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };
+
+function urgencyRank(u: string | null | undefined): number {
+  return URGENCY_RANK[(u || "").toLowerCase()] ?? 4;
+}
+
+const URGENCY_STYLE: Record<string, { bg: string; fg: string; border: string }> = {
+  critical: { bg: "hsl(0 84% 96%)", fg: "hsl(0 72% 45%)", border: "hsl(0 84% 88%)" },
+  high: { bg: "hsl(28 96% 95%)", fg: "hsl(24 80% 42%)", border: "hsl(28 90% 85%)" },
+  medium: { bg: "hsl(45 96% 95%)", fg: "hsl(38 75% 38%)", border: "hsl(45 88% 85%)" },
+  low: { bg: "hsl(var(--secondary))", fg: "hsl(var(--muted-foreground))", border: "hsl(var(--border))" },
+};
+
+function UrgencyPill({ u }: { u: string | null | undefined }) {
+  const key = (u || "").toLowerCase();
+  const meta = URGENCY_STYLE[key];
+  if (!meta) return null;
+  return (
+    <span
+      className="chip"
+      style={{ background: meta.bg, color: meta.fg, borderColor: meta.border, fontWeight: 700 }}
+    >
+      {key === "critical" ? "⚠ " : ""}
+      {key}
+    </span>
+  );
+}
+
 export default function IntakeFeed() {
   const state = useFetch(() => api.demands(300));
+  const [tab, setTab] = useState<"complaints" | "scan">("complaints");
   const [query, setQuery] = useState("");
+  const [urgentOnly, setUrgentOnly] = useState(false);
   const [selected, setSelected] = useState<FeedRow | null>(null);
 
   const rows: FeedRow[] = state.status === "ready" ? (state.data as FeedRow[]) : [];
 
-  // Filter by place name or category text (case-insensitive).
+  const urgentCount = useMemo(
+    () => rows.filter((d) => urgencyRank(d.urgency) <= 1).length,
+    [rows],
+  );
+
+  // Filter by place/category/channel text, optionally urgent-only, urgent-first.
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return rows;
-    return rows.filter((d) =>
-      [d.place_name, d.true_category, d.channel, d.language, d.raw_text]
-        .filter(Boolean)
-        .some((v) => v!.toLowerCase().includes(q)),
-    );
-  }, [rows, query]);
+    let out = rows;
+    if (q) {
+      out = out.filter((d) =>
+        [d.place_name, d.true_category, d.channel, d.language, d.raw_text]
+          .filter(Boolean)
+          .some((v) => v!.toLowerCase().includes(q)),
+      );
+    }
+    if (urgentOnly) out = out.filter((d) => urgencyRank(d.urgency) <= 1);
+    // Stable urgent-first ordering (critical/high float up; rest keep order).
+    return [...out]
+      .map((d, i) => ({ d, i }))
+      .sort((a, b) => urgencyRank(a.d.urgency) - urgencyRank(b.d.urgency) || a.i - b.i)
+      .map((x) => x.d);
+  }, [rows, query, urgentOnly]);
 
   const { page, pageCount, pageItems, total, from, to, setPage } =
     usePagination(filtered, PAGE_SIZE);
@@ -62,6 +107,29 @@ export default function IntakeFeed() {
         </div>
       }
     >
+      <div className="tabs" role="tablist" aria-label="Intake mode" style={{ marginBottom: 16 }}>
+        <button
+          role="tab"
+          aria-selected={tab === "complaints"}
+          className={tab === "complaints" ? "tab tab--active" : "tab"}
+          onClick={() => setTab("complaints")}
+        >
+          Complaints
+        </button>
+        <button
+          role="tab"
+          aria-selected={tab === "scan"}
+          className={tab === "scan" ? "tab tab--active" : "tab"}
+          onClick={() => setTab("scan")}
+        >
+          Scan a petition
+        </button>
+      </div>
+
+      {tab === "scan" && <ScanPetition />}
+
+      {tab === "complaints" && (
+        <>
       {state.status === "loading" && (
         <StateBlock
           variant="loading"
@@ -96,6 +164,25 @@ export default function IntakeFeed() {
                 aria-label="Filter demands"
               />
             </div>
+            <button
+              type="button"
+              onClick={() => setUrgentOnly((v) => !v)}
+              aria-pressed={urgentOnly}
+              className="chip"
+              style={{
+                cursor: "pointer",
+                fontWeight: 700,
+                background: urgentOnly ? "hsl(0 84% 96%)" : "hsl(var(--secondary))",
+                color: urgentOnly ? "hsl(0 72% 45%)" : "hsl(var(--muted-foreground))",
+                borderColor: urgentOnly ? "hsl(0 84% 88%)" : "hsl(var(--border))",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 5,
+              }}
+              title="Show only critical + high urgency complaints"
+            >
+              <AlertTriangle size={13} /> Urgent {urgentCount > 0 ? `(${urgentCount})` : ""}
+            </button>
             <span className="count-badge">{filtered.length.toLocaleString("en-IN")} demands</span>
           </div>
 
@@ -132,6 +219,7 @@ export default function IntakeFeed() {
                       }}
                     >
                       <div className="feed-item__top">
+                        <UrgencyPill u={d.urgency} />
                         {live && (
                           <span
                             className="chip"
@@ -201,6 +289,9 @@ export default function IntakeFeed() {
               />
             </>
           )}
+        </>
+      )}
+
         </>
       )}
 
@@ -310,6 +401,7 @@ function DetailModal({ d, onClose }: { d: FeedRow; onClose: () => void }) {
           {/* Structured fields */}
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
             <Meta icon={<Tag size={13} />} label="Category" value={d.true_category || "—"} />
+            <Meta icon={<AlertTriangle size={13} />} label="Urgency" value={(d.urgency || "—").toString()} />
             <Meta icon={<Radio size={13} />} label="Channel" value={d.channel || "—"} />
             <Meta icon={<Languages size={13} />} label="Language" value={(d.language || "—").toUpperCase()} />
             <Meta icon={<MapPin size={13} />} label="Place" value={d.place_name || "—"} />

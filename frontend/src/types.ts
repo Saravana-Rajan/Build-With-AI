@@ -138,9 +138,30 @@ export interface DemandRow {
   place_name: string | null;
   urban: boolean;
   true_category: string | null;
-  channel: string | null; // web | telegram | phone | meeting | import
-  language: string | null; // ta | en | hi
+  channel: string | null; // web | telegram | phone | meeting | import | paper
+  language: string | null; // ta | en
+  urgency?: string | null; // critical | high | medium | low
   created_at: string;
+  is_real?: boolean | null; // true = live citizen submission (Telegram/Scan)
+}
+
+// ── MP action log (close-the-loop tracker) — client-persisted for the demo ───
+export type ActionKind = "letter" | "work";
+export type ActionStatus = "sent" | "acknowledged" | "resolved";
+
+/** One thing the MP acted on: a department letter sent, or an MPLADS work funded. */
+export interface MpAction {
+  id: string; // stable key: `${kind}:${target}`
+  kind: ActionKind;
+  title: string;
+  department?: string | null;
+  place?: string | null;
+  scheme?: string | null;
+  rupees?: number | null;
+  beneficiaries?: number | null;
+  status: ActionStatus;
+  created_at: string; // ISO
+  updated_at: string; // ISO
 }
 
 /** GET /api/unified-issues — deduplicated / merged issue clusters. */

@@ -9,6 +9,10 @@ outlet / study + date). Each real issue is expanded into MANY citizen complaints
 Tamil / Hindi / English — so the feed looks lived-in while staying traceable:
 every row carries ``source_outlet`` + ``source_note`` + ``is_real=True``.
 
+Coimbatore is a Tamil-majority city, so complaints are authored ONLY in Tamil
+and English (no Hindi). The language mix is ~60% Tamil / ~40% English, produced
+by giving each real issue three Tamil templates and two English templates.
+
 Place names are kept consistent with ``data/coimbatore/urban_wards.json`` /
 ``fringe_villages.json`` where the real area maps onto a known ward, so the
 downstream analytics (petition_count per area) light up on real geography.
@@ -45,7 +49,7 @@ CHANNELS = ["web", "telegram", "phone", "meeting"]
 # Each carries: display metadata for the `real_issues` table (area/sector/issue/
 # source_outlet/source_date/headline) PLUS derivation metadata used to expand it
 # into citizen complaints (category, affected wards, weight, urgency, base date,
-# multilingual templates keyed (lang, text) with a {place} slot).
+# Tamil+English templates keyed (lang, text) with a {place} slot).
 REAL_ISSUES = [
     {
         "id": "RI-01",
@@ -67,8 +71,7 @@ REAL_ISSUES = [
         "templates": [
             ("ta", "Siruvani தண்ணி குறைஞ்சதால {place}ல வாரத்துக்கு ஒரு தடவைதான் குடிநீர் வருது."),
             ("ta", "{place}ல மூணு நாளைக்கு ஒரு முறைதான் தண்ணி விடுறாங்க, குடிக்கவே பத்தலை."),
-            ("hi", "सिरुवनी बांध सूखने से {place} में हफ्ते में सिर्फ एक बार पीने का पानी आता है।"),
-            ("hi", "{place} में तीन दिन में एक बार पानी मिलता है, पूरा मोहल्ला परेशान है।"),
+            ("ta", "{place}ல குடிநீர் பஞ்சம், விடியக்காலைல நாலு மணிக்கே குடம் வெச்சு வரிசையில நிக்கிறோம்."),
             ("en", "Siruvani level has crashed - {place} now gets drinking water only once a week."),
             ("en", "Water in {place} comes once in three days; we are queuing at 4am for pots."),
         ],
@@ -91,9 +94,9 @@ REAL_ISSUES = [
                   "Selvapuram", "Ondipudur"],
         "templates": [
             ("ta", "{place}ல தண்ணி இல்லை, டேங்கர் கேட்டு ஹெல்ப்லைன்ல கூப்பிட்டா வரலை."),
-            ("hi", "{place} में टैंकर के लिए हेल्पलाइन पर फोन किया पर पानी का ट्रक नहीं आया।"),
-            ("en", "Called the zone helpline for a water tanker in {place} three times - none came."),
             ("ta", "{place} பகுதிக்கு தண்ணி லாரி வரமாட்டேங்குது, குடிநீர் பஞ்சம்."),
+            ("ta", "{place}ல ஹெல்ப்லைன் நம்பர்ல மூணு தடவ கூப்பிட்டும் தண்ணி டேங்கர் வரலை."),
+            ("en", "Called the zone helpline for a water tanker in {place} three times - none came."),
             ("en", "Tanker supply promised for {place} but the truck skips our street every time."),
         ],
     },
@@ -115,9 +118,9 @@ REAL_ISSUES = [
                   "Kavundampalayam", "Ondipudur"],
         "templates": [
             ("ta", "{place}ல UGD வேலைக்காக ரோடு தோண்டி வெச்சு மாசக்கணக்கா மூடலை, தண்ணி பைப்பும் முடியலை."),
-            ("hi", "{place} में यूजीडी और पानी की लाइन का काम अधूरा है, सड़क महीनों से खुदी पड़ी है।"),
-            ("en", "UGD and water-pipe work in {place} is half-done - the road has been dug up for months."),
             ("ta", "{place} குடிநீர் திட்ட வேலை பாதியிலயே நின்னுபோச்சு, மண்ணு குழி ஆபத்து."),
+            ("ta", "{place}ல ஊரடி வடிகால் வேலை முடிக்காம ரோடு முழுக்க தோண்டி போட்டிருக்காங்க."),
+            ("en", "UGD and water-pipe work in {place} is half-done - the road has been dug up for months."),
             ("en", "Water-supply project in {place} stalled at 20%; trenches everywhere, no water yet."),
         ],
     },
@@ -141,10 +144,9 @@ REAL_ISSUES = [
                   "Rathinapuri", "Uppilipalayam"],
         "templates": [
             ("ta", "{place} ரோட்ல முழுக்க பள்ளம், தினமும் டூ-வீலர் விபத்து, ரிப்பேர் பண்ணுங்க."),
-            ("hi", "{place} की सड़क गड्ढों से भरी है, रोज़ दुर्घटनाएँ होती हैं, जल्दी मरम्मत करो।"),
-            ("en", "The road in {place} is all potholes - bikes skid daily. Please re-lay it."),
             ("ta", "{place}ல ரோடு பழுதாகி ரெண்டு வருஷம் ஆச்சு, மழையில குழி தெரியாம விழுறாங்க."),
-            ("hi", "{place} में बारिश के बाद गड्ढे और गहरे हो गए, पैदल चलना भी मुश्किल है।"),
+            ("ta", "{place} சாலையில பெரிய பள்ளங்க, இரவுல வண்டி ஓட்டவே பயமா இருக்கு."),
+            ("en", "The road in {place} is all potholes - bikes skid daily. Please re-lay it."),
             ("en", "Include {place} in the 1,847-road re-laying list - our stretch is dangerous."),
         ],
     },
@@ -165,7 +167,8 @@ REAL_ISSUES = [
         "wards": ["Vadavalli"],
         "templates": [
             ("ta", "{place}-மருதமலை ரோடு ரொம்ப ஒடுக்கம், திருவிழா நேரத்துல மணிக்கணக்கா ட்ராஃபிக்."),
-            ("hi", "{place} से मरुदमलै तक की सड़क बहुत संकरी है, त्योहार पर घंटों जाम लगता है।"),
+            ("ta", "{place} ரோடு நாலு வழிச்சாலையா ஆக்குறோம்னு சொன்னாங்க, வேலை மெதுவா நகருது."),
+            ("ta", "{place}ல ரோடு ஒடுக்கமா இருக்கிறதால தினமும் வாகன நெரிசல், போக்குவரத்து சிக்கல்."),
             ("en", "The {place}-Marudhamalai stretch is a two-lane bottleneck - jams for hours on festival days."),
             ("en", "Four-laning of {place} road was announced but work is crawling; daily gridlock continues."),
         ],
@@ -187,7 +190,8 @@ REAL_ISSUES = [
         "wards": ["Sanganoor", "Ganeshapuram"],
         "templates": [
             ("ta", "{place} கால்வோரம் இருக்கிற ரோடு முழுசா உடைஞ்சு போச்சு, வண்டி ஓட்டவே முடியலை."),
-            ("hi", "{place} नहर किनारे की सड़क पूरी तरह टूट चुकी है, गाड़ी चलाना खतरनाक है।"),
+            ("ta", "{place} கால்வாய் ஓரமா ரோடு போடுற வேலை தொடங்கியும் பாதி மட்டும்தான் முடிச்சிருக்காங்க."),
+            ("ta", "{place}ல கால்வோர சாலை உடைஞ்சு கிடக்கு, சீக்கிரம் சரி செய்யுங்க."),
             ("en", "The canal-side road in {place} is completely broken - restoration is overdue."),
             ("en", "Road-laying along the {place} canal started but half the stretch is still rubble."),
         ],
@@ -209,9 +213,9 @@ REAL_ISSUES = [
         "wards": ["Race Course", "Sungam", "Sivananda Colony"],
         "templates": [
             ("ta", "{place}ல மழைத்தண்ணி வடிஞ்சு போக வழியில்லை, சப்வே முழுக மூழ்கிடுச்சு."),
-            ("hi", "{place} में दो दिन की बारिश से सड़कें और सबवे डूब गए, निकासी की व्यवस्था नहीं है।"),
-            ("en", "Two days of rain and {place} is under water again - the subway is closed and drains overflow."),
             ("ta", "{place} சுரங்கப்பாதையில தண்ணி நிரம்பி வாகனம் போக முடியலை, டிரெயினேஜ் சரியில்லை."),
+            ("ta", "{place}ல ரெண்டு நாள் மழைக்கே சாலைகள் மூழ்கி, மழைநீர் வடிகால் இல்லாம தவிக்கிறோம்."),
+            ("en", "Two days of rain and {place} is under water again - the subway is closed and drains overflow."),
             ("en", "Stormwater in {place} has nowhere to go; every monsoon the underpass floods."),
         ],
     },
@@ -233,10 +237,9 @@ REAL_ISSUES = [
                   "Ganapathy", "Saravanampatti", "Kavundampalayam", "Saibaba Colony"],
         "templates": [
             ("ta", "{place}ல வெள்ளம் புகுந்து வீட்டுக்குள்ள தண்ணி, சாலைகள் எல்லாம் மூழ்கிடுச்சு."),
-            ("hi", "{place} में भारी बारिश से सड़कें डूब गईं, पानी घरों में घुस गया।"),
-            ("en", "{place} is flooded - water entered homes and the subway swallowed a bus."),
             ("ta", "{place} பகுதி முழுக்க வெள்ளம், மழைநீர் வடிகால் இல்லாததால தண்ணி நிக்குது."),
-            ("hi", "{place} में जल निकासी न होने से हर बारिश में इलाका डूब जाता है।"),
+            ("ta", "{place}ல மழையில சப்வேல தண்ணி நிரம்பி பஸ்ஸே சிக்கிக்கிச்சு, வெளியேற வழியில்லை."),
+            ("en", "{place} is flooded - water entered homes and the subway swallowed a bus."),
             ("en", "No stormwater drains in {place}; the October rains left the whole area submerged."),
         ],
     },
@@ -257,7 +260,8 @@ REAL_ISSUES = [
         "wards": ["Sanganoor"],
         "templates": [
             ("ta", "{place} ஓடையோரம் வீடு இடிஞ்சு விழுந்துச்சு, டிசில்ட்டிங் வேலை சரியா நடக்கலை."),
-            ("hi", "{place} नाले के किनारे मकान गिर गया, गाद निकासी का काम अधूरा है।"),
+            ("ta", "{place}ல வெள்ள கட்டுப்பாட்டு வேலைக்காக காலி பண்ணச்சொல்லி குடும்பங்க தவிக்குது."),
+            ("ta", "{place} ஓடையோர மண் சரிஞ்சு வீடு இடிஞ்சது, தடுப்புச்சுவர் வேலை சரியில்லை."),
             ("en", "A house collapsed along the {place} stream - desilting and retaining-wall work is botched."),
             ("en", "Flood-control evictions in {place} left families displaced and the stream still un-desilted."),
         ],
@@ -279,9 +283,9 @@ REAL_ISSUES = [
         "wards": ["Sanganoor", "Puliakulam", "Ramanathapuram"],
         "templates": [
             ("ta", "{place} கால்வாயில கழிவுநீர் கலந்து நாத்தம் அடிக்குது, கிணத்துத் தண்ணியும் கெட்டுபோச்சு."),
-            ("hi", "{place} नहर में मल-मूत्र और सीवेज मिल रहा है, बदबू और बीमारी फैल रही है।"),
-            ("en", "The {place} canal carries raw sewage - the stench is unbearable and groundwater is spoilt."),
             ("ta", "{place} ஓடையில சுத்திகரிக்காத கழிவுநீர் விடுறாங்க, சுகாதார பிரச்சனை."),
+            ("ta", "{place} கால்வாயில மலக்கழிவு கலந்து நாத்தம் தாங்கமுடியலை, கொசு தொல்லை."),
+            ("en", "The {place} canal carries raw sewage - the stench is unbearable and groundwater is spoilt."),
             ("en", "Untreated household and factory sewage flows into the {place} drain daily."),
         ],
     },
@@ -302,9 +306,9 @@ REAL_ISSUES = [
         "wards": ["Vellalore"],
         "templates": [
             ("ta", "{place} குப்பை மேட்டுல தினமும் டன் கணக்கா குப்பை கொட்டுறாங்க, நாத்தம் தாங்கமுடியலை."),
-            ("hi", "{place} डंप यार्ड में रोज़ टनों कचरा डाला जाता है, बदबू से जीना मुश्किल है।"),
-            ("en", "The {place} dump yard gets thousands of tonnes of mixed waste - the smell reaches our homes."),
             ("ta", "{place}ல பழைய குப்பையை அகத்தலை, ஈ, கொசு, நோய் பரவுது."),
+            ("ta", "{place} குப்பை மேட்டு நாத்தம் வீடு வரைக்கும் அடிக்குது, மூச்சுவிடவே கஷ்டம்."),
+            ("en", "The {place} dump yard gets thousands of tonnes of mixed waste - the smell reaches our homes."),
             ("en", "Legacy waste at {place} is still not bio-mined; flies and stench everywhere."),
         ],
     },
@@ -325,7 +329,8 @@ REAL_ISSUES = [
         "wards": ["Vellalore", "Kuniyamuthur"],
         "templates": [
             ("ta", "{place} குப்பை மேட்டு கசிவு கிணத்துத் தண்ணியில கலந்து, வீட்டு உபயோகத்துக்கே லாயக்கில்லை."),
-            ("hi", "{place} के लैंडफिल का रिसाव कुओं में मिल गया, पानी घरेलू उपयोग के लायक नहीं रहा।"),
+            ("ta", "{place}ல போர்வெல் தண்ணி கருப்பா நாத்தத்தோட வருது, குடிக்கவே முடியலை."),
+            ("ta", "{place} குப்பை மேட்டுக்கு பக்கத்துல கிணறு தண்ணி நச்சாகி கெட்டுபோச்சு."),
             ("en", "Landfill leachate near {place} has ruined our well water - it's unfit even for washing."),
             ("en", "Groundwater around {place} is contaminated by the dump; borewells now pump foul water."),
         ],
@@ -347,7 +352,8 @@ REAL_ISSUES = [
         "wards": ["GN Mills"],
         "templates": [
             ("ta", "{place} மேம்பாலத்துல தெருவிளக்கு எரியலை, இரவுல வண்டி ஓட்ட ரொம்ப ஆபத்து."),
-            ("hi", "{place} फ्लाईओवर की स्ट्रीट लाइटें महीनों से बंद हैं, रात में हादसे का डर है।"),
+            ("ta", "{place} பாலத்துல விளக்கே இல்லாம பல மாசமா இருட்டு, விபத்து அபாயம்."),
+            ("ta", "{place} மேம்பாலத்துல ராத்திரி காரிருட்டு, தெருவிளக்கை சரி செய்யுங்க."),
             ("en", "Streetlights on the {place} flyover have been dead for months - night riding is dangerous."),
             ("en", "The {place} flyover is pitch dark after sunset; please restore the lighting."),
         ],
@@ -369,7 +375,8 @@ REAL_ISSUES = [
         "wards": ["Ganapathy", "Peelamedu", "Hope College"],
         "templates": [
             ("ta", "{place} பகுதி முக்கிய சாலையில தெருவிளக்கே இல்லை, இரவுல நடக்கவே பயமா இருக்கு."),
-            ("hi", "{place} की मुख्य सड़क पर स्ट्रीट लाइट नहीं जलती, रात के यात्री असुरक्षित हैं।"),
+            ("ta", "{place}ல முக்கிய சாலையில விளக்கு எரியாததால இரவு பயணிகள் அச்சத்துல இருக்காங்க."),
+            ("ta", "{place} சாலையில ராத்திரி இருட்டா இருக்கு, எப்பவும் விபத்து நடக்கலாம்."),
             ("en", "No working streetlights on the {place} arterial stretch - commuters are unsafe at night."),
             ("en", "The {place} stretch of Avinashi Road stays dark; accidents waiting to happen."),
         ],
@@ -391,9 +398,9 @@ REAL_ISSUES = [
         "wards": ["Sidhapudur"],
         "templates": [
             ("ta", "{place} TNUHDB வீட்டுக்கு 85,000 ரூபா கட்டச்சொல்றாங்க, எங்களால முடியலை."),
-            ("hi", "{place} में टीएनयूएचडीबी घर के लिए 85,000 रुपये मांगे जा रहे हैं, हम गरीब कैसे दें?"),
-            ("en", "TNUHDB is demanding Rs 85,000 per family in {place} - beneficiaries can't afford it."),
             ("ta", "{place}ல வீடு ஒதுக்கீடு ஆனா தண்ணி இணைப்பும் இல்ல, பணப் பிரச்சனையும் தீரலை."),
+            ("ta", "{place} வீட்டுவாரிய குடியிருப்புல தண்ணி இணைப்பு இல்லை, கட்டணமும் அதிகம்."),
+            ("en", "TNUHDB is demanding Rs 85,000 per family in {place} - beneficiaries can't afford it."),
             ("en", "Housing-board tenements in {place} still lack water connections despite the fees demanded."),
         ],
     },
@@ -414,7 +421,8 @@ REAL_ISSUES = [
         "wards": ["Keeranatham"],
         "templates": [
             ("ta", "{place} குடியிருப்புல செப்டிக் டேங்க் நிரம்பி வழியுது, அடிப்படை வசதியே இல்லை."),
-            ("hi", "{place} के पुनर्वास फ्लैटों में सेप्टिक टैंक उफन रहे हैं, बुनियादी सुविधाएं नहीं हैं।"),
+            ("ta", "{place}ல மறுவாழ்வு வீடுகள்ல கழிவுநீர் வழிஞ்சு, பராமரிப்பே இல்லை."),
+            ("ta", "{place} புனர்வாழ்வு குடியிருப்புல அடிப்படை வசதி இல்லாம மக்கள் தவிக்கிறாங்க."),
             ("en", "Resettlement tenements in {place} have overflowing septic tanks and no basic amenities."),
             ("en", "We were resettled to {place} but live amid sewage overflow with no maintenance."),
         ],
@@ -436,7 +444,8 @@ REAL_ISSUES = [
         "wards": ["Velandipalayam", "Saravanampatti", "Nehru Nagar West", "Krishna Avenue"],
         "templates": [
             ("ta", "{place}ல அரசு நகர்ப்புற சுகாதார நிலையம் இல்லை, சின்ன காய்ச்சலுக்கும் தூரம் போகணும்."),
-            ("hi", "{place} में सरकारी शहरी स्वास्थ्य केंद्र नहीं है, छोटी बीमारी के लिए भी दूर जाना पड़ता है।"),
+            ("ta", "{place} பகுதியில மக்கள் தொகை பெருகியும் அருகில அரசு மருத்துவமனை இல்லை."),
+            ("ta", "{place}ல வாக்குறுதி கொடுத்த நகர்ப்புற சுகாதார நிலையத்தை சீக்கிரம் திறங்க."),
             ("en", "{place} has no urban PHC - even for a fever we travel far. Please open the promised UPHC."),
             ("en", "Population in {place} has exploded but there's no public health centre nearby."),
         ],
@@ -458,7 +467,8 @@ REAL_ISSUES = [
         "wards": ["CMCH"],
         "templates": [
             ("ta", "{place}ல ஓபி வரிசை ரொம்ப நீளம், பதிவு பண்ணவே மணிக்கணக்கா காத்திருக்கணும்."),
-            ("hi", "{place} में ओपीडी की भीड़ बहुत है, रजिस्ट्रेशन और दवा के लिए घंटों लगते हैं।"),
+            ("ta", "{place}ல தினமும் ஆயிரக்கணக்கான நோயாளிகள், கவுண்டர் பத்தாம மருந்துக்கே நீண்ட வரிசை."),
+            ("ta", "{place} மருத்துவமனையில கூட்ட நெரிசல், பரிசோதனைக்கு நாள் முழுக்க ஆகுது."),
             ("en", "{place} OPD is hopelessly overcrowded - hours of waiting for registration and pharmacy."),
             ("en", "5,500 patients a day at {place} and too few counters; diagnostics take all day."),
         ],
@@ -480,7 +490,8 @@ REAL_ISSUES = [
         "wards": ["Vellalore"],
         "templates": [
             ("ta", "{place}ல ஒருங்கிணைந்த பேருந்து நிலையம் 2020லயே நின்னுபோச்சு, இன்னும் காந்திபுரம்தான்."),
-            ("hi", "{place} का इंटीग्रेटेड बस टर्मिनस 2020 से अटका है, अब भी गांधीपुरम पर निर्भर हैं।"),
+            ("ta", "{place} பஸ் டெர்மினஸ் வேலை பல வருஷமா நிறுத்தி வெச்சிருக்காங்க, முடிக்கணும்."),
+            ("ta", "{place}ல புது பேருந்து நிலையம் முடிக்காததால காந்திபுரத்துல நெரிசல் அதிகம்."),
             ("en", "The {place} integrated bus terminus has been stalled since 2020-21 - finish it."),
             ("en", "Because {place} CIBT is incomplete, all buses still choke Gandhipuram."),
         ],
@@ -502,7 +513,8 @@ REAL_ISSUES = [
         "wards": ["Ukkadam"],
         "templates": [
             ("ta", "{place} பேருந்து நிலையம் இடிச்சதுக்கப்புறம் பஸ் நிற்க இடமில்லை, ரோட்லயே ஏறுறோம்."),
-            ("hi", "{place} बस टर्मिनस टूटने के बाद बसें सड़क पर रुकती हैं, यात्रियों को दिक्कत है।"),
+            ("ta", "{place}ல பேருந்து நிலையம் இடிச்சாச்சு, மறுசீரமைப்பு வேலை மெதுவா நடக்குது."),
+            ("ta", "{place} டெர்மினஸ் இல்லாததால பஸ் சாலையில நிற்குது, பயணிகளுக்கு ரொம்ப சிரமம்."),
             ("en", "Since the {place} terminus was demolished, buses halt on the road - chaos for passengers."),
             ("en", "The {place} terminus rebuild only started in Aug 2025; till then commuters suffer."),
         ],
@@ -524,7 +536,8 @@ REAL_ISSUES = [
         "wards": ["Saravanampatti", "Kalapatti", "Chinnavedampatti"],
         "templates": [
             ("ta", "{place} IT காரிடார்ல பீக் அவர்ல மணிக்கணக்கா ட்ராஃபிக், மெட்ரோவும் வேண்டாம்னு சொல்லிட்டாங்க."),
-            ("hi", "{place} आईटी कॉरिडोर पर पीक आवर में भारी जाम रहता है, मेट्रो प्रस्ताव भी खारिज हो गया।"),
+            ("ta", "{place}ல பீக் நேரத்துல 3 கிலோமீட்டர் போக ஒரு மணி நேரம் ஆகுது, போக்குவரத்து சிக்கல்."),
+            ("ta", "{place} ஐடி வழித்தடத்துல வாகன நெரிசல் தாங்கமுடியலை, சாலைகளை சரி செய்யுங்க."),
             ("en", "Peak-hour traffic on the {place} IT corridor is brutal and the metro was rejected - fix the roads."),
             ("en", "Commuting through {place} at 6pm takes an hour for 3km; we need real transport planning."),
         ],
@@ -546,7 +559,8 @@ REAL_ISSUES = [
         "wards": ["Sanganoor"],
         "templates": [
             ("ta", "{place} கால்வாய் ஆக்கிரமிப்பு அகற்றுறாங்க, ஆனா மறுவாழ்வு இல்லாம குடும்பங்க தவிக்குது."),
-            ("hi", "{place} नहर के अतिक्रमण हटाए जा रहे हैं पर पुनर्वास नहीं मिला, परिवार परेशान हैं।"),
+            ("ta", "{place}ல கால்வாய் தூர்வார ஆக்கிரமிப்பு வீடுகளை இடிக்கிறாங்க, மறுகுடியமர்வு தெளிவில்லை."),
+            ("ta", "{place} கால்வோர கடைகளை காலி பண்ணச்சொல்றாங்க, ஆனா மாற்று இடம் தரலை."),
             ("en", "Eviction of {place} canal encroachments is on, but displaced families got no rehabilitation."),
             ("en", "3,000+ structures along the {place} canal face demolition with unclear resettlement."),
         ],

@@ -20,6 +20,8 @@ import HBarChart from "../components/HBarChart";
 import ProvenanceChip from "../components/Provenance";
 import InfoTip from "../components/InfoTip";
 import ComplaintsModal from "../components/ComplaintsModal";
+import ActionCenter from "./ActionCenter";
+import ImpactScorecard from "./ImpactScorecard";
 import type { DemandRow, RankedProject } from "../types";
 
 function langChip(code: string | null): string {
@@ -45,6 +47,7 @@ const onKeyActivate =
 
 export default function Dashboard() {
   const [complaintsView, setComplaintsView] = useState<ComplaintsView | null>(null);
+  const [tab, setTab] = useState<"overview" | "today" | "impact">("overview");
   const stats = useFetch(() => api.stats(), () => false);
   const demands = useFetch<DemandRow[]>(() => api.demands(6));
   const depts = useFetch<DepartmentsResult>(
@@ -105,6 +108,39 @@ export default function Dashboard() {
         </p>
       </div>
 
+      {/* Dashboard sub-tabs — Overview / Today briefing / Impact scorecard */}
+      <div className="tabs" role="tablist" aria-label="Dashboard view" style={{ marginBottom: 18 }}>
+        <button
+          role="tab"
+          aria-selected={tab === "overview"}
+          className={tab === "overview" ? "tab tab--active" : "tab"}
+          onClick={() => setTab("overview")}
+        >
+          Overview
+        </button>
+        <button
+          role="tab"
+          aria-selected={tab === "today"}
+          className={tab === "today" ? "tab tab--active" : "tab"}
+          onClick={() => setTab("today")}
+        >
+          Today
+        </button>
+        <button
+          role="tab"
+          aria-selected={tab === "impact"}
+          className={tab === "impact" ? "tab tab--active" : "tab"}
+          onClick={() => setTab("impact")}
+        >
+          Impact
+        </button>
+      </div>
+
+      {tab === "today" && <ActionCenter />}
+      {tab === "impact" && <ImpactScorecard />}
+
+      {tab === "overview" && (
+        <>
       {/* Owed hero — the lead story (WOW #1) */}
       <section aria-label="Entitlements owed" className="headline mb-4">
         <span className="headline__label">
@@ -452,6 +488,8 @@ export default function Dashboard() {
           infrastructure.
         </div>
       </div>
+        </>
+      )}
 
       <ComplaintsModal
         open={complaintsView !== null}

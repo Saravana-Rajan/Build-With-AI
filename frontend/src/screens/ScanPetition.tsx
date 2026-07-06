@@ -1,6 +1,5 @@
 import { useRef, useState } from "react";
 import type { DragEvent, ReactNode } from "react";
-import Page from "../components/Page";
 import StateBlock from "../components/StateBlock";
 import { submitIntake, ApiError } from "../api";
 import type { IntakeResponse } from "../api";
@@ -63,10 +62,11 @@ export default function ScanPetition() {
   const busy = status.kind === "reading";
 
   return (
-    <Page
-      title="Scan a Petition"
-      subtitle="Photograph a paper letter, or upload a PDF or voice note. The AI reads it and files a structured record — the way the front desk should work."
-    >
+    <div>
+      <p className="muted" style={{ marginBottom: 16 }}>
+        Photograph a paper letter, or upload a PDF or voice note. The AI reads it and
+        files a structured record — the way the front desk should work.
+      </p>
       <div className="scan-grid">
         <section className="card scan-uploader" aria-label="Upload petition">
           <div
@@ -182,7 +182,7 @@ export default function ScanPetition() {
           {status.kind === "done" && <Result result={status.result} />}
         </section>
       </div>
-    </Page>
+    </div>
   );
 }
 

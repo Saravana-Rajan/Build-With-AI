@@ -40,13 +40,17 @@ def demands(limit: int = Query(50, le=500)):
     try:
         syn = bq.query(
             f"SELECT * FROM `{DS}.complaints_synthetic` ORDER BY created_at DESC LIMIT {limit}")
+        # Normalise to a single `urgency` field (synthetic uses `urgency_hint`).
+        for r in syn:
+            if "urgency" not in r or r.get("urgency") is None:
+                r["urgency"] = r.get("urgency_hint")
     except Exception:
         syn = []
 
     live = []
     try:
         rows = bq.query(
-            f"SELECT id, raw_text, place_name, urban, category, source, language, "
+            f"SELECT id, raw_text, place_name, urban, category, source, language, urgency, "
             f"CAST(created_at AS STRING) AS created_at "
             f"FROM `{DS}.demand_records` ORDER BY created_at DESC LIMIT 50")
         for r in rows:
@@ -58,6 +62,7 @@ def demands(limit: int = Query(50, le=500)):
                 "true_category": r.get("category"),
                 "channel": r.get("source"),
                 "language": r.get("language"),
+                "urgency": r.get("urgency"),
                 "created_at": r.get("created_at"),
                 "is_real": True,
             })
