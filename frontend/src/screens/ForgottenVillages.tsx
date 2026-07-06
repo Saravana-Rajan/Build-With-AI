@@ -1,9 +1,11 @@
 import { useMemo, useState } from "react";
+import type { KeyboardEvent } from "react";
 import { ArrowUpDown } from "lucide-react";
 import Page from "../components/Page";
 import StateBlock from "../components/StateBlock";
 import Pagination, { usePagination } from "../components/Pagination";
 import ProvenanceChip from "../components/Provenance";
+import ComplaintsModal from "../components/ComplaintsModal";
 import { api } from "../api";
 import { useFetch } from "../useFetch";
 import type { SilentVillage } from "../types";
@@ -16,6 +18,15 @@ export default function ForgottenVillages() {
   const state = useFetch(() => api.silentVillages(300));
   const [sortKey, setSortKey] = useState<SortKey>("silent_score");
   const [asc, setAsc] = useState(false);
+  const [selected, setSelected] = useState<SilentVillage | null>(null);
+
+  const onKeyActivate =
+    (fn: () => void) => (e: KeyboardEvent<HTMLElement>) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        fn();
+      }
+    };
 
   const rows: SilentVillage[] = state.status === "ready" ? state.data : [];
 
@@ -91,7 +102,15 @@ export default function ForgottenVillages() {
               </thead>
               <tbody>
                 {pageItems.map((v) => (
-                  <tr key={v.area_id}>
+                  <tr
+                    key={v.area_id}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`View citizen complaints from ${v.place_name}`}
+                    className="cursor-pointer hover:bg-secondary/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
+                    onClick={() => setSelected(v)}
+                    onKeyDown={onKeyActivate(() => setSelected(v))}
+                  >
                     <td>{v.place_name}</td>
                     <td className="num">{v.need_score.toFixed(1)}</td>
                     <td className="num">{v.petition_count}</td>
@@ -120,6 +139,18 @@ export default function ForgottenVillages() {
           />
         </>
       )}
+
+      <ComplaintsModal
+        open={selected !== null}
+        onClose={() => setSelected(null)}
+        placeName={selected?.place_name}
+        title={selected?.place_name ?? "Citizen complaints"}
+        subtitle={
+          selected
+            ? `Need score ${selected.need_score.toFixed(1)} · ${selected.petition_count} petitions on file`
+            : undefined
+        }
+      />
     </Page>
   );
 }

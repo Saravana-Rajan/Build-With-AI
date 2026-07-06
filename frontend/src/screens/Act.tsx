@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { KeyboardEvent, ReactNode } from "react";
 import {
   ChevronRight,
   FileText,
@@ -15,6 +16,7 @@ import Page from "../components/Page";
 import StateBlock from "../components/StateBlock";
 import LetterModal, { LetterBody } from "../components/LetterModal";
 import Pagination, { usePagination } from "../components/Pagination";
+import ComplaintsModal from "../components/ComplaintsModal";
 import { api } from "../api";
 import { useFetch } from "../useFetch";
 import { formatCrore, formatInr } from "../format";
@@ -29,6 +31,23 @@ import type { Department, RankedProject } from "../types";
 type Tab = "A" | "B";
 
 const MPLADS_BUDGET = 5_00_00_000; // ₹5 crore annual allocation.
+
+/** The citizen complaints behind a letter / work — place (+ category) drill-down. */
+type ComplaintsView = {
+  placeName: string | null | undefined;
+  category?: string | null;
+  title: string;
+  subtitle?: ReactNode;
+};
+
+/** Enter/Space activates a role="button" element, matching a click. */
+const onKeyActivate =
+  (fn: () => void) => (e: KeyboardEvent<HTMLElement>) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      fn();
+    }
+  };
 
 /** Group projects by owning department, sorted by group size (largest first). */
 function groupByDept(rows: RankedProject[]): Array<[string, RankedProject[]]> {
@@ -154,7 +173,16 @@ export default function Act() {
   const [cart, setCart] = useState<Set<string>>(new Set());
   const [sent, setSent] = useState<Set<string>>(new Set());
   const [modal, setModal] = useState<ModalState | null>(null);
+  const [complaints, setComplaints] = useState<ComplaintsView | null>(null);
   const cartInit = useRef(false);
+
+  const openProjectComplaints = (p: RankedProject) =>
+    setComplaints({
+      placeName: p.place_name,
+      category: p.category,
+      title: p.title,
+      subtitle: `${p.place_name} · ${p.category} — the citizen complaints behind this`,
+    });
 
   const projects = useFetch(() => api.rankedProjects(300));
   const depts = useFetch<DepartmentsResult>(
@@ -345,6 +373,7 @@ export default function Act() {
                 defaultOpen={i === 0}
                 onGenerate={() => openDeptLetter(dept, items)}
                 onWhyEligible={openItemLetter}
+                onSeeComplaints={openProjectComplaints}
               />
             ))
           )}
@@ -394,6 +423,14 @@ export default function Act() {
               cart={cart}
               committed={committed}
               onToggle={toggle}
+              onSeeComplaints={(c) =>
+                setComplaints({
+                  placeName: c.place_name,
+                  category: c.category,
+                  title: candidateTitle(c),
+                  subtitle: `${c.place_name} · ${c.category} — the citizen complaints behind this work`,
+                })
+              }
             />
           )}
         </section>
@@ -485,6 +522,15 @@ export default function Act() {
           )}
         </LetterModal>
       )}
+
+      <ComplaintsModal
+        open={complaints !== null}
+        onClose={() => setComplaints(null)}
+        placeName={complaints?.placeName}
+        category={complaints?.category}
+        title={complaints?.title ?? "Citizen complaints"}
+        subtitle={complaints?.subtitle}
+      />
     </Page>
   );
 }
@@ -498,6 +544,7 @@ function DeptLetterCard({
   defaultOpen,
   onGenerate,
   onWhyEligible,
+  onSeeComplaints,
 }: {
   dept: string;
   items: RankedProject[];
@@ -506,6 +553,7 @@ function DeptLetterCard({
   defaultOpen?: boolean;
   onGenerate: () => void;
   onWhyEligible: (p: RankedProject) => void;
+  onSeeComplaints: (p: RankedProject) => void;
 }) {
   const [open, setOpen] = useState(!!defaultOpen);
   const [showAll, setShowAll] = useState(false);
@@ -617,7 +665,16 @@ function DeptLetterCard({
             <div style={{ marginTop: 14 }}>
               <ul className="ranked-list">
                 {pager.pageItems.map((p) => (
-                  <li key={p.rank} className="ranked-item">
+                  <li
+                    key={p.rank}
+                    className="ranked-item"
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`View citizen complaints behind ${p.title}`}
+                    style={{ cursor: "pointer" }}
+                    onClick={() => onSeeComplaints(p)}
+                    onKeyDown={onKeyActivate(() => onSeeComplaints(p))}
+                  >
                     <div className="ranked-item__body">
                       <div className="ranked-item__head">
                         <strong>{p.title}</strong>
@@ -633,7 +690,10 @@ function DeptLetterCard({
                     </div>
                     <button
                       className="btn btn--sm"
-                      onClick={() => onWhyEligible(p)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onWhyEligible(p);
+                      }}
                     >
                       <HelpCircle size={14} /> Why eligible
                     </button>
@@ -664,12 +724,14 @@ function MpladsPool({
   cart,
   committed,
   onToggle,
+  onSeeComplaints,
 }: {
   candidates: MpladsCandidate[];
   recommended: Set<string>;
   cart: Set<string>;
   committed: number;
   onToggle: (id: string) => void;
+  onSeeComplaints: (c: MpladsCandidate) => void;
 }) {
   const selectedCount = candidates.filter((c) => cart.has(c.id)).length;
 
@@ -707,6 +769,7 @@ function MpladsPool({
               isRec={isRec}
               wouldOver={wouldOver}
               onToggle={() => onToggle(c.id)}
+              onSeeComplaints={() => onSeeComplaints(c)}
             />
           );
         })}
@@ -721,15 +784,23 @@ function MpladsCard({
   isRec,
   wouldOver,
   onToggle,
+  onSeeComplaints,
 }: {
   c: MpladsCandidate;
   inCart: boolean;
   isRec: boolean;
   wouldOver: boolean;
   onToggle: () => void;
+  onSeeComplaints: () => void;
 }) {
   return (
     <div
+      role="button"
+      tabIndex={0}
+      aria-label={`View citizen complaints behind ${candidateTitle(c)}`}
+      onClick={onSeeComplaints}
+      onKeyDown={onKeyActivate(onSeeComplaints)}
+      className="cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       style={{
         border: inCart
           ? "1.5px solid hsl(var(--primary))"
@@ -747,8 +818,9 @@ function MpladsCard({
         checked={inCart}
         disabled={wouldOver}
         onChange={onToggle}
-        aria-label={`Include ${candidateTitle(c)}`}
-        style={{ marginTop: 4, width: 17, height: 17, flexShrink: 0 }}
+        onClick={(e) => e.stopPropagation()}
+        aria-label={`Include ${candidateTitle(c)} in the MPLADS cart`}
+        style={{ marginTop: 4, width: 17, height: 17, flexShrink: 0, cursor: "pointer" }}
       />
 
       <div style={{ flex: 1, minWidth: 0 }}>

@@ -1,3 +1,5 @@
+import { useState } from "react";
+import type { KeyboardEvent, ReactNode } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
@@ -12,10 +14,11 @@ import {
 import { api } from "../api";
 import { useFetch } from "../useFetch";
 import { formatCrore, formatCroreShort } from "../format";
-import { loadDepartments, departmentColor, departmentSlug } from "../lib/departments";
+import { loadDepartments, departmentColor } from "../lib/departments";
 import type { DepartmentsResult } from "../lib/departments";
 import HBarChart from "../components/HBarChart";
 import ProvenanceChip from "../components/Provenance";
+import ComplaintsModal from "../components/ComplaintsModal";
 import type { DemandRow, RankedProject } from "../types";
 
 function langChip(code: string | null): string {
@@ -23,7 +26,24 @@ function langChip(code: string | null): string {
   return code.toUpperCase();
 }
 
+type ComplaintsView = {
+  placeName: string | null | undefined;
+  category?: string | null;
+  title: string;
+  subtitle?: ReactNode;
+};
+
+/** Enter/Space activates a role="button" element, matching a click. */
+const onKeyActivate =
+  (fn: () => void) => (e: KeyboardEvent<HTMLElement>) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      fn();
+    }
+  };
+
 export default function Dashboard() {
+  const [complaintsView, setComplaintsView] = useState<ComplaintsView | null>(null);
   const stats = useFetch(() => api.stats(), () => false);
   const demands = useFetch<DemandRow[]>(() => api.demands(6));
   const depts = useFetch<DepartmentsResult>(
@@ -184,11 +204,20 @@ export default function Dashboard() {
             {depts.status === "ready" &&
               deptRows.slice(0, 4).map((d) => {
                 const color = departmentColor(d.department);
+                const topArea = d.top_areas[0];
                 return (
-                  <Link
+                  <button
                     key={d.department}
-                    to={`/departments#${departmentSlug(d.department)}`}
-                    className="group flex flex-col gap-1.5 rounded-lg border border-border bg-card p-3.5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-md"
+                    type="button"
+                    aria-label={`View citizen complaints behind ${d.department}`}
+                    onClick={() =>
+                      setComplaintsView({
+                        placeName: topArea,
+                        title: d.department,
+                        subtitle: `${formatCrore(d.total_gap_value)} owed · ${d.issue_count.toLocaleString("en-IN")} issues${topArea ? ` · ${topArea}` : ""}`,
+                      })
+                    }
+                    className="group flex cursor-pointer flex-col gap-1.5 rounded-lg border border-border bg-card p-3.5 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span className="truncate text-xs font-semibold text-foreground">{d.department}</span>
@@ -211,9 +240,9 @@ export default function Dashboard() {
                       ))}
                     </div>
                     <div className="mt-1 text-[11px] font-semibold text-primary group-hover:underline">
-                      Push this dept →
+                      See complaints →
                     </div>
-                  </Link>
+                  </button>
                 );
               })}
           </div>
@@ -275,7 +304,26 @@ export default function Dashboard() {
               {topPriorities.map((p, i) => (
                 <li
                   key={p.rank}
-                  className="flex items-center gap-3 rounded-md px-2 py-2 hover:bg-secondary/50"
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`View citizen complaints behind ${p.title}`}
+                  onClick={() =>
+                    setComplaintsView({
+                      placeName: p.place_name,
+                      category: p.category,
+                      title: p.title,
+                      subtitle: `${p.place_name} · ${p.category}${p.matched_scheme ? ` · ${p.matched_scheme}` : ""}`,
+                    })
+                  }
+                  onKeyDown={onKeyActivate(() =>
+                    setComplaintsView({
+                      placeName: p.place_name,
+                      category: p.category,
+                      title: p.title,
+                      subtitle: `${p.place_name} · ${p.category}${p.matched_scheme ? ` · ${p.matched_scheme}` : ""}`,
+                    }),
+                  )}
+                  className="flex cursor-pointer items-center gap-3 rounded-md px-2 py-2 hover:bg-secondary/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
                   <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-accent text-[11px] font-bold text-accent-foreground">
                     {i + 1}
@@ -340,8 +388,28 @@ export default function Dashboard() {
           {demands.status === "ready" && (
             <ol className="relative space-y-3 border-l border-border pl-4">
               {demands.data.map((d) => (
-                <li key={d.id} className="relative">
-                  <span className="absolute -left-[21px] top-1 h-2.5 w-2.5 rounded-full border-2 border-card bg-primary" />
+                <li
+                  key={d.id}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`View citizen complaints from ${d.place_name ?? "this area"}`}
+                  onClick={() =>
+                    setComplaintsView({
+                      placeName: d.place_name,
+                      title: d.place_name ?? "Citizen complaints",
+                      subtitle: d.true_category ? `All complaints from ${d.place_name}` : undefined,
+                    })
+                  }
+                  onKeyDown={onKeyActivate(() =>
+                    setComplaintsView({
+                      placeName: d.place_name,
+                      title: d.place_name ?? "Citizen complaints",
+                      subtitle: d.true_category ? `All complaints from ${d.place_name}` : undefined,
+                    }),
+                  )}
+                  className="relative -mx-1 cursor-pointer rounded-md px-1 py-0.5 hover:bg-secondary/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                >
+                  <span className="absolute -left-[20px] top-1.5 h-2.5 w-2.5 rounded-full border-2 border-card bg-primary" />
                   <div className="flex flex-wrap items-baseline gap-2 text-xs">
                     <span className="font-medium text-foreground">{d.place_name ?? "Unknown"}</span>
                     {d.true_category && (
@@ -379,6 +447,15 @@ export default function Dashboard() {
           infrastructure.
         </div>
       </div>
+
+      <ComplaintsModal
+        open={complaintsView !== null}
+        onClose={() => setComplaintsView(null)}
+        placeName={complaintsView?.placeName}
+        category={complaintsView?.category}
+        title={complaintsView?.title ?? "Citizen complaints"}
+        subtitle={complaintsView?.subtitle}
+      />
     </div>
   );
 }

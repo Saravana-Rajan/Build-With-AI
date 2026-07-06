@@ -276,11 +276,11 @@ function ComplaintsModalBody({
           {(feed.status === "ready" || feed.status === "empty") && count === 0 && (
             <StateBlock
               variant="empty"
-              title="No complaints match this area"
+              title="No complaints from here — that's exactly why it's a forgotten village."
               detail={
                 category
-                  ? `No ${category} complaints on file for ${placeName ?? "this area"} yet.`
-                  : `No complaints on file for ${placeName ?? "this area"} yet.`
+                  ? `Not a single ${category} complaint has reached us from ${placeName ?? "this area"}. Silence isn't the absence of need — it's the constituents no one has heard from yet.`
+                  : `Not a single complaint has reached us from ${placeName ?? "this area"}. Silence isn't the absence of need — it's the constituents no one has heard from yet.`
               }
             />
           )}
