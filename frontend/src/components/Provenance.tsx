@@ -1,7 +1,10 @@
 /**
  * Small provenance chip for data credibility: is a number real (Census), a
  * synthetic demo complaint, or computed by the pipeline? Kept tiny + neutral.
+ * Hover/focus reveals the plain-language "provenance" definition via InfoTip.
  */
+import { GLOSSARY } from "../lib/glossary";
+
 export type Provenance = "real" | "synthetic" | "computed" | "modelled";
 
 const META: Record<Provenance, { label: string; className: string }> = {
@@ -13,5 +16,9 @@ const META: Record<Provenance, { label: string; className: string }> = {
 
 export default function ProvenanceChip({ kind }: { kind: Provenance }) {
   const m = META[kind] ?? META.computed;
-  return <span className={m.className} title={`Data source: ${m.label}`}>{m.label}</span>;
+  return (
+    <span className={m.className} title={GLOSSARY.Provenance}>
+      {m.label}
+    </span>
+  );
 }

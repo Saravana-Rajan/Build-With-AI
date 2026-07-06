@@ -5,6 +5,7 @@ import Page from "../components/Page";
 import StateBlock from "../components/StateBlock";
 import HBarChart from "../components/HBarChart";
 import ComplaintsModal from "../components/ComplaintsModal";
+import InfoTip from "../components/InfoTip";
 import { useFetch } from "../useFetch";
 import { formatCrore, formatCroreShort } from "../format";
 import {
@@ -53,8 +54,19 @@ function SchemeBadge({ info }: { info: SchemeInfo }) {
       >
         Central scheme
       </span>
-      <span style={{ fontSize: 14, fontWeight: 800, letterSpacing: "-0.01em", lineHeight: 1.15 }}>
+      <span
+        style={{
+          fontSize: 14,
+          fontWeight: 800,
+          letterSpacing: "-0.01em",
+          lineHeight: 1.15,
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 5,
+        }}
+      >
         {info.code}
+        <InfoTip term={info.code} />
       </span>
       <span style={{ fontSize: 11, lineHeight: 1.25, color: "rgba(255,255,255,0.9)" }}>
         {info.name}
@@ -244,7 +256,10 @@ export default function Departments() {
                       <span className="dept-panel__owed-val" style={{ color }}>
                         {formatCrore(d.total_gap_value)}
                       </span>
-                      <span className="muted">owed · {d.issue_count.toLocaleString("en-IN")} open issues</span>
+                      <span className="muted">
+                        owed
+                        <InfoTip term="Entitlement / Owed" className="mx-1" />· {d.issue_count.toLocaleString("en-IN")} open issues
+                      </span>
                       <div style={{ flexBasis: "100%", marginTop: 8 }}>
                         <div
                           role="img"
@@ -283,6 +298,7 @@ export default function Departments() {
                     >
                       <span className="dept-panel__label" style={{ color: "hsl(var(--foreground))" }}>
                         ★ Central schemes to push
+                        <InfoTip term="Scheme" className="ml-1" />
                       </span>
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 2 }}>
                         {primary.length === 0 && <span className="muted">No matched scheme</span>}

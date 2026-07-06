@@ -14,9 +14,11 @@ import {
   ChevronsRight,
   LogOut,
   Sparkles,
+  BookOpen,
 } from "lucide-react";
 import type { ComponentType } from "react";
 import { cn } from "../lib/utils";
+import GlossaryModal from "./GlossaryModal";
 
 // ── Navigation model (single source of truth) ───────────────────────────────
 interface NavItem {
@@ -66,6 +68,7 @@ function Sidebar({
   collapsed: boolean;
   onToggle: () => void;
 }) {
+  const [glossaryOpen, setGlossaryOpen] = React.useState(false);
   return (
     <aside
       className={cn(
@@ -179,6 +182,16 @@ function Sidebar({
         )}
         <button
           type="button"
+          onClick={() => setGlossaryOpen(true)}
+          className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-white/60 px-2.5 py-1.5 text-[11px] font-medium text-slate-500 transition-colors hover:bg-white hover:text-primary dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10"
+          aria-label="Open glossary of terms"
+          title="Glossary — plain-language definitions"
+        >
+          <BookOpen className="h-3.5 w-3.5" />
+          {!collapsed && <span>Glossary</span>}
+        </button>
+        <button
+          type="button"
           onClick={onToggle}
           className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-white/60 px-2.5 py-1.5 text-[11px] font-medium text-slate-500 transition-colors hover:bg-white hover:text-slate-700 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10"
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
@@ -193,6 +206,8 @@ function Sidebar({
           )}
         </button>
       </div>
+
+      {glossaryOpen && <GlossaryModal onClose={() => setGlossaryOpen(false)} />}
     </aside>
   );
 }

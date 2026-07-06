@@ -18,6 +18,7 @@ import { loadDepartments, departmentColor } from "../lib/departments";
 import type { DepartmentsResult } from "../lib/departments";
 import HBarChart from "../components/HBarChart";
 import ProvenanceChip from "../components/Provenance";
+import InfoTip from "../components/InfoTip";
 import ComplaintsModal from "../components/ComplaintsModal";
 import type { DemandRow, RankedProject } from "../types";
 
@@ -106,13 +107,17 @@ export default function Dashboard() {
 
       {/* Owed hero — the lead story (WOW #1) */}
       <section aria-label="Entitlements owed" className="headline mb-4">
-        <span className="headline__label">Already owed to your people · unclaimed entitlements</span>
+        <span className="headline__label">
+          Already owed to your people · unclaimed entitlements
+          <InfoTip term="Entitlement / Owed" className="ml-1" />
+        </span>
         <span className="headline__value">
           {owed != null ? formatCrore(owed) : stats.status === "error" ? "₹—" : "₹…"}
         </span>
         <span className="headline__note">
           This money is your constituents&apos; by right — Track A unlocks it with letters, spending
-          <strong> ₹0</strong> of your <strong>₹5&nbsp;cr</strong> MPLADS budget before it&apos;s touched.
+          <strong> ₹0</strong> of your <strong>₹5&nbsp;cr</strong> MPLADS
+          <InfoTip term="MPLADS" className="mx-1" /> budget before it&apos;s touched.
         </span>
       </section>
 

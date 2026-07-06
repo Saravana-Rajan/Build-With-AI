@@ -5,6 +5,7 @@ import Page from "../components/Page";
 import StateBlock from "../components/StateBlock";
 import Pagination, { usePagination } from "../components/Pagination";
 import ProvenanceChip from "../components/Provenance";
+import InfoTip from "../components/InfoTip";
 import ComplaintsModal from "../components/ComplaintsModal";
 import { api } from "../api";
 import { useFetch } from "../useFetch";
@@ -94,9 +95,18 @@ export default function ForgottenVillages() {
               <thead>
                 <tr>
                   <th>Area</th>
-                  <th className="num">{sortBtn("need_score", "Need score")}</th>
-                  <th className="num">{sortBtn("petition_count", "Petitions")}</th>
-                  <th className="num">{sortBtn("silent_score", "Silent score")}</th>
+                  <th className="num">
+                    {sortBtn("need_score", "Need score")}
+                    <InfoTip term="Need score" className="ml-1" />
+                  </th>
+                  <th className="num">
+                    {sortBtn("petition_count", "Petitions")}
+                    <InfoTip term="Silent village / Forgotten" className="ml-1" />
+                  </th>
+                  <th className="num">
+                    {sortBtn("silent_score", "Silent score")}
+                    <InfoTip term="Silent village / Forgotten" className="ml-1" />
+                  </th>
                   <th>Status</th>
                 </tr>
               </thead>

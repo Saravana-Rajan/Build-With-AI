@@ -17,6 +17,7 @@ import StateBlock from "../components/StateBlock";
 import LetterModal, { LetterBody } from "../components/LetterModal";
 import Pagination, { usePagination } from "../components/Pagination";
 import ComplaintsModal from "../components/ComplaintsModal";
+import InfoTip from "../components/InfoTip";
 import { api } from "../api";
 import { useFetch } from "../useFetch";
 import { formatCrore, formatInr } from "../format";
@@ -329,6 +330,7 @@ export default function Act() {
         >
           Track A · Letters ({groupedA.length} depts)
         </button>
+        <InfoTip term="Track A" className="self-center" />
         <button
           role="tab"
           aria-selected={tab === "B"}
@@ -337,6 +339,7 @@ export default function Act() {
         >
           Track B · ₹5 Cr cart ({candidates.length})
         </button>
+        <InfoTip term="Track B" className="self-center" />
       </div>
 
       {projects.status === "loading" && (
@@ -357,7 +360,8 @@ export default function Act() {
         <section aria-label="Track A letters">
           <p className="muted" style={{ marginBottom: 14 }}>
             One consolidated letter per department to unlock existing entitlements
-            (JJM, PMAY-U, pensions). ₹0 of MPLADS required — pick a department,
+            (JJM, PMAY-U, pensions). ₹0 of MPLADS
+            <InfoTip term="MPLADS" className="mx-1" /> required — pick a department,
             generate, send.
           </p>
           {groupedA.length === 0 ? (
@@ -385,7 +389,8 @@ export default function Act() {
           <p className="muted" style={{ marginBottom: 14 }}>
             Track B = needs <strong>no central scheme covers</strong> — mostly
             local roads and works. These are funded from your own{" "}
-            <strong>₹5 Cr MPLADS</strong> allocation. The highlighted mix is the
+            <strong>₹5 Cr MPLADS</strong>
+            <InfoTip term="MPLADS" className="mx-1" /> allocation. The highlighted mix is the
             optimiser's pick: it fits the budget while serving the most people
             per rupee. Adjust freely — the budget guard blocks over-spend.
           </p>

@@ -3,6 +3,7 @@ import Page from "../components/Page";
 import StateBlock from "../components/StateBlock";
 import Pagination, { usePagination } from "../components/Pagination";
 import ComplaintsModal from "../components/ComplaintsModal";
+import InfoTip from "../components/InfoTip";
 import { api } from "../api";
 import { useFetch } from "../useFetch";
 import { formatInr } from "../format";
@@ -149,7 +150,10 @@ export default function Priorities() {
       subtitle="Deduplicated issues across the constituency and the ranked project list."
     >
       <section className="headline headline--slim" aria-label="Issue summary">
-        <span className="headline__label">Signal from noise · duplicates merged</span>
+        <span className="headline__label">
+          Signal from noise · duplicates merged
+          <InfoTip term="Deduplicate / Unified issue" className="ml-1" />
+        </span>
         <span className="headline__value headline__value--sm">
           {issues.status === "ready"
             ? headline(issues.data)
@@ -164,7 +168,10 @@ export default function Priorities() {
       {projects.status === "ready" && ranked.length > 0 && (
         <div className="card spark-card">
           <div className="spark-card__meta">
-            <span className="dept-panel__label">Score distribution</span>
+            <span className="dept-panel__label">
+              Score distribution
+              <InfoTip term="Priority score" className="ml-1" />
+            </span>
             <span className="muted" style={{ fontSize: 13 }}>
               {ranked.length.toLocaleString("en-IN")} ranked · top {Math.round(topScore * 100)} · median{" "}
               {Math.round(medianScore * 100)}
@@ -223,6 +230,7 @@ export default function Priorities() {
                   <div className="ranked-item__head">
                     <strong>{p.title}</strong>
                     <span className={`chip chip--track-${p.track}`}>Track {p.track}</span>
+                    <InfoTip term={p.track === "A" ? "Track A" : "Track B"} />
                   </div>
                   <div className="muted ranked-item__meta">
                     {p.place_name} · {p.category}

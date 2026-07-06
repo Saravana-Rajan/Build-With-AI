@@ -7,6 +7,7 @@ import StateBlock from "../components/StateBlock";
 import Pagination, { usePagination } from "../components/Pagination";
 import HBarChart from "../components/HBarChart";
 import ProvenanceChip from "../components/Provenance";
+import InfoTip from "../components/InfoTip";
 import ComplaintsModal from "../components/ComplaintsModal";
 import { api } from "../api";
 import { useFetch } from "../useFetch";
@@ -95,7 +96,10 @@ export default function ConstituencyXRay() {
       <section className="xray-grid">
         <div className="card card--map">
           <div className="card__head">
-            <h2 className="section-title">Coverage heatmap</h2>
+            <h2 className="section-title">
+              Coverage heatmap
+              <InfoTip term="Coverage" className="ml-1" />
+            </h2>
             <span className="muted">By ward (urban) and village (rural)</span>
           </div>
           <AreaMap
@@ -108,6 +112,7 @@ export default function ConstituencyXRay() {
           <div className="card__head">
             <h2 className="section-title">
               Biggest gaps
+              <InfoTip term="Gap" className="ml-1" />
               {gaps.status === "ready" && (
                 <span className="count-badge">
                   {filtered.length.toLocaleString("en-IN")}
