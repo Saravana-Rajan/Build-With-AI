@@ -86,10 +86,16 @@ export default function IntakeFeed() {
       );
     }
     if (urgentOnly) out = out.filter((d) => urgencyRank(d.urgency) <= 1);
-    // Stable urgent-first ordering (critical/high float up; rest keep order).
+    // LIVE citizen submissions pin to the very top (the MP just received them),
+    // then urgent-first (critical/high), then original recency order — stable.
     return [...out]
       .map((d, i) => ({ d, i }))
-      .sort((a, b) => urgencyRank(a.d.urgency) - urgencyRank(b.d.urgency) || a.i - b.i)
+      .sort(
+        (a, b) =>
+          (isLive(b.d) ? 1 : 0) - (isLive(a.d) ? 1 : 0) ||
+          urgencyRank(a.d.urgency) - urgencyRank(b.d.urgency) ||
+          a.i - b.i,
+      )
       .map((x) => x.d);
   }, [rows, query, urgentOnly]);
 
