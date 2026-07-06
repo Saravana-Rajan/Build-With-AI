@@ -64,7 +64,8 @@ def demands(limit: int = Query(50, le=500)):
                 "language": r.get("language"),
                 "urgency": r.get("urgency"),
                 "created_at": r.get("created_at"),
-                "is_real": True,
+                "live": True,  # genuine live citizen submission (distinct from
+                # complaints_synthetic.is_real, which means "sourced from news")
             })
     except Exception:
         live = []

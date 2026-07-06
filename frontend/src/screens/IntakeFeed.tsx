@@ -13,13 +13,13 @@ const PAGE_SIZE = 15;
 
 /** /demands rows may carry live-submission provenance from demand_records. */
 type FeedRow = DemandRow & {
-  is_real?: boolean | null;
   source_outlet?: string | null;
 };
 
-/** "Live" = a citizen submission just came in (Telegram / Scan / web intake). */
+/** "Live" = a genuine citizen submission (Telegram / Scan / web intake), NOT a
+ * news-sourced synthetic row (which carries is_real for provenance only). */
 function isLive(d: FeedRow): boolean {
-  return d.is_real === true || d.channel === "telegram" || d.channel === "paper";
+  return d.live === true || d.channel === "telegram" || d.channel === "paper";
 }
 
 /** Tolerant date formatter — handles ISO and "YYYY-MM-DD HH:MM:SS+00" shapes. */

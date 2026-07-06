@@ -142,7 +142,8 @@ export interface DemandRow {
   language: string | null; // ta | en
   urgency?: string | null; // critical | high | medium | low
   created_at: string;
-  is_real?: boolean | null; // true = live citizen submission (Telegram/Scan)
+  live?: boolean | null; // true = genuine live citizen submission (Telegram/Scan/web intake)
+  is_real?: boolean | null; // true = sourced from real news (provenance, NOT "live")
 }
 
 // ── MP action log (close-the-loop tracker) — client-persisted for the demo ───
