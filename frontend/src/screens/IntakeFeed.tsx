@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Search } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Search, X, MapPin, Radio, Languages, Tag, Clock, Hash } from "lucide-react";
 import Page from "../components/Page";
 import StateBlock from "../components/StateBlock";
 import Pagination, { usePagination } from "../components/Pagination";
@@ -10,11 +10,32 @@ import type { DemandRow } from "../types";
 
 const PAGE_SIZE = 15;
 
+/** /demands rows may carry live-submission provenance from demand_records. */
+type FeedRow = DemandRow & {
+  is_real?: boolean | null;
+  source_outlet?: string | null;
+};
+
+/** "Live" = a citizen submission just came in (Telegram / Scan / web intake). */
+function isLive(d: FeedRow): boolean {
+  return d.is_real === true || d.channel === "telegram" || d.channel === "paper";
+}
+
+/** Tolerant date formatter — handles ISO and "YYYY-MM-DD HH:MM:SS+00" shapes. */
+function fmtDate(s: string | null | undefined): string {
+  if (!s) return "";
+  const d = new Date(s.replace(" ", "T"));
+  return isNaN(d.getTime())
+    ? s
+    : d.toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" });
+}
+
 export default function IntakeFeed() {
   const state = useFetch(() => api.demands(300));
   const [query, setQuery] = useState("");
+  const [selected, setSelected] = useState<FeedRow | null>(null);
 
-  const rows: DemandRow[] = state.status === "ready" ? state.data : [];
+  const rows: FeedRow[] = state.status === "ready" ? (state.data as FeedRow[]) : [];
 
   // Filter by place name or category text (case-insensitive).
   const filtered = useMemo(() => {
@@ -33,7 +54,7 @@ export default function IntakeFeed() {
   return (
     <Page
       title="Intake"
-      subtitle="Where staff triage incoming demands as they are structured and geo-resolved."
+      subtitle="Where staff triage incoming demands as they are structured and geo-resolved. Click any complaint to see the full record."
       actions={
         <div className="flex items-center gap-2">
           <ProvenanceChip kind="synthetic" />
@@ -87,26 +108,86 @@ export default function IntakeFeed() {
           ) : (
             <>
               <ul className="feed">
-                {pageItems.map((d) => (
-                  <li key={d.id} className="feed-item">
-                    <div className="feed-item__top">
-                      {d.language && (
-                        <span className="chip chip--muted">{d.language.toUpperCase()}</span>
-                      )}
-                      {d.true_category && (
-                        <span className="chip chip--muted">{d.true_category}</span>
-                      )}
-                      {d.channel && <span className="chip chip--muted">{d.channel}</span>}
-                      {d.place_name && (
-                        <span className="feed-item__place">
-                          {d.place_name}
-                          {d.urban ? " · urban" : " · rural"}
+                {pageItems.map((d) => {
+                  const live = isLive(d);
+                  return (
+                    <li
+                      key={d.id}
+                      className="feed-item"
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`View full complaint from ${d.place_name ?? "unknown area"}`}
+                      onClick={() => setSelected(d)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setSelected(d);
+                        }
+                      }}
+                      style={{
+                        cursor: "pointer",
+                        borderLeft: live
+                          ? "3px solid hsl(var(--success))"
+                          : "3px solid transparent",
+                      }}
+                    >
+                      <div className="feed-item__top">
+                        {live && (
+                          <span
+                            className="chip"
+                            style={{
+                              background: "hsl(152 55% 95%)",
+                              color: "hsl(152 60% 30%)",
+                              borderColor: "hsl(152 45% 82%)",
+                              fontWeight: 700,
+                            }}
+                          >
+                            ● Live
+                          </span>
+                        )}
+                        {d.language && (
+                          <span className="chip chip--muted">{d.language.toUpperCase()}</span>
+                        )}
+                        {d.true_category && (
+                          <span className="chip chip--muted">{d.true_category}</span>
+                        )}
+                        {d.channel && <span className="chip chip--muted">{d.channel}</span>}
+                        {d.place_name && (
+                          <span className="feed-item__place">
+                            {d.place_name}
+                            {d.urban ? " · urban" : " · rural"}
+                          </span>
+                        )}
+                      </div>
+                      <p
+                        className="feed-item__text"
+                        style={{
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden",
+                        }}
+                      >
+                        {d.raw_text || "(no text)"}
+                      </p>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          marginTop: 8,
+                          fontSize: 12,
+                          color: "hsl(var(--muted-foreground))",
+                        }}
+                      >
+                        <span>{fmtDate(d.created_at)}</span>
+                        <span style={{ fontWeight: 600, color: "hsl(var(--primary, var(--foreground)))" }}>
+                          View details →
                         </span>
-                      )}
-                    </div>
-                    <p className="feed-item__text">{d.raw_text || "(no text)"}</p>
-                  </li>
-                ))}
+                      </div>
+                    </li>
+                  );
+                })}
               </ul>
 
               <Pagination
@@ -122,6 +203,174 @@ export default function IntakeFeed() {
           )}
         </>
       )}
+
+      {selected && <DetailModal d={selected} onClose={() => setSelected(null)} />}
     </Page>
+  );
+}
+
+/** Full single-complaint record — the "detailed view" for an intake row. */
+function DetailModal({ d, onClose }: { d: FeedRow; onClose: () => void }) {
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const live = isLive(d);
+
+  useEffect(() => {
+    closeRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Complaint detail"
+      onClick={onClose}
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "hsl(213 43% 16% / 0.45)",
+        backdropFilter: "blur(2px)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 20,
+        zIndex: 100,
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          background: "hsl(var(--card))",
+          color: "hsl(var(--card-foreground))",
+          border: "1px solid hsl(var(--border))",
+          borderRadius: "0.9rem",
+          boxShadow: "0 24px 60px hsl(213 43% 16% / 0.35)",
+          width: "min(620px, 100%)",
+          maxHeight: "88vh",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <header
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            gap: 12,
+            padding: "18px 20px",
+            borderBottom: "1px solid hsl(var(--border))",
+          }}
+        >
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+              {live && (
+                <span
+                  className="chip"
+                  style={{
+                    background: "hsl(152 55% 95%)",
+                    color: "hsl(152 60% 30%)",
+                    borderColor: "hsl(152 45% 82%)",
+                    fontWeight: 700,
+                  }}
+                >
+                  ● Live submission
+                </span>
+              )}
+              <h2
+                style={{
+                  margin: 0,
+                  fontFamily: "var(--font-display)",
+                  fontSize: 19,
+                  color: "hsl(var(--foreground))",
+                }}
+              >
+                {d.place_name || "Unknown area"}
+                {d.urban != null ? (d.urban ? " · urban" : " · rural") : ""}
+              </h2>
+            </div>
+            <p style={{ margin: 0, fontSize: 13, color: "hsl(var(--muted-foreground))" }}>
+              {d.true_category ? `${d.true_category} complaint` : "Complaint"} · {fmtDate(d.created_at)}
+            </p>
+          </div>
+          <button
+            type="button"
+            ref={closeRef}
+            className="btn btn--sm"
+            aria-label="Close"
+            onClick={onClose}
+          >
+            <X size={16} />
+          </button>
+        </header>
+
+        <div style={{ padding: 20, overflow: "auto" }}>
+          {/* Structured fields */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
+            <Meta icon={<Tag size={13} />} label="Category" value={d.true_category || "—"} />
+            <Meta icon={<Radio size={13} />} label="Channel" value={d.channel || "—"} />
+            <Meta icon={<Languages size={13} />} label="Language" value={(d.language || "—").toUpperCase()} />
+            <Meta icon={<MapPin size={13} />} label="Place" value={d.place_name || "—"} />
+            <Meta icon={<Clock size={13} />} label="Received" value={fmtDate(d.created_at) || "—"} />
+            <Meta icon={<Hash size={13} />} label="Reference" value={d.id} />
+          </div>
+
+          {/* Full complaint text — what the citizen actually said / the AI read. */}
+          <div
+            style={{
+              padding: "14px 16px",
+              borderRadius: "0.6rem",
+              border: "1px solid hsl(var(--border))",
+              background: "hsl(40 33% 98%)",
+            }}
+          >
+            <div
+              className="muted"
+              style={{ fontSize: 12, fontWeight: 600, marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.04em" }}
+            >
+              Full complaint {live ? "· as read by the AI" : "text"}
+            </div>
+            <p
+              style={{
+                margin: 0,
+                fontSize: 14,
+                lineHeight: 1.6,
+                color: "hsl(var(--foreground))",
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-word",
+              }}
+            >
+              {d.raw_text || "(no text)"}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Meta({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 2,
+        padding: "8px 12px",
+        borderRadius: "0.5rem",
+        background: "hsl(var(--secondary))",
+        minWidth: 120,
+      }}
+    >
+      <span
+        className="muted"
+        style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.04em" }}
+      >
+        {icon} {label}
+      </span>
+      <span style={{ fontSize: 13.5, fontWeight: 600, color: "hsl(var(--foreground))" }}>{value}</span>
+    </div>
   );
 }
