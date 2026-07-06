@@ -79,6 +79,7 @@ interface MpladsCandidate {
   beneficiaries: number; // Σ beneficiaries
   count: number; // number of raw works merged into this candidate
   priority: number; // max priority_score across merged works
+  why?: Record<string, number>; // factor breakdown of the top-priority work
 }
 
 /** Merge duplicate MPLADS works by place + category (sum ₹, beneficiaries). */
@@ -91,7 +92,10 @@ function mergeCandidates(rows: RankedProject[]): MpladsCandidate[] {
       ex.cost += p.estimated_cost ?? 0;
       ex.beneficiaries += p.beneficiaries ?? 0;
       ex.count += 1;
-      ex.priority = Math.max(ex.priority, p.priority_score);
+      if (p.priority_score > ex.priority) {
+        ex.priority = p.priority_score;
+        ex.why = p.why; // keep the factor breakdown of the strongest work
+      }
     } else {
       m.set(id, {
         id,
@@ -101,6 +105,7 @@ function mergeCandidates(rows: RankedProject[]): MpladsCandidate[] {
         beneficiaries: p.beneficiaries ?? 0,
         count: 1,
         priority: p.priority_score,
+        why: p.why,
       });
     }
   }
@@ -146,6 +151,70 @@ const CATEGORY_LABEL: Record<string, string> = {
 function candidateTitle(c: MpladsCandidate): string {
   const label = CATEGORY_LABEL[c.category] ?? "Community works";
   return `${label} — ${c.place_name}`;
+}
+
+// ── Track-B rationale: WHY no central scheme owns this (so MPLADS is the route) ─
+const WHY_NO_SCHEME: Record<string, string> = {
+  road: "Internal, ward and colony roads fall outside PMGSY (which funds only rural inter-village links) and state highway budgets — MPLADS is the standard route to fund them.",
+  water: "A stand-alone local source — a borewell, mini-tank or last-mile network — sits outside the JJM/AMRUT scheme scope, so it has to be funded from MPLADS.",
+  sanitation: "Local storm-water and open drains aren't covered by the Swachh Bharat Mission (which funds toilets, not drainage) — this is a classic MPLADS work.",
+  education: "Minor school works — an extra classroom, a compound wall, a toilet block — fall below Samagra Shiksha's sanction thresholds, so MPLADS fills the gap.",
+  health: "One-time building and equipment upgrades to a sub-centre aren't part of the NHM recurring grant, so they're funded as an MPLADS asset.",
+  housing: "Site-level support that sits outside the PMAY unit grant (access, retaining works, common facilities) is funded from MPLADS.",
+  jobs: "Local livelihood infrastructure — a work-shed or market platform — has no dedicated central scheme, so MPLADS funds the asset.",
+  pension: "This is a local welfare asset with no central capital scheme behind it — MPLADS is the funding route.",
+  other: "Community assets — a hall, street lighting, a crematorium — have no dedicated central scheme, so they are funded from MPLADS.",
+};
+
+/** Concrete deliverable an amount buys, at demo-plausible Indian public-works rates. */
+function whatItFunds(category: string, cost: number): string {
+  switch (category) {
+    case "road":
+      return `≈ ${(cost / 5_500_000).toFixed(1)} km of all-weather BT road with cross-drainage`;
+    case "water":
+      return `≈ ${Math.round(cost / 20_000).toLocaleString("en-IN")} household connections, or an overhead tank + distribution network`;
+    case "sanitation":
+      return `≈ ${(cost / 4_000_000).toFixed(1)} km of covered storm-water drain`;
+    case "education":
+      return `≈ ${Math.max(1, Math.round(cost / 1_200_000))} classroom(s) + compound wall and toilet block`;
+    case "health":
+      return "a sub-centre building and equipment upgrade";
+    case "housing":
+      return `site works + common facilities for ≈ ${Math.max(1, Math.round(cost / 180_000)).toLocaleString("en-IN")} houses`;
+    default:
+      return "community assets — hall, street lighting, or crematorium works";
+  }
+}
+
+/** How this work was surfaced — resident-raised vs need-mapped (silent area). */
+function evidenceLine(why: Record<string, number> | undefined): string {
+  const demand = why?.demand ?? 0;
+  if (demand > 0.05) return "Raised directly by residents through petitions.";
+  return "Surfaced by need-mapping — high local deficit, few or no petitions yet.";
+}
+
+/** ₹ per resident served — the MPLADS efficiency metric the optimiser ranks on. */
+function perBeneficiary(cost: number, benef: number): string {
+  if (benef <= 0) return "—";
+  return `₹${Math.round(cost / benef).toLocaleString("en-IN")}/resident served`;
+}
+
+/** Top scoring factors as chips (Need / Demand / Equity), 0–100. */
+function CandidateFactors({ why }: { why: Record<string, number> | undefined }) {
+  if (!why) return null;
+  const factors = Object.entries(why)
+    .filter(([, v]) => typeof v === "number")
+    .sort((a, b) => b[1] - a[1]);
+  if (factors.length === 0) return null;
+  return (
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
+      {factors.map(([factor, value]) => (
+        <span key={factor} className="chip chip--muted" style={{ textTransform: "capitalize" }}>
+          {factor} {Math.round(value * 100)}
+        </span>
+      ))}
+    </div>
+  );
 }
 
 // ── Modal view state ─────────────────────────────────────────────────────────
@@ -857,14 +926,34 @@ function MpladsCard({
           )}
         </div>
 
-        {/* Why it's Track B — the load-bearing rationale. */}
+        {/* Why it's Track B — the load-bearing rationale (per category). */}
         <div
           className="muted"
           style={{ fontSize: 13, lineHeight: 1.5, marginBottom: 8 }}
         >
-          No central scheme covers this local {c.category} need — funded from your
-          ₹5 Cr MPLADS allocation.
+          {WHY_NO_SCHEME[c.category] ?? WHY_NO_SCHEME.other}
         </div>
+
+        {/* What the money actually buys + how it was surfaced. */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 4,
+            marginBottom: 8,
+            fontSize: 13,
+          }}
+        >
+          <span style={{ color: "hsl(var(--foreground))" }}>
+            <strong>What {formatInr(c.cost)} funds:</strong>{" "}
+            <span className="muted">{whatItFunds(c.category, c.cost)}</span>
+          </span>
+          <span className="muted" style={{ fontStyle: "italic" }}>
+            {evidenceLine(c.why)}
+          </span>
+        </div>
+
+        <CandidateFactors why={c.why} />
 
         <div
           style={{
@@ -881,6 +970,15 @@ function MpladsCard({
           <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
             <Users size={13} /> {c.beneficiaries.toLocaleString("en-IN")}{" "}
             beneficiaries
+          </span>
+          <span
+            style={{ display: "inline-flex", alignItems: "center", gap: 5, fontWeight: 600, color: "hsl(var(--success))" }}
+            title="Cost efficiency — the optimiser prefers the lowest ₹ per resident"
+          >
+            {perBeneficiary(c.cost, c.beneficiaries)}
+          </span>
+          <span className="muted" style={{ textDecoration: "underline", textUnderlineOffset: 2 }}>
+            View citizen complaints →
           </span>
         </div>
       </div>
