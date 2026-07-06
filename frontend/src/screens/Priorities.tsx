@@ -9,6 +9,72 @@ import type { RankedProject, UnifiedIssue } from "../types";
 
 const PAGE_SIZE = 12;
 
+/** RankedProject + the proximity need-justification fields the backend adds. */
+type Justified = RankedProject & {
+  verdict?: string | null;
+  nearest_km?: number | null;
+  nearest_area?: string | null;
+  justification?: string | null;
+};
+
+const VERDICT_META: Record<
+  string,
+  { label: string; bg: string; fg: string; border: string }
+> = {
+  genuine_gap: {
+    label: "Act · genuine gap",
+    bg: "hsl(0 84% 97%)",
+    fg: "hsl(0 72% 45%)",
+    border: "hsl(0 84% 92%)",
+  },
+  watch: {
+    label: "Watch",
+    bg: "hsl(45 96% 95%)",
+    fg: "hsl(38 80% 38%)",
+    border: "hsl(45 90% 88%)",
+  },
+  served: {
+    label: "Likely served",
+    bg: "hsl(var(--secondary))",
+    fg: "hsl(var(--muted-foreground))",
+    border: "hsl(var(--border))",
+  },
+};
+
+/** "Why this matters" — verdict badge + the proximity reason, per ranked item. */
+function WhyThisMatters({ p }: { p: Justified }) {
+  const verdict = p.verdict || undefined;
+  if (!verdict || verdict === "not_assessed" || !p.justification) return null;
+  const meta = VERDICT_META[verdict] ?? VERDICT_META.served;
+  const km =
+    typeof p.nearest_km === "number" && p.nearest_km > 0
+      ? `~${p.nearest_km} km`
+      : null;
+  return (
+    <div
+      className="why-matters"
+      style={{ display: "flex", alignItems: "baseline", gap: 8, marginTop: 8 }}
+    >
+      <span
+        className="chip"
+        style={{
+          background: meta.bg,
+          color: meta.fg,
+          borderColor: meta.border,
+          fontWeight: 600,
+          flexShrink: 0,
+        }}
+      >
+        {meta.label}
+        {km ? ` · ${km}` : ""}
+      </span>
+      <span className="muted" style={{ fontSize: 13, lineHeight: 1.4 }}>
+        {p.justification}
+      </span>
+    </div>
+  );
+}
+
 /** "N raw → M issues, duplicates merged" from the unified-issues clusters. */
 function headline(issues: UnifiedIssue[]): string {
   const raw = issues.reduce((sum, i) => sum + (i.report_count || 0), 0);
@@ -146,6 +212,7 @@ export default function Priorities() {
                     {p.matched_scheme ? ` · ${p.matched_scheme}` : ""}
                     {p.estimated_cost != null ? ` · ${formatInr(p.estimated_cost)}` : ""}
                   </div>
+                  <WhyThisMatters p={p as Justified} />
                   {whyFactors(p.why)}
                 </div>
                 <div className="ranked-item__score num">{p.priority_score.toFixed(2)}</div>

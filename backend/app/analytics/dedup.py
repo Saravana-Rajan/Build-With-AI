@@ -272,6 +272,12 @@ TARGET_TABLE = "unified_issues"
 
 
 def _main() -> int:
+    # Windows consoles default to cp1252 and choke on Tamil/Hindi sample text.
+    try:
+        import sys
+        sys.stdout.reconfigure(encoding="utf-8")  # type: ignore[attr-defined]
+    except Exception:  # noqa: BLE001
+        pass
     from app.store import bq
 
     rows = bq.query(

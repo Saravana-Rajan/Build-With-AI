@@ -8,6 +8,7 @@ import Departments from "./screens/Departments";
 import Act from "./screens/Act";
 import ForgottenVillages from "./screens/ForgottenVillages";
 import ScanPetition from "./screens/ScanPetition";
+import AskSarvik from "./screens/AskSarvik";
 
 export const router = createBrowserRouter([
   {
@@ -23,6 +24,7 @@ export const router = createBrowserRouter([
       { path: "departments", element: <Departments /> },
       { path: "act", element: <Act /> },
       { path: "forgotten", element: <ForgottenVillages /> },
+      { path: "ask", element: <AskSarvik /> },
       { path: "*", element: <Navigate to="/" replace /> },
     ],
   },

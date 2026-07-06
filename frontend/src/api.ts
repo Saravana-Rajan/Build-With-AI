@@ -47,6 +47,32 @@ async function get<T>(path: string, init?: RequestInit): Promise<T> {
   return (await res.json()) as T;
 }
 
+async function post<T>(path: string, body: unknown): Promise<T> {
+  const res = await fetch(`${API_URL}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    throw new ApiError(res.status, `POST ${path} failed (${res.status})`);
+  }
+  return (await res.json()) as T;
+}
+
+/** POST /api/letter/department — one consolidated official letter to a dept. */
+export interface DepartmentLetterResponse {
+  letter_text: string;
+  department: string;
+  areas_count: number;
+  rupees: number;
+}
+
+/** POST /api/letter/item — single-beneficiary letter + eligibility rationale. */
+export interface ItemLetterResponse {
+  letter_text: string;
+  eligibility: string;
+}
+
 export const api = {
   /** Headline numbers for the dashboard hero. */
   stats: () => get<StatsResponse>("/api/stats"),
@@ -75,6 +101,27 @@ export const api = {
    * callers fall back to deriving departments from scheme gaps.
    */
   departments: () => get<Department[]>("/api/departments"),
+
+  /** Generate ONE consolidated official letter to a department (Track A). */
+  letterDepartment: (body: {
+    department: string;
+    scheme?: string | null;
+    schemes?: string[];
+    areas?: string[];
+    rupees?: number | null;
+    areas_count?: number | null;
+  }) => post<DepartmentLetterResponse>("/api/letter/department", body),
+
+  /** Generate a single-beneficiary letter + eligibility rationale. */
+  letterItem: (body: {
+    place_name: string;
+    scheme?: string | null;
+    category?: string | null;
+    title?: string | null;
+    area_id?: string | null;
+    beneficiaries?: number | null;
+    urban?: boolean;
+  }) => post<ItemLetterResponse>("/api/letter/item", body),
 };
 
 /**

@@ -550,14 +550,98 @@
 
 .xray-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 20px;
-  align-items: start;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 18px;
+  align-items: stretch;
 }
 @media (max-width: 960px) {
   .xray-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* Map card stretches to the row height so the map fills it (no dead space). */
+.card--map {
+  display: flex;
+  flex-direction: column;
+}
+.card--map .card__head {
+  flex: 0 0 auto;
+}
+
+/* AreaMap: toolbar (auto) + canvas (fills) + legend (auto). */
+.areamap {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  gap: 12px;
+}
+.areamap__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex: 0 0 auto;
+}
+.areamap__lede {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.areamap__hint {
+  font-size: 12px;
+}
+.areamap__canvas {
+  flex: 1 1 auto;
+  min-height: 340px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid hsl(var(--border));
+  position: relative;
+  background: hsl(var(--muted));
+}
+.areamap__empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 13px;
+}
+
+/* Segmented Map/Grid toggle (Sabha tokens). */
+.viewtoggle {
+  display: inline-flex;
+  flex: 0 0 auto;
+  border: 1px solid hsl(var(--border));
+  border-radius: 999px;
+  background: hsl(var(--muted));
+  padding: 2px;
+}
+.viewtoggle button {
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  color: hsl(var(--muted-foreground));
+}
+.viewtoggle button[aria-pressed="true"] {
+  background: hsl(var(--card));
+  color: hsl(var(--primary));
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.12);
+}
+
+/* Grid view fills the canvas when toggled on. */
+.map-grid--fill {
+  height: 100%;
+  grid-auto-rows: 1fr;
+  padding: 6px;
+  overflow: auto;
 }
 
 .gap-list {

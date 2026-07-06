@@ -9,13 +9,11 @@ import {
   VolumeX,
   Megaphone,
   ScanLine,
-  Search,
-  Bell,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
   LogOut,
-  Languages,
+  Sparkles,
 } from "lucide-react";
 import type { ComponentType } from "react";
 import { cn } from "../lib/utils";
@@ -30,6 +28,7 @@ interface NavItem {
 
 const NAV: NavItem[] = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, group: "workspace" },
+  { to: "/ask", label: "Ask Sarvik", icon: Sparkles, group: "workspace" },
   { to: "/intake", label: "Intake", icon: Inbox, group: "workspace" },
   { to: "/priorities", label: "Priorities", icon: ListChecks, group: "workspace" },
   { to: "/x-ray", label: "Constituency X-Ray", icon: MapIcon, group: "intel" },
@@ -59,12 +58,6 @@ export const ROUTE_TITLE: Record<string, string> = {
   "/scan": "Scan Petition",
 };
 
-const LANGS = [
-  { code: "en", short: "EN" },
-  { code: "ta", short: "தமிழ்" },
-  { code: "hi", short: "हिन्दी" },
-] as const;
-
 // ── Sidebar ──────────────────────────────────────────────────────────────────
 function Sidebar({
   collapsed,
@@ -89,7 +82,7 @@ function Sidebar({
         aria-label="Sarvik AI — home"
       >
         <img
-          src="/sarvik-logo.svg"
+          src="/sarvik-logo.png"
           alt=""
           aria-hidden="true"
           className="h-9 w-9 shrink-0 object-contain"
@@ -171,7 +164,7 @@ function Sidebar({
                 MP Office
               </span>
               <span className="truncate text-[10px] text-slate-500 dark:text-slate-400">
-                office@sarvik.local
+                Coimbatore
               </span>
             </div>
             <button
@@ -205,36 +198,13 @@ function Sidebar({
 }
 
 // ── Top bar ──────────────────────────────────────────────────────────────────
-function TopBar({
-  search,
-  onSearch,
-  lang,
-  onLang,
-}: {
-  search: string;
-  onSearch: (v: string) => void;
-  lang: string;
-  onLang: (l: string) => void;
-}) {
+function TopBar() {
   const location = useLocation();
-  const searchRef = React.useRef<HTMLInputElement | null>(null);
   const title = ROUTE_TITLE[location.pathname] ?? "Sarvik AI";
 
   const hour = new Date().getHours();
   const greeting =
     hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
-
-  // "/" focuses the search box.
-  React.useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "/" && document.activeElement?.tagName !== "INPUT") {
-        e.preventDefault();
-        searchRef.current?.focus();
-      }
-    }
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, []);
 
   return (
     <header
@@ -252,101 +222,16 @@ function TopBar({
           <span className="font-medium text-slate-700 dark:text-slate-200">{title}</span>
         </nav>
         <span className="hidden truncate text-[11px] text-slate-500 sm:inline dark:text-slate-400">
-          {greeting}, MP Office · Coimbatore
+          {greeting} · Coimbatore
         </span>
-      </div>
-
-      {/* Search */}
-      <form
-        className="ml-auto hidden flex-1 max-w-md md:flex"
-        onSubmit={(e) => e.preventDefault()}
-        role="search"
-      >
-        <label className="relative w-full">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
-          <input
-            ref={searchRef}
-            type="search"
-            value={search}
-            onChange={(e) => onSearch(e.target.value)}
-            placeholder="Search…"
-            className="h-9 w-full rounded-full border border-border bg-white/80 pl-8 pr-8 text-xs placeholder:text-slate-400 focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 dark:bg-white/5 dark:text-slate-200"
-          />
-          <kbd className="pointer-events-none absolute right-2 top-1/2 hidden -translate-y-1/2 rounded border border-border bg-slate-50 px-1 text-[9px] font-medium text-slate-500 sm:inline-block dark:bg-white/5 dark:text-slate-400">
-            /
-          </kbd>
-        </label>
-      </form>
-
-      {/* Right cluster */}
-      <div className="ml-auto flex items-center gap-1.5 md:ml-0">
-        {/* Language toggle */}
-        <div
-          className="hidden items-center gap-0.5 rounded-md border border-border bg-white p-0.5 sm:flex dark:bg-white/5"
-          role="group"
-          aria-label="Language"
-        >
-          <Languages className="ml-1 h-3.5 w-3.5 text-slate-400" />
-          {LANGS.map((opt) => (
-            <button
-              key={opt.code}
-              type="button"
-              onClick={() => onLang(opt.code)}
-              aria-pressed={lang === opt.code}
-              className={cn(
-                "rounded-md px-2 py-0.5 text-[10px] font-semibold transition-all",
-                lang === opt.code
-                  ? "spark-gradient text-white shadow-sm"
-                  : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white",
-              )}
-            >
-              {opt.short}
-            </button>
-          ))}
-        </div>
-
-        {/* Notifications */}
-        <button
-          type="button"
-          className="relative flex items-center gap-1.5 rounded-full border border-border bg-white px-3 py-1.5 text-[11px] font-medium text-slate-600 transition-all hover:border-slate-300 hover:shadow-sm dark:bg-white/5 dark:text-slate-300"
-          aria-label="Notifications"
-        >
-          <Bell className="h-3.5 w-3.5" />
-          <span className="hidden md:inline">Notification</span>
-          <span className="absolute -right-0.5 -top-0.5 flex h-2.5 w-2.5">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-70" />
-            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-rose-500" />
-          </span>
-        </button>
-
-        {/* User chip */}
-        <div className="flex items-center gap-2 rounded-md border border-border px-2 py-1 text-xs dark:border-white/10">
-          <span
-            className="flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-semibold text-white"
-            style={{ background: "linear-gradient(135deg,#7c5cfa 0%,#4f46e5 100%)" }}
-            aria-hidden="true"
-          >
-            MP
-          </span>
-          <span className="hidden flex-col items-start leading-tight sm:flex">
-            <span className="font-medium text-slate-700 dark:text-slate-200">MP Office</span>
-            <span className="text-[9px] uppercase tracking-wide text-slate-400">MP Office</span>
-          </span>
-        </div>
       </div>
     </header>
   );
 }
 
 // ── Shell ────────────────────────────────────────────────────────────────────
-export interface OutletContext {
-  search: string;
-}
-
 export default function Layout() {
   const [collapsed, setCollapsed] = React.useState(false);
-  const [search, setSearch] = React.useState("");
-  const [lang, setLang] = React.useState("en");
 
   React.useEffect(() => {
     try {
@@ -371,14 +256,9 @@ export default function Layout() {
     <div className="flex h-screen overflow-hidden bg-background text-foreground">
       <Sidebar collapsed={collapsed} onToggle={toggleCollapse} />
       <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
-        <TopBar
-          search={search}
-          onSearch={setSearch}
-          lang={lang}
-          onLang={setLang}
-        />
+        <TopBar />
         <main className="mx-auto w-full min-w-0 flex-1 overflow-y-auto px-4 pb-8 pt-4 sm:px-6 lg:px-8 xl:max-w-[1600px]">
-          <Outlet context={{ search } satisfies OutletContext} />
+          <Outlet />
         </main>
       </div>
     </div>

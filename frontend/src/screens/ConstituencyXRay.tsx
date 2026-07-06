@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import Page from "../components/Page";
-import MapPlaceholder from "../components/MapPlaceholder";
+import AreaMap from "../components/AreaMap";
 import type { AreaCell } from "../components/MapPlaceholder";
 import StateBlock from "../components/StateBlock";
 import Pagination, { usePagination } from "../components/Pagination";
@@ -96,7 +96,10 @@ export default function ConstituencyXRay() {
             <h2 className="section-title">Coverage heatmap</h2>
             <span className="muted">By ward (urban) and village (rural)</span>
           </div>
-          <MapPlaceholder cells={gaps.status === "ready" ? cells : undefined} />
+          <AreaMap
+            gaps={gaps.status === "ready" ? filtered : []}
+            fallbackCells={gaps.status === "ready" ? cells : undefined}
+          />
         </div>
 
         <div className="card">
