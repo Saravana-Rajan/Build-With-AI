@@ -4,6 +4,7 @@ import { Search, MapPin, ArrowRight, Landmark, Send } from "lucide-react";
 import Page from "../components/Page";
 import StateBlock from "../components/StateBlock";
 import HBarChart from "../components/HBarChart";
+import ComplaintsModal from "../components/ComplaintsModal";
 import { useFetch } from "../useFetch";
 import { formatCrore, formatCroreShort } from "../format";
 import {
@@ -100,6 +101,9 @@ export default function Departments() {
   // Per-area ₹ owed, to enrich each department's "top areas" with values.
   const gaps = useFetch<SchemeGap[]>(() => api.schemeGaps(300));
   const [query, setQuery] = useState("");
+  const [selectedArea, setSelectedArea] = useState<{ area: string; department: string } | null>(
+    null,
+  );
 
   const rows = depts.status === "ready" ? depts.data.data : [];
   const derived = depts.status === "ready" && depts.data.derived;
@@ -301,7 +305,9 @@ export default function Departments() {
                     </div>
 
                     <div className="dept-panel__section">
-                      <span className="dept-panel__label">Top areas · ₹ owed</span>
+                      <span className="dept-panel__label">
+                        Top areas · ₹ owed — tap to see the complaints
+                      </span>
                       <ul className="dept-panel__areas">
                         {d.top_areas.length === 0 && <li className="muted">—</li>}
                         {[...d.top_areas]
@@ -310,7 +316,20 @@ export default function Departments() {
                               (areaValue.get(b) ?? 0) - (areaValue.get(a) ?? 0),
                           )
                           .map((a) => (
-                          <li key={a}>
+                          <li
+                            key={a}
+                            role="button"
+                            tabIndex={0}
+                            aria-label={`View citizen complaints from ${a}`}
+                            style={{ cursor: "pointer" }}
+                            onClick={() => setSelectedArea({ area: a, department: d.department })}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                setSelectedArea({ area: a, department: d.department });
+                              }
+                            }}
+                          >
                             <span className="dept-panel__area-name">
                               <MapPin size={12} /> {a}
                             </span>
@@ -355,6 +374,18 @@ export default function Departments() {
           )}
         </>
       )}
+
+      <ComplaintsModal
+        open={selectedArea !== null}
+        onClose={() => setSelectedArea(null)}
+        placeName={selectedArea?.area}
+        title={selectedArea?.area ?? "Citizen complaints"}
+        subtitle={
+          selectedArea
+            ? `All open complaints from ${selectedArea.area} · ${selectedArea.department}`
+            : undefined
+        }
+      />
     </Page>
   );
 }

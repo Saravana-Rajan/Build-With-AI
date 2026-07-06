@@ -7,6 +7,7 @@ import StateBlock from "../components/StateBlock";
 import Pagination, { usePagination } from "../components/Pagination";
 import HBarChart from "../components/HBarChart";
 import ProvenanceChip from "../components/Provenance";
+import ComplaintsModal from "../components/ComplaintsModal";
 import { api } from "../api";
 import { useFetch } from "../useFetch";
 import { formatCrore, formatCroreShort } from "../format";
@@ -30,6 +31,7 @@ export default function ConstituencyXRay() {
   const gaps = useFetch(() => api.schemeGaps(300));
   const [query, setQuery] = useState("");
   const [dept, setDept] = useState<string>(ALL);
+  const [selectedGap, setSelectedGap] = useState<SchemeGap | null>(null);
 
   const rows: SchemeGap[] = gaps.status === "ready" ? gaps.data : [];
 
@@ -163,7 +165,21 @@ export default function ConstituencyXRay() {
                 <>
                   <ul className="gap-list">
                     {pageItems.map((g) => (
-                      <li key={`${g.area_id}-${g.scheme}`} className="gap-list__item">
+                      <li
+                        key={`${g.area_id}-${g.scheme}`}
+                        className="gap-list__item"
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`View citizen complaints from ${g.place_name}`}
+                        style={{ cursor: "pointer" }}
+                        onClick={() => setSelectedGap(g)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setSelectedGap(g);
+                          }
+                        }}
+                      >
                         <div>
                           <strong>{g.place_name}</strong>
                           <span className="muted"> · {g.scheme}</span>
@@ -205,6 +221,20 @@ export default function ConstituencyXRay() {
           <HBarChart data={chartData} format={formatCroreShort} labelWidth={210} />
         </div>
       )}
+
+      <ComplaintsModal
+        open={selectedGap !== null}
+        onClose={() => setSelectedGap(null)}
+        placeName={selectedGap?.place_name}
+        title={
+          selectedGap ? `${selectedGap.place_name} · ${selectedGap.scheme}` : "Citizen complaints"
+        }
+        subtitle={
+          selectedGap
+            ? `Complaints behind the ${selectedGap.scheme} gap in ${selectedGap.place_name}`
+            : undefined
+        }
+      />
     </Page>
   );
 }

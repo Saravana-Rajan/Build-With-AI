@@ -1,4 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import {
+  Children,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import {
   Sparkles,
   Send,
@@ -116,6 +122,49 @@ function linkifyDepartments(md: string): string {
   return md.replace(NAV_RE, (m) => `[${m}](sarvik-nav:/departments)`);
 }
 
+// ₹-amounts like "₹632.50 crore", "₹5 crore", "₹1,20,000", "₹40 lakh".
+const MONEY_RE = /(₹\s?[\d,]+(?:\.\d+)?(?:\s*(?:crore|lakh|cr))?)/gi;
+
+/**
+ * Walk rendered markdown children and wrap any ₹ money amount found in a text
+ * node with the emerald "money" highlight. Element children pass through and
+ * get highlighted by their own component override (e.g. money inside **bold**).
+ */
+function highlightMoney(children: ReactNode): ReactNode {
+  return Children.map(children, (child) => {
+    if (typeof child !== "string") return child;
+    // split() with one capture group → odd indices are the matches.
+    const parts = child.split(MONEY_RE);
+    if (parts.length === 1) return child;
+    return parts.map((part, i) =>
+      i % 2 === 1 ? (
+        <span key={i} className="sarvik-money">
+          {part}
+        </span>
+      ) : (
+        part
+      ),
+    );
+  });
+}
+
+/**
+ * Factory for a react-markdown element renderer that keeps the tag but runs its
+ * text through the money highlighter. Used for the text-bearing tags.
+ */
+function moneyTag(Tag: "p" | "li" | "strong" | "em" | "td" | "th") {
+  return function MoneyTag({
+    children,
+    node: _node,
+    ...props
+  }: {
+    children?: ReactNode;
+    node?: unknown;
+  }) {
+    return <Tag {...props}>{highlightMoney(children)}</Tag>;
+  };
+}
+
 export default function AskSarvik() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -181,7 +230,11 @@ export default function AskSarvik() {
         .sarvik-md > :first-child { margin-top: 0; }
         .sarvik-md > :last-child { margin-bottom: 0; }
         .sarvik-md p { margin: 0 0 8px; }
-        .sarvik-md strong { font-weight: 600; color: hsl(var(--foreground)); }
+        .sarvik-md strong { font-weight: 700; color: hsl(var(--primary)); }
+        .sarvik-money {
+          font-weight: 700; color: hsl(var(--success));
+          font-variant-numeric: tabular-nums;
+        }
         .sarvik-md ul, .sarvik-md ol { margin: 6px 0; padding-left: 20px; }
         .sarvik-md li { margin: 2px 0; }
         .sarvik-md li::marker { color: hsl(var(--muted-foreground)); }
@@ -209,12 +262,20 @@ export default function AskSarvik() {
           border: 1px solid hsl(var(--border)); padding: 4px 8px; text-align: left;
         }
         .sarvik-inline-link {
-          appearance: none; border: none; background: none; padding: 0;
-          font: inherit; color: hsl(var(--primary)); font-weight: 600;
-          cursor: pointer; text-decoration: underline;
-          text-underline-offset: 2px; text-decoration-thickness: 1px;
+          appearance: none; font: inherit; font-size: 0.92em; font-weight: 600;
+          display: inline-flex; align-items: center;
+          padding: 0.5px 8px; margin: 0 1px; border-radius: 9999px;
+          line-height: 1.35; cursor: pointer;
+          color: hsl(var(--primary));
+          background: hsl(var(--primary) / 0.09);
+          border: 1px solid hsl(var(--primary) / 0.22);
+          transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
         }
-        .sarvik-inline-link:hover { color: hsl(var(--primary) / 0.8); }
+        .sarvik-inline-link:hover {
+          color: hsl(var(--accent-foreground));
+          background: hsl(var(--saffron) / 0.22);
+          border-color: hsl(var(--saffron) / 0.55);
+        }
         .sarvik-nav-chip {
           display: inline-flex; align-items: center; gap: 4px;
           padding: 4px 10px; border-radius: 9999px;
@@ -432,10 +493,13 @@ function Bubble({ message }: { message: ChatMessage }) {
           width: 30,
           height: 30,
           borderRadius: "9999px",
-          background: isUser ? "hsl(var(--secondary))" : "hsl(var(--accent))",
-          color: isUser
-            ? "hsl(var(--secondary-foreground))"
-            : "hsl(var(--accent-foreground))",
+          background: isUser
+            ? "hsl(var(--secondary))"
+            : "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--saffron)) 130%)",
+          color: isUser ? "hsl(var(--secondary-foreground))" : "#fff",
+          boxShadow: isUser
+            ? "none"
+            : "0 2px 8px -3px hsl(var(--primary) / 0.5)",
         }}
       >
         {isUser ? <User size={16} /> : <Sparkles size={16} />}
@@ -459,10 +523,14 @@ function Bubble({ message }: { message: ChatMessage }) {
             lineHeight: 1.55,
             whiteSpace: isUser ? "pre-wrap" : "normal",
             overflowWrap: "anywhere",
-            background: isUser ? "hsl(var(--primary))" : "hsl(var(--muted))",
+            background: isUser
+              ? "hsl(var(--primary))"
+              : "hsl(var(--accent) / 0.5)",
             color: isUser
               ? "hsl(var(--primary-foreground))"
               : "hsl(var(--foreground))",
+            border: isUser ? "none" : "1px solid hsl(var(--saffron) / 0.28)",
+            borderLeft: isUser ? "none" : "3px solid hsl(var(--saffron))",
             borderTopRightRadius: isUser ? 4 : 16,
             borderTopLeftRadius: isUser ? 16 : 4,
           }}
@@ -473,6 +541,12 @@ function Bubble({ message }: { message: ChatMessage }) {
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
+                p: moneyTag("p"),
+                li: moneyTag("li"),
+                strong: moneyTag("strong"),
+                em: moneyTag("em"),
+                td: moneyTag("td"),
+                th: moneyTag("th"),
                 a({ href, children, ...props }) {
                   if (href && href.startsWith("sarvik-nav:")) {
                     const to = href.slice("sarvik-nav:".length);

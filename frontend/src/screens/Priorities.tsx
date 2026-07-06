@@ -1,7 +1,8 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Page from "../components/Page";
 import StateBlock from "../components/StateBlock";
 import Pagination, { usePagination } from "../components/Pagination";
+import ComplaintsModal from "../components/ComplaintsModal";
 import { api } from "../api";
 import { useFetch } from "../useFetch";
 import { formatInr } from "../format";
@@ -140,6 +141,8 @@ export default function Priorities() {
   const { page, pageCount, pageItems, total, from, to, setPage } =
     usePagination(ranked, PAGE_SIZE);
 
+  const [selected, setSelected] = useState<Justified | null>(null);
+
   return (
     <Page
       title="Priorities"
@@ -200,7 +203,21 @@ export default function Priorities() {
         <>
           <ul className="ranked-list">
             {pageItems.map((p) => (
-              <li key={p.rank} className="ranked-item">
+              <li
+                key={p.rank}
+                className="ranked-item"
+                role="button"
+                tabIndex={0}
+                aria-label={`View citizen complaints behind ${p.title}`}
+                style={{ cursor: "pointer" }}
+                onClick={() => setSelected(p as Justified)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setSelected(p as Justified);
+                  }
+                }}
+              >
                 <div className="ranked-item__rank">{p.rank}</div>
                 <div className="ranked-item__body">
                   <div className="ranked-item__head">
@@ -231,6 +248,26 @@ export default function Priorities() {
           />
         </>
       )}
+
+      <ComplaintsModal
+        open={selected !== null}
+        onClose={() => setSelected(null)}
+        placeName={selected?.place_name}
+        category={selected?.category}
+        title={selected?.title ?? "Citizen complaints"}
+        subtitle={
+          selected ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <span>
+                {selected.place_name} · {selected.category}
+                {selected.matched_scheme ? ` · ${selected.matched_scheme}` : ""}
+              </span>
+              <WhyThisMatters p={selected} />
+              {whyFactors(selected.why)}
+            </div>
+          ) : undefined
+        }
+      />
     </Page>
   );
 }
