@@ -22,7 +22,7 @@ export type Track = "A" | "B";
 
 export type MatchType = "delivery_failure" | "coverage_gap" | "mplads_candidate";
 
-export type Source = "web" | "telegram" | "phone" | "meeting" | "import";
+export type Source = "web" | "telegram" | "phone" | "meeting" | "import" | "paper";
 
 // ── Step 0: raw intake ───────────────────────────────────────────────────────
 export interface Submission {

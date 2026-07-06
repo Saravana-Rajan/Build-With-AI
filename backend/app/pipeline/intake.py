@@ -95,15 +95,26 @@ async def intake(
     """Accept a text complaint or an uploaded media file (voice/photo/pdf)."""
     if not text and not file:
         raise HTTPException(400, "Provide 'text' or a 'file'.")
-    if file:
-        import tempfile, os
-        suffix = os.path.splitext(file.filename or "")[1] or ".bin"
-        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
-            tmp.write(await file.read())
-            tmp_path = tmp.name
-        rec = process_media(tmp_path, file.content_type, language, source)
-    else:
-        rec = process_text(text, language, source)
+    try:
+        if file:
+            import tempfile, os
+            suffix = os.path.splitext(file.filename or "")[1] or ".bin"
+            with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+                tmp.write(await file.read())
+                tmp_path = tmp.name
+            rec = process_media(tmp_path, file.content_type, language, source)
+        else:
+            rec = process_text(text, language, source)
+    except HTTPException:
+        raise
+    except Exception as exc:  # noqa: BLE001
+        # Surface a clean, CORS-tagged error to the browser. An unhandled 500
+        # escapes above the CORS middleware and shows only "Failed to fetch";
+        # an HTTPException is handled inside it and reaches the client with the
+        # real reason.
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(500, f"Could not read the petition: {exc}") from exc
 
     return {
         "reference": rec.id,

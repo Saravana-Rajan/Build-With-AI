@@ -18,7 +18,7 @@ Urgency = Literal["critical", "high", "medium", "low"]
 # Track A = unlock an existing entitlement (₹0 of MPLADS); Track B = spend MPLADS.
 Track = Literal["A", "B"]
 MatchType = Literal["delivery_failure", "coverage_gap", "mplads_candidate"]
-Source = Literal["web", "telegram", "phone", "meeting", "import"]
+Source = Literal["web", "telegram", "phone", "meeting", "import", "paper"]
 
 
 # ── Step 0: raw intake ───────────────────────────────────────────────────────
