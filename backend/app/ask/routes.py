@@ -32,9 +32,18 @@ class AskRequest(BaseModel):
 
 
 SYSTEM_INSTRUCTION = (
-    "You are Sarvik, answering an Indian MP about their Coimbatore constituency "
-    "using ONLY the provided data; be concise, cite the numbers, say if data "
-    "doesn't cover it."
+    "You are Sarvik, a senior policy & data analyst advising an Indian MP on their "
+    "Coimbatore constituency. Answer ONLY from the provided data. Give a THOROUGH, "
+    "STRUCTURED answer: cite exact numbers, name specific areas/schemes/departments, "
+    "explain the WHY, compare options where relevant, and END with a concrete "
+    "recommended next action for the MP. Never give a shallow one-liner — be the "
+    "MP's expert advisor. Format with markdown (bold, bullet/numbered lists).\n\n"
+    "BUDGET / ₹5-crore rule: Track A items cost the MP ₹0 — they are existing "
+    "entitlements unlocked simply by the MP writing official letters to the relevant "
+    "department. So the ₹5 crore MPLADS fund applies to Track B (no-scheme) works. "
+    "For any budget question, explain this split first, then list the Track B "
+    "candidates with their estimated costs and recommend a concrete funding mix that "
+    "fits the ₹5 crore envelope."
 )
 
 
@@ -65,7 +74,7 @@ def _rupees(value) -> str:
 
 
 def build_data_context() -> str:
-    """Assemble a small, aggregate-only snapshot of the constituency data."""
+    """Assemble a rich, aggregate-only snapshot of the constituency data."""
     total_owed = _scalar(f"SELECT SUM(gap_value) FROM `{DS}.scheme_gaps`", 0) or 0
     complaints = _scalar(f"SELECT COUNT(*) FROM `{DS}.complaints_synthetic`", 0) or 0
     silent = _scalar(
@@ -77,34 +86,42 @@ def build_data_context() -> str:
         f"FROM `{DS}.department_summary` ORDER BY total_gap_value DESC LIMIT 20"
     )
     scheme_gaps = _q(
-        f"SELECT place_name, scheme, department, gap, gap_value "
-        f"FROM `{DS}.scheme_gaps` ORDER BY gap_value DESC LIMIT 10"
+        f"SELECT place_name, scheme, department, eligible, covered, gap, gap_value, "
+        f"data_source FROM `{DS}.scheme_gaps` ORDER BY gap_value DESC LIMIT 20"
     )
     projects = _q(
-        f"SELECT rank, place_name, title, category, track, priority_score, "
-        f"estimated_cost, beneficiaries FROM `{DS}.ranked_projects` "
-        f"ORDER BY priority_score DESC LIMIT 10"
+        f"SELECT rank, place_name, category, track, matched_scheme, priority_score, "
+        f"verdict, justification, estimated_cost FROM `{DS}.ranked_projects` "
+        f"ORDER BY priority_score DESC LIMIT 20"
     )
     silent_villages = _q(
-        f"SELECT place_name, silent_score, petition_count "
+        f"SELECT place_name, need_score, petition_count "
         f"FROM `{DS}.silent_villages` WHERE flagged = true "
-        f"ORDER BY silent_score DESC LIMIT 10"
+        f"ORDER BY need_score DESC LIMIT 15"
+    )
+    complaint_cats = _q(
+        f"SELECT true_category, COUNT(*) AS n FROM `{DS}.complaints_synthetic` "
+        f"GROUP BY true_category ORDER BY n DESC"
+    )
+    unified = _q(
+        f"SELECT category, place_name, report_count FROM `{DS}.unified_issues` "
+        f"ORDER BY report_count DESC LIMIT 10"
     )
 
     lines: list[str] = []
     lines.append("=== COIMBATORE CONSTITUENCY DATA CONTEXT ===")
     lines.append("")
-    lines.append("OVERALL:")
+    lines.append("HEADLINE:")
     lines.append(f"- Total entitlements owed (Σ scheme gap value): {_rupees(total_owed)}")
     lines.append(f"- Complaints / demands recorded: {int(complaints)}")
     lines.append(f"- Flagged silent (under-petitioning) villages: {int(silent)}")
     lines.append("")
 
-    lines.append("DEPARTMENTS (₹ owed, open issues, schemes, top areas):")
+    lines.append("DEPARTMENT SUMMARY (all departments — ₹ owed, open issues, schemes, top areas):")
     if departments:
         for d in departments:
-            schemes = ", ".join((d.get("schemes") or [])[:6]) or "—"
-            areas = ", ".join((d.get("top_areas") or [])[:5]) or "—"
+            schemes = ", ".join((d.get("schemes") or [])[:8]) or "—"
+            areas = ", ".join((d.get("top_areas") or [])[:6]) or "—"
             lines.append(
                 f"- {d.get('department', '—')}: {_rupees(d.get('total_gap_value'))} owed, "
                 f"{int(d.get('issue_count') or 0)} issues | schemes: {schemes} | "
@@ -114,42 +131,67 @@ def build_data_context() -> str:
         lines.append("- (no department summary available)")
     lines.append("")
 
-    lines.append("TOP 10 SCHEME GAPS (largest ₹ first):")
+    lines.append("TOP 20 SCHEME GAPS (largest ₹ first):")
     if scheme_gaps:
         for g in scheme_gaps:
             lines.append(
                 f"- {g.get('place_name', '—')} · {g.get('scheme', '—')} "
-                f"({g.get('department') or 'dept —'}): gap of "
-                f"{int(g.get('gap') or 0)} = {_rupees(g.get('gap_value'))}"
+                f"({g.get('department') or 'dept —'}): eligible {int(g.get('eligible') or 0)}, "
+                f"covered {int(g.get('covered') or 0)}, gap {int(g.get('gap') or 0)} = "
+                f"{_rupees(g.get('gap_value'))} [source: {g.get('data_source') or '—'}]"
             )
     else:
         lines.append("- (no scheme gaps available)")
     lines.append("")
 
-    lines.append("TOP 10 RANKED PROJECTS (highest priority first):")
+    lines.append("TOP 20 RANKED PROJECTS (highest priority first):")
     if projects:
         for p in projects:
-            cost = _rupees(p.get("estimated_cost")) if p.get("estimated_cost") else "Track A / ₹0 MPLADS"
+            track = p.get("track") or "—"
+            cost = _rupees(p.get("estimated_cost")) if p.get("estimated_cost") else "₹0 (Track A — unlock via dept letter)"
+            just = (p.get("justification") or "").strip().replace("\n", " ")
+            if len(just) > 160:
+                just = just[:157] + "…"
             lines.append(
-                f"- #{int(p.get('rank') or 0)} {p.get('title', '—')} "
-                f"@ {p.get('place_name', '—')} [{p.get('category', '—')}, "
-                f"Track {p.get('track', '—')}] score {round(float(p.get('priority_score') or 0), 2)} · "
-                f"{cost} · {int(p.get('beneficiaries') or 0)} beneficiaries"
+                f"- #{int(p.get('rank') or 0)} {p.get('place_name', '—')} "
+                f"[{p.get('category', '—')}, Track {track}] score "
+                f"{round(float(p.get('priority_score') or 0), 2)} · "
+                f"scheme: {p.get('matched_scheme') or '—'} · verdict: {p.get('verdict') or '—'} · "
+                f"cost: {cost} · why: {just or '—'}"
             )
     else:
         lines.append("- (no ranked projects available)")
     lines.append("")
 
-    lines.append("TOP SILENT / FORGOTTEN VILLAGES (highest silence first):")
+    lines.append("TOP 15 SILENT / FORGOTTEN VILLAGES (highest need first):")
     if silent_villages:
         for s in silent_villages:
             lines.append(
-                f"- {s.get('place_name', '—')}: silent_score "
-                f"{round(float(s.get('silent_score') or 0), 2)}, "
+                f"- {s.get('place_name', '—')}: need_score "
+                f"{round(float(s.get('need_score') or 0), 2)}, "
                 f"{int(s.get('petition_count') or 0)} petitions"
             )
     else:
         lines.append("- (no silent villages available)")
+    lines.append("")
+
+    lines.append("COMPLAINTS BY CATEGORY:")
+    if complaint_cats:
+        for c in complaint_cats:
+            lines.append(f"- {c.get('true_category') or '—'}: {int(c.get('n') or 0)}")
+    else:
+        lines.append("- (no complaint categories available)")
+    lines.append("")
+
+    lines.append("TOP 10 UNIFIED ISSUES (most-reported first):")
+    if unified:
+        for u in unified:
+            lines.append(
+                f"- {u.get('category', '—')} @ {u.get('place_name', '—')}: "
+                f"{int(u.get('report_count') or 0)} reports"
+            )
+    else:
+        lines.append("- (no unified issues available)")
 
     return "\n".join(lines)
 
@@ -171,8 +213,15 @@ def _ask_gemini(question: str, context: str) -> str | None:
         prompt = (
             f"{context}\n\n"
             f"=== QUESTION FROM THE MP ===\n{question}\n\n"
-            "Answer using ONLY the data above. Cite the specific numbers. If the "
-            "data doesn't cover the question, say so plainly."
+            "Answer using ONLY the data above. Give a thorough, structured markdown "
+            "answer: cite the exact numbers, name the specific areas / schemes / "
+            "departments involved, explain the WHY behind the situation, compare the "
+            "options where relevant, and finish with a concrete recommended next "
+            "action for the MP. If the question is about budget or the ₹5-crore fund, "
+            "remember Track A items cost the MP ₹0 (unlocked via department letters) "
+            "so the ₹5 crore MPLADS applies to Track B works — list those Track B "
+            "candidates with costs and recommend a mix. Do not give a shallow "
+            "one-liner. If the data genuinely doesn't cover the question, say so plainly."
         )
         resp = client.models.generate_content(
             model=model,

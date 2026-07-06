@@ -419,10 +419,33 @@ def build_silent(areas: List[dict]) -> List[SilentVillage]:
     return out
 
 
-def _estimated_cost(area: dict) -> float:
-    """Modelled Track-B (MPLADS) project cost from population, ₹2M-40M."""
-    raw = max(2_000_000.0, area["population"] * 1500.0)
-    return float(min(40_000_000.0, round(raw, -5)))
+# Realistic Indian public-works cost ranges per category, in ₹ crore (lo, hi).
+_CRORE = 10_000_000.0
+_COST_RANGES_CR: Dict[str, tuple[float, float]] = {
+    "road":       (0.4, 2.0),  # local road / works
+    "water":      (0.5, 2.5),  # JJM / AMRUT works
+    "housing":    (0.8, 3.0),  # housing cluster
+    "education":  (0.5, 1.8),  # school / education building
+    "health":     (0.8, 2.5),  # health / PHC building
+    "sanitation": (0.3, 1.5),  # sanitation / drainage
+    "pension":    (0.2, 1.0),  # pension / other
+    "jobs":       (0.2, 1.0),  # livelihood / other
+    "other":      (0.2, 1.0),  # generic / other
+}
+
+
+def _estimated_cost(area: dict, category: str) -> float:
+    """Realistic ₹ project cost by category, deterministically seeded by area name.
+
+    Every ranked project (Track A and Track B alike) gets a plausible Indian
+    public-works cost drawn from a category-specific ₹-crore band. The position
+    within the band is a stable pseudo-random factor seeded by the area name, so
+    the figure never changes between runs. Rounded to the nearest ₹1 lakh.
+    """
+    lo, hi = _COST_RANGES_CR.get(category, (0.2, 1.0))
+    factor = _hash01(area["place_name"], "cost")
+    cost = (lo + (hi - lo) * factor) * _CRORE
+    return float(round(cost, -5))
 
 
 def _project_category(area: dict, complaints: List[dict]) -> str:
@@ -455,7 +478,7 @@ def build_ranked(areas: List[dict], complaints: List[dict]) -> List[RankedProjec
                 "track": track,
                 "matched_scheme": scheme,
                 "beneficiaries": area["population"],
-                "estimated_cost": _estimated_cost(area) if track == "B" else None,
+                "estimated_cost": _estimated_cost(area, category),
                 # four transparent factors in [0, 1]
                 "demand": demand,
                 "need": area["need_score"],
