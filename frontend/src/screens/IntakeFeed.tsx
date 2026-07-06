@@ -16,10 +16,11 @@ type FeedRow = DemandRow & {
   source_outlet?: string | null;
 };
 
-/** "Live" = a genuine citizen submission (Telegram / Scan / web intake), NOT a
- * news-sourced synthetic row (which carries is_real for provenance only). */
+/** "Live" = a genuine citizen submission written to demand_records (Telegram /
+ * Scan / web intake). ONLY the backend `live` flag counts — the synthetic seed
+ * corpus also uses "telegram"/"web" as channel values, so channel is unreliable. */
 function isLive(d: FeedRow): boolean {
-  return d.live === true || d.channel === "telegram" || d.channel === "paper";
+  return d.live === true;
 }
 
 /** Tolerant date formatter — handles ISO and "YYYY-MM-DD HH:MM:SS+00" shapes. */
