@@ -168,9 +168,13 @@ function GapCircle({
     const onClick = circle.addListener("click", () => onSelect(area));
     const onHover = circle.addListener("mouseover", () => onSelect(area));
     return () => {
-      onClick.remove();
-      onHover.remove();
-      circle.setMap(null);
+      try {
+        onClick?.remove();
+        onHover?.remove();
+        circle.setMap(null);
+      } catch {
+        /* map may already be torn down on auth failure */
+      }
     };
   }, [map, area, color, radius, onSelect]);
   return null;
