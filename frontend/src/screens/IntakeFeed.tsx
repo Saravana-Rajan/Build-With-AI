@@ -45,6 +45,14 @@ const URGENCY_STYLE: Record<string, { bg: string; fg: string; border: string }> 
   low: { bg: "hsl(var(--secondary))", fg: "hsl(var(--muted-foreground))", border: "hsl(var(--border))" },
 };
 
+const URGENCY_FILTERS: { key: "all" | "critical" | "high" | "medium" | "low"; label: string }[] = [
+  { key: "all", label: "All" },
+  { key: "critical", label: "Critical" },
+  { key: "high", label: "High" },
+  { key: "medium", label: "Medium" },
+  { key: "low", label: "Low" },
+];
+
 function UrgencyPill({ u }: { u: string | null | undefined }) {
   const key = (u || "").toLowerCase();
   const meta = URGENCY_STYLE[key];
@@ -64,17 +72,22 @@ export default function IntakeFeed() {
   const state = useFetch(() => api.demands(300));
   const [tab, setTab] = useState<"complaints" | "scan">("complaints");
   const [query, setQuery] = useState("");
-  const [urgentOnly, setUrgentOnly] = useState(false);
+  const [urgencyFilter, setUrgencyFilter] =
+    useState<"all" | "critical" | "high" | "medium" | "low">("all");
   const [selected, setSelected] = useState<FeedRow | null>(null);
 
   const rows: FeedRow[] = state.status === "ready" ? (state.data as FeedRow[]) : [];
 
-  const urgentCount = useMemo(
-    () => rows.filter((d) => urgencyRank(d.urgency) <= 1).length,
-    [rows],
-  );
+  const urgencyCounts = useMemo(() => {
+    const c = { critical: 0, high: 0, medium: 0, low: 0 };
+    for (const d of rows) {
+      const k = (d.urgency || "").toLowerCase();
+      if (k in c) c[k as keyof typeof c]++;
+    }
+    return c;
+  }, [rows]);
 
-  // Filter by place/category/channel text, optionally urgent-only, urgent-first.
+  // Filter by text + urgency level; live-pinned, then critical-first.
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     let out = rows;
@@ -85,7 +98,8 @@ export default function IntakeFeed() {
           .some((v) => v!.toLowerCase().includes(q)),
       );
     }
-    if (urgentOnly) out = out.filter((d) => urgencyRank(d.urgency) <= 1);
+    if (urgencyFilter !== "all")
+      out = out.filter((d) => (d.urgency || "").toLowerCase() === urgencyFilter);
     // LIVE citizen submissions pin to the very top (the MP just received them),
     // then urgent-first (critical/high), then original recency order — stable.
     return [...out]
@@ -97,7 +111,7 @@ export default function IntakeFeed() {
           a.i - b.i,
       )
       .map((x) => x.d);
-  }, [rows, query, urgentOnly]);
+  }, [rows, query, urgencyFilter]);
 
   const { page, pageCount, pageItems, total, from, to, setPage } =
     usePagination(filtered, PAGE_SIZE);
@@ -170,26 +184,51 @@ export default function IntakeFeed() {
                 aria-label="Filter demands"
               />
             </div>
-            <button
-              type="button"
-              onClick={() => setUrgentOnly((v) => !v)}
-              aria-pressed={urgentOnly}
-              className="chip"
-              style={{
-                cursor: "pointer",
-                fontWeight: 700,
-                background: urgentOnly ? "hsl(0 84% 96%)" : "hsl(var(--secondary))",
-                color: urgentOnly ? "hsl(0 72% 45%)" : "hsl(var(--muted-foreground))",
-                borderColor: urgentOnly ? "hsl(0 84% 88%)" : "hsl(var(--border))",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 5,
-              }}
-              title="Show only critical + high urgency complaints"
-            >
-              <AlertTriangle size={13} /> Urgent {urgentCount > 0 ? `(${urgentCount})` : ""}
-            </button>
             <span className="count-badge">{filtered.length.toLocaleString("en-IN")} demands</span>
+          </div>
+
+          {/* Urgency status filter — critical first, then high / medium / low. */}
+          <div
+            role="group"
+            aria-label="Filter by urgency"
+            style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 14 }}
+          >
+            {URGENCY_FILTERS.map((f) => {
+              const active = urgencyFilter === f.key;
+              const count =
+                f.key === "all"
+                  ? rows.length
+                  : urgencyCounts[f.key as keyof typeof urgencyCounts];
+              const meta = f.key !== "all" ? URGENCY_STYLE[f.key] : null;
+              return (
+                <button
+                  key={f.key}
+                  type="button"
+                  onClick={() => setUrgencyFilter(f.key)}
+                  aria-pressed={active}
+                  className="chip"
+                  style={{
+                    cursor: "pointer",
+                    fontWeight: 700,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 5,
+                    background: active
+                      ? meta?.bg ?? "hsl(213 58% 24% / 0.08)"
+                      : "hsl(var(--secondary))",
+                    color: active
+                      ? meta?.fg ?? "hsl(var(--foreground))"
+                      : "hsl(var(--muted-foreground))",
+                    borderColor: active
+                      ? meta?.border ?? "hsl(var(--border))"
+                      : "hsl(var(--border))",
+                  }}
+                >
+                  {f.key === "critical" && <AlertTriangle size={13} />}
+                  {f.label} ({count.toLocaleString("en-IN")})
+                </button>
+              );
+            })}
           </div>
 
           {filtered.length === 0 ? (
