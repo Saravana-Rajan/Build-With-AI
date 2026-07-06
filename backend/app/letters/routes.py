@@ -172,21 +172,8 @@ def _consolidated_letter(req: DepartmentLetterRequest, mp_name: str) -> str:
 @router.post("/letter/department")
 def letter_department(req: DepartmentLetterRequest):
     """Generate ONE consolidated official letter to a department."""
+    # Template letter is instant and demo-safe (no LLM latency/hang).
     letter = _consolidated_letter(req, MP_NAME)
-
-    # Best-effort polish when Gemini/Vertex credentials exist; silent fallback.
-    system = (
-        "You are a parliamentary correspondence officer in India. You write "
-        "concise, formal, respectful official letters in English. Preserve every "
-        "factual figure, area name, the reference number and the date exactly, "
-        "and do not invent new facts."
-    )
-    prompt = (
-        "Polish the following official letter for tone and clarity while keeping "
-        "all numbers, names, areas, the reference number and the date unchanged. "
-        "Return only the finished letter.\n\n" + letter
-    )
-    letter = _gemini_polish(prompt, system) or letter
 
     return {
         "letter_text": letter,
@@ -196,27 +183,37 @@ def letter_department(req: DepartmentLetterRequest):
     }
 
 
+def _item_letter(req: ItemLetterRequest, mp_name: str) -> str:
+    """Instant single-beneficiary template letter (no LLM latency)."""
+    today = date.today()
+    scheme = req.scheme or "the applicable scheme"
+    ref_no = f"MP/{today.strftime('%Y%m%d')}/{(req.category or 'GEN')[:3].upper()}"
+    benef = req.beneficiaries or 1
+    return (
+        f"Ref. No.: {ref_no}\n"
+        f"Date: {today.strftime('%d %B %Y')}\n\n"
+        f"To,\nThe Secretary,\nThe department administering {scheme},\nGovernment.\n\n"
+        f"Subject: Request to extend {scheme} entitlements to eligible "
+        f"beneficiaries in {req.place_name}.\n\n"
+        f"Sir/Madam,\n\n"
+        f"I write regarding eligible-but-uncovered beneficiaries under {scheme} in "
+        f"{req.place_name} of my constituency. Approximately {benef} eligible "
+        f"person(s)/household(s) here are entitled to benefits under this scheme "
+        f"but remain unserved.\n\n"
+        f"As this is an existing entitlement, closing the gap requires no fresh "
+        f"outlay of constituency development funds — only the administrative "
+        f"extension of {scheme} to those already eligible.\n\n"
+        f"I request the Department to verify the eligible list for {req.place_name}, "
+        f"initiate enrolment and disbursement at the earliest, and apprise this "
+        f"office of the action taken.\n\n"
+        f"Thanking you,\n\nYours faithfully,\n\n{mp_name}\n"
+        f"Member of Parliament.\n"
+    )
+
+
 @router.post("/letter/item")
 def letter_item(req: ItemLetterRequest):
-    """Single-beneficiary letter + a plain-language eligibility rationale."""
-    scheme = req.scheme or "the applicable scheme"
-
-    # Synthesize a single-area gap so we can reuse the vetted Track A drafter.
-    gap = SchemeGap(
-        area_id=req.area_id or "—",
-        place_name=req.place_name,
-        urban=req.urban,
-        scheme=scheme,
-        category=req.category or "",
-        eligible=req.beneficiaries or 1,
-        covered=0,
-        gap=req.beneficiaries or 1,
-        per_unit_value=0.0,
-        gap_value=0.0,
-        data_source="modelled",
-    )
-    department = f"the department administering {scheme}"
-    letter = draft_track_a_letter(gap, MP_NAME, department)
+    """Single-beneficiary letter + a plain-language eligibility rationale (instant)."""
+    letter = _item_letter(req, MP_NAME)
     eligibility = _eligibility_rationale(req.scheme, req.category)
-
     return {"letter_text": letter, "eligibility": eligibility}
