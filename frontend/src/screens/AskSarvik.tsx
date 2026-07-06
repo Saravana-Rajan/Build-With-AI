@@ -1,5 +1,15 @@
 import { useEffect, useRef, useState } from "react";
-import { Sparkles, Send, User, AlertTriangle, Loader2 } from "lucide-react";
+import {
+  Sparkles,
+  Send,
+  User,
+  AlertTriangle,
+  Loader2,
+  ArrowRight,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import Page from "../components/Page";
 
 /**
@@ -29,6 +39,81 @@ const API_URL = (import.meta.env.VITE_API_URL ?? "http://localhost:8000").replac
 
 function uid() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+/* ── Redirect layer: turn Sarvik's grounded answer into navigable actions ── */
+
+interface NavChip {
+  label: string;
+  to: string;
+}
+
+/**
+ * Choose "quick-nav" chips by keyword-matching the answer. Departments and the
+ * Constituency X-Ray are always offered; the rest surface when relevant.
+ */
+function quickNavChips(content: string): NavChip[] {
+  const t = content.toLowerCase();
+  const chips: NavChip[] = [];
+  const push = (label: string, to: string) => {
+    if (!chips.some((c) => c.to === to)) chips.push({ label, to });
+  };
+
+  push("View Departments", "/departments"); // always
+  if (/silent|forgotten|under[-\s]?petition|0\s+petition|zero\s+petition/.test(t)) {
+    push("Forgotten Villages", "/forgotten");
+  }
+  push("Constituency X-Ray", "/x-ray"); // always
+  if (/priorit|ranked|\bscore/.test(t)) push("Priorities", "/priorities");
+  if (/letter|mplads|₹\s?5\s*crore|5\s*crore|track\s+[ab]\b|\bact\b/.test(t)) {
+    push("Act", "/act");
+  }
+  return chips;
+}
+
+/** Department names + central-scheme codes we linkify inside the answer. */
+const NAV_TERMS = [
+  "Housing & Urban Affairs",
+  "Health & Family Welfare",
+  "Drinking Water & Sanitation",
+  "Rural Development",
+  "Social Welfare",
+  "School Education",
+  "Jal Shakti",
+  "Jal Jeevan",
+  "PMAY-G",
+  "PMAY-U",
+  "PM-JAY",
+  "MGNREGA",
+  "MPLADS",
+  "PMGSY",
+  "PMEGP",
+  "PMAY",
+  "NHM",
+  "JJM",
+  "SBM",
+  "NSAP",
+];
+
+function escapeRe(s: string) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+// Longest-first so "PMAY-G" wins over "PMAY". Not preceded by "[" so we never
+// re-wrap an existing markdown link.
+const NAV_RE = new RegExp(
+  "(?<!\\[)(" +
+    [...NAV_TERMS]
+      .sort((a, b) => b.length - a.length)
+      .map(escapeRe)
+      .join("|") +
+    ")",
+  "g",
+);
+
+/** Wrap known department / scheme mentions as internal nav links. */
+function linkifyDepartments(md: string): string {
+  return md.replace(NAV_RE, (m) => `[${m}](sarvik-nav:/departments)`);
 }
 
 export default function AskSarvik() {
@@ -93,6 +178,54 @@ export default function AskSarvik() {
         @keyframes ask-spin { to { transform: rotate(360deg); } }
         .ask-spin { animation: ask-spin 0.8s linear infinite; }
         @keyframes ask-blink { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
+        .sarvik-md > :first-child { margin-top: 0; }
+        .sarvik-md > :last-child { margin-bottom: 0; }
+        .sarvik-md p { margin: 0 0 8px; }
+        .sarvik-md strong { font-weight: 600; color: hsl(var(--foreground)); }
+        .sarvik-md ul, .sarvik-md ol { margin: 6px 0; padding-left: 20px; }
+        .sarvik-md li { margin: 2px 0; }
+        .sarvik-md li::marker { color: hsl(var(--muted-foreground)); }
+        .sarvik-md h1, .sarvik-md h2, .sarvik-md h3,
+        .sarvik-md h4, .sarvik-md h5, .sarvik-md h6 {
+          font-size: 15px; font-weight: 600; margin: 10px 0 4px;
+          color: hsl(var(--foreground));
+        }
+        .sarvik-md a { color: hsl(var(--primary)); text-decoration: underline; }
+        .sarvik-md code {
+          font-size: 0.9em; padding: 1px 5px; border-radius: 4px;
+          background: hsl(var(--secondary)); font-family: var(--font-mono, monospace);
+        }
+        .sarvik-md pre {
+          margin: 8px 0; padding: 10px 12px; border-radius: 8px;
+          background: hsl(var(--secondary)); overflow-x: auto;
+        }
+        .sarvik-md pre code { padding: 0; background: transparent; }
+        .sarvik-md blockquote {
+          margin: 8px 0; padding-left: 12px;
+          border-left: 3px solid hsl(var(--border)); color: hsl(var(--muted-foreground));
+        }
+        .sarvik-md table { border-collapse: collapse; margin: 8px 0; font-size: 14px; }
+        .sarvik-md th, .sarvik-md td {
+          border: 1px solid hsl(var(--border)); padding: 4px 8px; text-align: left;
+        }
+        .sarvik-inline-link {
+          appearance: none; border: none; background: none; padding: 0;
+          font: inherit; color: hsl(var(--primary)); font-weight: 600;
+          cursor: pointer; text-decoration: underline;
+          text-underline-offset: 2px; text-decoration-thickness: 1px;
+        }
+        .sarvik-inline-link:hover { color: hsl(var(--primary) / 0.8); }
+        .sarvik-nav-chip {
+          display: inline-flex; align-items: center; gap: 4px;
+          padding: 4px 10px; border-radius: 9999px;
+          border: 1px solid hsl(var(--border)); background: hsl(var(--card));
+          color: hsl(var(--foreground)); font-size: 12.5px; font-weight: 600;
+          cursor: pointer; transition: background 0.15s ease, border-color 0.15s ease;
+        }
+        .sarvik-nav-chip:hover {
+          background: hsl(var(--accent)); color: hsl(var(--accent-foreground));
+          border-color: hsl(var(--accent));
+        }
       `}</style>
       <div
         className="card"
@@ -278,6 +411,8 @@ export default function AskSarvik() {
 
 function Bubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === "user";
+  const navigate = useNavigate();
+  const chips = isUser ? [] : quickNavChips(message.content);
   return (
     <div
       style={{
@@ -307,21 +442,85 @@ function Bubble({ message }: { message: ChatMessage }) {
       </span>
       <div
         style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: isUser ? "flex-end" : "flex-start",
           maxWidth: "78%",
-          padding: "11px 15px",
-          borderRadius: 16,
-          fontSize: 15,
-          lineHeight: 1.55,
-          whiteSpace: "pre-wrap",
-          background: isUser ? "hsl(var(--primary))" : "hsl(var(--muted))",
-          color: isUser
-            ? "hsl(var(--primary-foreground))"
-            : "hsl(var(--foreground))",
-          borderTopRightRadius: isUser ? 4 : 16,
-          borderTopLeftRadius: isUser ? 16 : 4,
+          minWidth: 0,
         }}
       >
-        {message.content}
+        <div
+          className={isUser ? undefined : "sarvik-md"}
+          style={{
+            maxWidth: "100%",
+            padding: "11px 15px",
+            borderRadius: 16,
+            fontSize: 15,
+            lineHeight: 1.55,
+            whiteSpace: isUser ? "pre-wrap" : "normal",
+            overflowWrap: "anywhere",
+            background: isUser ? "hsl(var(--primary))" : "hsl(var(--muted))",
+            color: isUser
+              ? "hsl(var(--primary-foreground))"
+              : "hsl(var(--foreground))",
+            borderTopRightRadius: isUser ? 4 : 16,
+            borderTopLeftRadius: isUser ? 16 : 4,
+          }}
+        >
+          {isUser ? (
+            message.content
+          ) : (
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                a({ href, children, ...props }) {
+                  if (href && href.startsWith("sarvik-nav:")) {
+                    const to = href.slice("sarvik-nav:".length);
+                    return (
+                      <button
+                        type="button"
+                        className="sarvik-inline-link"
+                        onClick={() => navigate(to)}
+                      >
+                        {children}
+                      </button>
+                    );
+                  }
+                  return (
+                    <a href={href} target="_blank" rel="noreferrer" {...props}>
+                      {children}
+                    </a>
+                  );
+                },
+              }}
+            >
+              {linkifyDepartments(message.content)}
+            </ReactMarkdown>
+          )}
+        </div>
+
+        {chips.length > 0 && (
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 6,
+              marginTop: 8,
+            }}
+          >
+            {chips.map((c) => (
+              <button
+                key={c.to}
+                type="button"
+                className="sarvik-nav-chip"
+                onClick={() => navigate(c.to)}
+              >
+                {c.label}
+                <ArrowRight size={13} />
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
