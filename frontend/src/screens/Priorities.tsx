@@ -93,7 +93,7 @@ function whyFactors(why: Record<string, number> | null | undefined) {
     <div className="why-factors">
       {factors.map(([factor, value]) => (
         <span key={factor} className="chip chip--muted why-factors__chip">
-          {factor} {value.toFixed(2)}
+          {factor} {Math.round(value * 100)}
         </span>
       ))}
     </div>
@@ -163,8 +163,8 @@ export default function Priorities() {
           <div className="spark-card__meta">
             <span className="dept-panel__label">Score distribution</span>
             <span className="muted" style={{ fontSize: 13 }}>
-              {ranked.length.toLocaleString("en-IN")} ranked · top {topScore.toFixed(2)} · median{" "}
-              {medianScore.toFixed(2)}
+              {ranked.length.toLocaleString("en-IN")} ranked · top {Math.round(topScore * 100)} · median{" "}
+              {Math.round(medianScore * 100)}
             </span>
           </div>
           <ScoreSpark scores={scores} />
@@ -215,7 +215,7 @@ export default function Priorities() {
                   <WhyThisMatters p={p as Justified} />
                   {whyFactors(p.why)}
                 </div>
-                <div className="ranked-item__score num">{p.priority_score.toFixed(2)}</div>
+                <div className="ranked-item__score num">{Math.round(p.priority_score * 100)}</div>
               </li>
             ))}
           </ul>

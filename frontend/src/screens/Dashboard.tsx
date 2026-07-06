@@ -297,7 +297,7 @@ export default function Dashboard() {
                     {p.track === "A" ? "Track A" : "Track B"}
                   </span>
                   <span className="shrink-0 text-xs font-bold tabular-nums text-foreground">
-                    {p.priority_score.toFixed(2)}
+                    {Math.round(p.priority_score * 100)}
                   </span>
                 </li>
               ))}
