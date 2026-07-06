@@ -82,20 +82,19 @@ async def _send_message(client: httpx.AsyncClient, chat_id: int, text: str) -> N
 
 
 def _reply_text(rec: DemandRecord) -> str:
-    """Bilingual (ta / hi / en) acknowledgement with reference id, scheme, place."""
-    scheme = rec.matched_scheme or "MPLADS / பொது / सामान्य"
+    """Bilingual (Tamil / English) acknowledgement with reference id, scheme, place."""
+    scheme = rec.matched_scheme or "MPLADS / பொது"
     place = rec.place_name or "—"
+    category = rec.category or "—"
     return (
         f"✅ உங்கள் புகார் பெறப்பட்டது.\n"
         f"குறிப்பு எண்: {rec.id}\n"
+        f"வகை: {category}\n"
         f"திட்டம்: {scheme}\n"
         f"இடம்: {place}\n\n"
-        f"✅ आपकी शिकायत दर्ज हो गई है।\n"
-        f"संदर्भ संख्या: {rec.id}\n"
-        f"योजना: {scheme}\n"
-        f"स्थान: {place}\n\n"
         f"✅ Your complaint has been received.\n"
         f"Reference: {rec.id}\n"
+        f"Category: {category}\n"
         f"Scheme: {scheme}\n"
         f"Place: {place}"
     )
@@ -150,7 +149,6 @@ async def telegram_webhook(request: Request) -> dict:
                         client,
                         chat_id,
                         "உரை, குரல் அல்லது புகைப்படமாக உங்கள் புகாரை அனுப்பவும்.\n"
-                        "कृपया अपनी शिकायत टेक्स्ट, वॉइस या फ़ोटो के रूप में भेजें।\n"
                         "Please send your complaint as text, voice, or photo.",
                     )
     except Exception as exc:  # noqa: BLE001 — never let Telegram see a non-200
