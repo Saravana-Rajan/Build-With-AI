@@ -30,8 +30,41 @@ def stats():
 
 @router.get("/demands")
 def demands(limit: int = Query(50, le=500)):
-    return bq.query(
-        f"SELECT * FROM `{DS}.complaints_synthetic` ORDER BY created_at DESC LIMIT {limit}")
+    """Intake feed: LIVE citizen submissions first, then the seeded corpus.
+
+    Live petitions (Telegram / Scan-a-Petition) are written to `demand_records`
+    by the intake pipeline; the seeded + real-news corpus lives in
+    `complaints_synthetic`. Merge them so a complaint a citizen just sent shows
+    at the top of the MP's Intake feed, mapped into the same row shape.
+    """
+    try:
+        syn = bq.query(
+            f"SELECT * FROM `{DS}.complaints_synthetic` ORDER BY created_at DESC LIMIT {limit}")
+    except Exception:
+        syn = []
+
+    live = []
+    try:
+        rows = bq.query(
+            f"SELECT id, raw_text, place_name, urban, category, source, language, "
+            f"CAST(created_at AS STRING) AS created_at "
+            f"FROM `{DS}.demand_records` ORDER BY created_at DESC LIMIT 50")
+        for r in rows:
+            live.append({
+                "id": r.get("id"),
+                "raw_text": r.get("raw_text"),
+                "place_name": r.get("place_name"),
+                "urban": r.get("urban"),
+                "true_category": r.get("category"),
+                "channel": r.get("source"),
+                "language": r.get("language"),
+                "created_at": r.get("created_at"),
+                "is_real": True,
+            })
+    except Exception:
+        live = []
+
+    return (live + syn)[:limit]
 
 
 @router.get("/scheme-gaps")
