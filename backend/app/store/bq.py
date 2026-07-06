@@ -55,13 +55,34 @@ def _fqn(table: str) -> str:
     return f"{PROJECT_ID}.{DATASET}.{table}"
 
 
-def query(sql: str) -> list[dict]:
-    """Run SQL and return rows as a list of dicts."""
+import time
+
+# In-process TTL cache for read queries. Analytics tables change only when the
+# batch job reruns, so caching identical SELECTs avoids a BigQuery round-trip
+# (~1-2s) on every page load / navigation. Live queries pass cache=False.
+_CACHE: dict[str, tuple[float, list[dict]]] = {}
+_CACHE_TTL = float(os.getenv("BQ_CACHE_TTL", "180"))  # seconds
+
+
+def query(sql: str, cache: bool = True) -> list[dict]:
+    """Run SQL and return rows as a list of dicts.
+
+    Results are cached in-process for BQ_CACHE_TTL seconds (default 180) unless
+    ``cache=False`` — pass that for queries whose freshness matters (e.g. live
+    citizen submissions) so they always hit BigQuery.
+    """
+    if cache and _CACHE_TTL > 0:
+        hit = _CACHE.get(sql)
+        if hit and (time.time() - hit[0]) < _CACHE_TTL:
+            return hit[1]
     try:
         job = client().query(sql)
-        return [dict(row.items()) for row in job.result()]
+        rows = [dict(row.items()) for row in job.result()]
     except Exception as exc:  # noqa: BLE001
         raise _wrap(exc)
+    if cache and _CACHE_TTL > 0:
+        _CACHE[sql] = (time.time(), rows)
+    return rows
 
 
 def insert_rows(table: str, rows: list[dict]) -> None:

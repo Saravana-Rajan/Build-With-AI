@@ -36,7 +36,17 @@ export class ApiError extends Error {
   }
 }
 
-async function get<T>(path: string, init?: RequestInit): Promise<T> {
+// In-memory response cache — stable analytics endpoints are cached so moving
+// between pages doesn't refetch (and re-pay BigQuery latency). Live endpoints
+// (demands) pass cache:false so new submissions always show.
+const _cache = new Map<string, { t: number; data: unknown }>();
+const CACHE_TTL = 90_000; // ms
+
+async function get<T>(path: string, init?: RequestInit, cache = true): Promise<T> {
+  if (cache && !init) {
+    const hit = _cache.get(path);
+    if (hit && Date.now() - hit.t < CACHE_TTL) return hit.data as T;
+  }
   const res = await fetch(`${API_URL}${path}`, {
     headers: { Accept: "application/json" },
     ...init,
@@ -44,7 +54,9 @@ async function get<T>(path: string, init?: RequestInit): Promise<T> {
   if (!res.ok) {
     throw new ApiError(res.status, `GET ${path} failed (${res.status})`);
   }
-  return (await res.json()) as T;
+  const data = (await res.json()) as T;
+  if (cache && !init) _cache.set(path, { t: Date.now(), data });
+  return data;
 }
 
 async function post<T>(path: string, body: unknown): Promise<T> {
@@ -77,8 +89,9 @@ export const api = {
   /** Headline numbers for the dashboard hero. */
   stats: () => get<StatsResponse>("/api/stats"),
 
-  /** Live intake feed — most recent raw demands. */
-  demands: (limit = 50) => get<DemandRow[]>(`/api/demands?limit=${limit}`),
+  /** Live intake feed — most recent raw demands (never cached: must stay live). */
+  demands: (limit = 50) =>
+    get<DemandRow[]>(`/api/demands?limit=${limit}`, undefined, false),
 
   /** Per-area scheme coverage gaps (Constituency X-Ray). */
   schemeGaps: (limit = 100) => get<SchemeGap[]>(`/api/scheme-gaps?limit=${limit}`),

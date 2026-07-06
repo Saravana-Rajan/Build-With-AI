@@ -52,7 +52,9 @@ def demands(limit: int = Query(50, le=500)):
         rows = bq.query(
             f"SELECT id, raw_text, place_name, urban, category, source, language, urgency, "
             f"CAST(created_at AS STRING) AS created_at "
-            f"FROM `{DS}.demand_records` ORDER BY created_at DESC LIMIT 50")
+            f"FROM `{DS}.demand_records` ORDER BY created_at DESC LIMIT 50",
+            cache=False,  # live submissions must appear immediately
+        )
         for r in rows:
             live.append({
                 "id": r.get("id"),
