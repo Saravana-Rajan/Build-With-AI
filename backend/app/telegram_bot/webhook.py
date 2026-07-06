@@ -182,6 +182,18 @@ async def telegram_webhook(request: Request) -> dict:
                     tmp_path = await _download_to_temp(client, largest["file_id"], ".jpg")
                     if tmp_path:
                         rec = process_media(tmp_path, "image/jpeg", "ta", "telegram")
+
+                elif message.get("document"):
+                    # A file attachment — PDF petition, or an image/audio sent as a
+                    # file rather than a photo/voice. Use its name for the suffix
+                    # and its declared MIME (Gemini handles image/*, pdf, audio/*).
+                    doc = message["document"]
+                    fname = doc.get("file_name") or ""
+                    suffix = os.path.splitext(fname)[1] or ".bin"
+                    tmp_path = await _download_to_temp(client, doc["file_id"], suffix)
+                    if tmp_path:
+                        mime = doc.get("mime_type") or None
+                        rec = process_media(tmp_path, mime, "ta", "telegram")
             finally:
                 if tmp_path:
                     try:
