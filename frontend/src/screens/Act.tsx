@@ -27,6 +27,7 @@ import {
   departmentColor,
 } from "../lib/departments";
 import type { DepartmentsResult } from "../lib/departments";
+import { schemeInfo } from "../lib/schemeMeta";
 import type { Department, RankedProject } from "../types";
 
 type Tab = "A" | "B";
@@ -644,6 +645,12 @@ function DeptLetterCard({
     ? summary.schemes
     : uniqueSchemes(items);
 
+  const totalBenef = items.reduce((s, p) => s + (p.beneficiaries ?? 0), 0);
+  const perResident =
+    owed != null && totalBenef > 0
+      ? `₹${Math.round(owed / totalBenef).toLocaleString("en-IN")}/resident`
+      : null;
+
   const pager = usePagination(items, 10);
 
   return (
@@ -680,6 +687,106 @@ function DeptLetterCard({
 
       {open && (
         <div className="dept-section__body">
+          {/* Why this is ₹0 — the load-bearing Track A rationale. */}
+          <div
+            style={{
+              marginBottom: 14,
+              padding: "10px 12px",
+              borderRadius: "0.6rem",
+              background: "hsl(160 84% 96%)",
+              border: "1px solid hsl(160 55% 86%)",
+              color: "hsl(160 45% 24%)",
+              fontSize: 13,
+              lineHeight: 1.5,
+            }}
+          >
+            These are benefits your constituents are <strong>already entitled to</strong> under
+            central schemes but haven't received. One consolidated letter triggers the
+            department's administrative extension of the scheme — <strong>₹0 of your MPLADS</strong>{" "}
+            required.
+          </div>
+
+          {/* Entitlements to unlock — per scheme: what's owed + which ministry. */}
+          {schemes.length > 0 && (
+            <div style={{ marginBottom: 14 }}>
+              <div
+                className="muted"
+                style={{ fontSize: 13, marginBottom: 8, fontWeight: 500 }}
+              >
+                Entitlements to unlock
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {schemes.map((s) => {
+                  const info = schemeInfo(s);
+                  return (
+                    <div
+                      key={s}
+                      style={{
+                        display: "flex",
+                        gap: 10,
+                        alignItems: "flex-start",
+                        fontSize: 13,
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      <span
+                        className="chip"
+                        style={{
+                          flexShrink: 0,
+                          background: `${info.color}14`,
+                          color: info.color,
+                          borderColor: `${info.color}44`,
+                          fontWeight: 700,
+                        }}
+                      >
+                        {info.code}
+                      </span>
+                      <span>
+                        {info.entitlement ? (
+                          <>
+                            Every eligible citizen is owed {info.entitlement}
+                          </>
+                        ) : (
+                          <>Existing entitlements under {info.name} remain unclaimed here. </>
+                        )}
+                        <span className="muted"> Push: {info.ministry}.</span>
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* The math — who's owed, how much, efficiency. */}
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 16,
+              marginBottom: 14,
+              fontSize: 13,
+              color: "hsl(var(--muted-foreground))",
+            }}
+          >
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+              <Users size={13} /> ≈ {totalBenef.toLocaleString("en-IN")} residents entitled
+            </span>
+            {owed != null && (
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontWeight: 600, color: "hsl(var(--foreground))" }}>
+                {formatInr(owed)} owed
+              </span>
+            )}
+            {perResident && (
+              <span
+                style={{ display: "inline-flex", alignItems: "center", gap: 5, fontWeight: 600, color: "hsl(var(--success))" }}
+                title="Entitlement value owed per resident — unlocked at ₹0 cost to your fund"
+              >
+                {perResident}
+              </span>
+            )}
+          </div>
+
           {/* Compact summary — top areas, not 184 rows. */}
           <div style={{ marginBottom: 14 }}>
             <div
@@ -698,15 +805,6 @@ function DeptLetterCard({
                 <span className="chip chip--muted">and {moreCount} more</span>
               )}
             </div>
-            {schemes.length > 0 && (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
-                {schemes.map((s) => (
-                  <span key={s} className="chip chip--track-A">
-                    {s}
-                  </span>
-                ))}
-              </div>
-            )}
           </div>
 
           {/* One clear primary action per department. */}

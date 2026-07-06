@@ -20,6 +20,8 @@ export interface SchemeInfo {
   ministry: string;
   /** Vivid accent hex used for the highlighted badge. */
   color: string;
+  /** The concrete benefit a citizen is already entitled to under this scheme. */
+  entitlement?: string;
 }
 
 /** Keyed by UPPERCASED scheme code. Includes context-only sibling schemes. */
@@ -29,66 +31,88 @@ const META: Record<string, SchemeInfo> = {
     name: "Pradhan Mantri Awas Yojana – Gramin",
     ministry: "Ministry of Rural Development",
     color: "#b45309",
+    entitlement:
+      "a pucca-house grant (~₹1.2–1.3 lakh + MGNREGA labour + toilet) for every SECC/Awas+ eligible family without a durable home.",
   },
   "PMAY-U": {
     code: "PMAY-U",
     name: "Pradhan Mantri Awas Yojana – Urban",
     ministry: "Ministry of Housing & Urban Affairs",
     color: "#c2410c",
+    entitlement:
+      "a housing subsidy / interest subvention for eligible urban households without a pucca house of their own.",
   },
   NHM: {
     code: "NHM",
     name: "National Health Mission",
     ministry: "Ministry of Health & Family Welfare",
     color: "#dc2626",
+    entitlement:
+      "access to a functional health sub-centre/PHC, free essential drugs, maternal & child care, and an issued health card for every eligible resident.",
   },
   JJM: {
     code: "JJM",
     name: "Jal Jeevan Mission",
     ministry: "Ministry of Jal Shakti",
     color: "#0284c7",
+    entitlement:
+      "a Functional Household Tap Connection delivering 55 litres per person per day — at no cost to every rural household.",
   },
   AMRUT: {
     code: "AMRUT",
     name: "Atal Mission for Rejuvenation & Urban Transformation",
     ministry: "Ministry of Housing & Urban Affairs",
     color: "#0891b2",
+    entitlement:
+      "a metered piped-water and sewerage connection for every household in the mission's urban local bodies.",
   },
   MGNREGA: {
     code: "MGNREGA",
     name: "Mahatma Gandhi National Rural Employment Guarantee Act",
     ministry: "Ministry of Rural Development",
     color: "#ca8a04",
+    entitlement:
+      "100 days of guaranteed wage-employment per year for every rural household that demands work.",
   },
   NULM: {
     code: "NULM",
     name: "Deendayal Antyodaya Yojana – National Urban Livelihoods Mission",
     ministry: "Ministry of Housing & Urban Affairs",
     color: "#a16207",
+    entitlement:
+      "skills training, self-employment credit and SHG support for the eligible urban poor.",
   },
   NSAP: {
     code: "NSAP",
     name: "National Social Assistance Programme",
     ministry: "Ministry of Rural Development",
     color: "#7c3aed",
+    entitlement:
+      "a monthly old-age / widow / disability pension for every BPL applicant who meets the age and income criteria.",
   },
   "SBM-G": {
     code: "SBM-G",
     name: "Swachh Bharat Mission – Gramin",
     ministry: "Ministry of Jal Shakti",
     color: "#059669",
+    entitlement:
+      "an IHHL toilet-construction incentive (~₹12,000) for every rural household without a sanitary latrine.",
   },
   "SBM-U": {
     code: "SBM-U",
     name: "Swachh Bharat Mission – Urban",
     ministry: "Ministry of Housing & Urban Affairs",
     color: "#0d9488",
+    entitlement:
+      "an individual / community toilet incentive and door-to-door waste collection for eligible urban households.",
   },
   "SAMAGRA SHIKSHA": {
     code: "Samagra Shiksha",
     name: "Samagra Shiksha Abhiyan",
     ministry: "Ministry of Education",
     color: "#2563eb",
+    entitlement:
+      "free schooling, uniforms, textbooks and a mid-day meal for every school-age child in the eligible cohort.",
   },
 
   // ── Context-only sibling schemes (shown as "related", never as primary) ──
