@@ -118,6 +118,6 @@ async def intake(
 
     return {
         "reference": rec.id,
-        "ack": "உங்கள் புகார் பெறப்பட்டது / आपकी शिकायत मिल गई / Your complaint has been received.",
+        "ack": "உங்கள் புகார் பெறப்பட்டது / Your complaint has been received.",
         "record": rec.model_dump(),
     }

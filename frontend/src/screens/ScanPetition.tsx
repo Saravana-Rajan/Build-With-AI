@@ -7,7 +7,6 @@ import type { IntakeResponse } from "../api";
 
 const LANGUAGES = [
   { value: "ta", label: "Tamil" },
-  { value: "hi", label: "Hindi" },
   { value: "en", label: "English" },
 ];
 
