@@ -81,6 +81,44 @@ async def _send_message(client: httpx.AsyncClient, chat_id: int, text: str) -> N
         logger.warning("sendMessage failed for chat_id=%s: %s", chat_id, exc)
 
 
+_WELCOME = (
+    "🙏 வணக்கம்! இது கோயம்புத்தூர் தொகுதி புகார் உதவியாளர்.\n"
+    "உங்கள் புகாரை உரை, குரல் பதிவு அல்லது புகைப்படமாக அனுப்பவும்.\n"
+    'எ.கா: "சரவணம்பட்டியில் ஒரு வாரமாக குடிநீர் வரவில்லை"\n\n'
+    "🙏 Welcome to the Coimbatore Constituency complaint assistant.\n"
+    "Send your complaint as text, a voice note, or a photo of a petition.\n"
+    'E.g. "No drinking water in Saravanampatti for a week"'
+)
+
+_ASK_REAL = (
+    "உங்கள் புகாரை விவரமாக எழுதவும் — இடம் மற்றும் பிரச்சனை.\n"
+    'எ.கா: "பீளமேட்டில் தெரு விளக்குகள் ஒரு மாதமாக எரியவில்லை"\n\n'
+    "Please describe your complaint with a place and the problem.\n"
+    'E.g. "Street lights not working in Peelamedu for a month"'
+)
+
+# Greetings / test pings that must NOT be filed as complaints.
+_GREETINGS = {
+    "hi", "hello", "hey", "start", "test", "ok", "okay", "thanks",
+    "thank you", "hai", "vanakkam", "வணக்கம்", "ஹாய்", "hii", "yo",
+}
+
+
+def _is_command(text: str) -> bool:
+    """Telegram bot command, e.g. /start, /help."""
+    return text.strip().startswith("/")
+
+
+def _looks_trivial(text: str) -> bool:
+    """A greeting or a one-word ping with no substance — don't file it."""
+    s = text.strip().lower()
+    if s in _GREETINGS:
+        return True
+    # single word and no digits (real short complaints usually name a place/number)
+    words = s.split()
+    return len(words) < 2 and not any(ch.isdigit() for ch in s)
+
+
 def _reply_text(rec: DemandRecord) -> str:
     """Bilingual (Tamil / English) acknowledgement with reference id, scheme, place."""
     scheme = rec.matched_scheme or "MPLADS / பொது"
@@ -120,7 +158,17 @@ async def telegram_webhook(request: Request) -> dict:
             tmp_path: str | None = None
             try:
                 if message.get("text"):
-                    rec = process_text(message["text"], "ta", "telegram")
+                    text = message["text"]
+                    # Commands and greetings must not be filed as complaints.
+                    if _is_command(text):
+                        if chat_id is not None:
+                            await _send_message(client, chat_id, _WELCOME)
+                        return {"ok": True}
+                    if _looks_trivial(text):
+                        if chat_id is not None:
+                            await _send_message(client, chat_id, _ASK_REAL)
+                        return {"ok": True}
+                    rec = process_text(text, "ta", "telegram")
 
                 elif message.get("voice") or message.get("audio"):
                     media = message.get("voice") or message.get("audio")
