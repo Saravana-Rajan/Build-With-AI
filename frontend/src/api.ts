@@ -36,17 +36,35 @@ export class ApiError extends Error {
   }
 }
 
-// In-memory response cache — stable analytics endpoints are cached so moving
-// between pages doesn't refetch (and re-pay BigQuery latency). Live endpoints
-// (demands) pass cache:false so new submissions always show.
+// Stale-while-revalidate response cache — stable analytics endpoints are
+// served INSTANTLY from memory/localStorage (so every page paints with data,
+// no spinner), then silently refreshed in the background when older than
+// FRESH_TTL. Live endpoints (demands) pass cache:false so new submissions
+// always show.
 const _cache = new Map<string, { t: number; data: unknown }>();
-const CACHE_TTL = 90_000; // ms
+const FRESH_TTL = 90_000; // ms — refresh in background beyond this age
+const SERVE_TTL = 24 * 60 * 60_000; // ms — never serve anything older than a day
+const LS_PREFIX = "sarvik-api:";
 
-async function get<T>(path: string, init?: RequestInit, cache = true): Promise<T> {
-  if (cache && !init) {
-    const hit = _cache.get(path);
-    if (hit && Date.now() - hit.t < CACHE_TTL) return hit.data as T;
+function _lsGet(path: string): { t: number; data: unknown } | null {
+  try {
+    const raw = localStorage.getItem(LS_PREFIX + path);
+    if (!raw) return null;
+    return JSON.parse(raw) as { t: number; data: unknown };
+  } catch {
+    return null;
   }
+}
+
+function _lsSet(path: string, entry: { t: number; data: unknown }): void {
+  try {
+    localStorage.setItem(LS_PREFIX + path, JSON.stringify(entry));
+  } catch {
+    /* storage full/blocked — memory cache still works */
+  }
+}
+
+async function _fetchFresh<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {
     headers: { Accept: "application/json" },
     ...init,
@@ -54,9 +72,64 @@ async function get<T>(path: string, init?: RequestInit, cache = true): Promise<T
   if (!res.ok) {
     throw new ApiError(res.status, `GET ${path} failed (${res.status})`);
   }
-  const data = (await res.json()) as T;
-  if (cache && !init) _cache.set(path, { t: Date.now(), data });
+  return (await res.json()) as T;
+}
+
+// De-dupe concurrent background refreshes per path.
+const _inflight = new Map<string, Promise<unknown>>();
+
+function _revalidate(path: string): void {
+  if (_inflight.has(path)) return;
+  const p = _fetchFresh(path)
+    .then((data) => {
+      const entry = { t: Date.now(), data };
+      _cache.set(path, entry);
+      _lsSet(path, entry);
+      return data;
+    })
+    .catch(() => undefined)
+    .finally(() => _inflight.delete(path));
+  _inflight.set(path, p);
+}
+
+async function get<T>(path: string, init?: RequestInit, cache = true): Promise<T> {
+  if (cache && !init) {
+    const hit = _cache.get(path) ?? _lsGet(path);
+    if (hit && Date.now() - hit.t < SERVE_TTL) {
+      _cache.set(path, hit);
+      // Serve instantly; refresh silently if getting stale.
+      if (Date.now() - hit.t > FRESH_TTL) _revalidate(path);
+      return hit.data as T;
+    }
+  }
+  const data = await _fetchFresh<T>(path, init);
+  if (cache && !init) {
+    const entry = { t: Date.now(), data };
+    _cache.set(path, entry);
+    _lsSet(path, entry);
+  }
   return data;
+}
+
+/**
+ * Warm every stable analytics endpoint once at app boot so the first visit to
+ * each page paints instantly from cache instead of paying BigQuery latency.
+ * Fire-and-forget; failures are silent (screens fall back to normal fetch).
+ */
+export function prefetchAll(): void {
+  const paths = [
+    "/api/stats",
+    "/api/scheme-gaps?limit=100",
+    "/api/ranked-projects?limit=50",
+    "/api/silent-villages?limit=50",
+    "/api/unified-issues?limit=100",
+    "/api/departments",
+  ];
+  for (const p of paths) {
+    const hit = _cache.get(p) ?? _lsGet(p);
+    if (!hit || Date.now() - hit.t > FRESH_TTL) _revalidate(p);
+    else if (hit && !_cache.has(p)) _cache.set(p, hit);
+  }
 }
 
 async function post<T>(path: string, body: unknown): Promise<T> {

@@ -35,6 +35,13 @@ function fmtDate(s: string | null | undefined): string {
 // ── Urgency triage — surface critical/high complaints first ──────────────────
 const URGENCY_RANK: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };
 
+/** Specific mapped categories rank above the catch-all "other" bucket so the
+ * top of the feed showcases clean category extraction. */
+function categoryRank(c: string | null | undefined): number {
+  const k = (c || "").trim().toLowerCase();
+  return k === "" || k === "other" ? 1 : 0;
+}
+
 function urgencyRank(u: string | null | undefined): number {
   return URGENCY_RANK[(u || "").toLowerCase()] ?? 4;
 }
@@ -102,12 +109,14 @@ export default function IntakeFeed() {
     if (urgencyFilter !== "all")
       out = out.filter((d) => (d.urgency || "").toLowerCase() === urgencyFilter);
     // LIVE citizen submissions pin to the very top (the MP just received them),
-    // then urgent-first (critical/high), then original recency order — stable.
+    // then cleanly-mapped categories before the "other" bucket, then
+    // urgent-first (critical/high), then original recency order — stable.
     return [...out]
       .map((d, i) => ({ d, i }))
       .sort(
         (a, b) =>
           (isLive(b.d) ? 1 : 0) - (isLive(a.d) ? 1 : 0) ||
+          categoryRank(a.d.true_category) - categoryRank(b.d.true_category) ||
           urgencyRank(a.d.urgency) - urgencyRank(b.d.urgency) ||
           a.i - b.i,
       )

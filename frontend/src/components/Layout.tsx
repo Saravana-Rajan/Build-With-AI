@@ -202,6 +202,14 @@ function Sidebar({
             </>
           )}
         </button>
+        {!collapsed && (
+          <div className="mt-2 flex items-center justify-center gap-1.5 border-t border-border pt-2 text-[10px] text-slate-400 dark:text-slate-500">
+            <span>powered by</span>
+            <span className="text-[11px] font-bold tracking-tight text-slate-600 dark:text-slate-300">
+              techjays
+            </span>
+          </div>
+        )}
       </div>
 
       {glossaryOpen && <GlossaryModal onClose={() => setGlossaryOpen(false)} />}

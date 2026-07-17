@@ -1,4 +1,5 @@
 import * as React from "react";
+import { createPortal } from "react-dom";
 import { X, Search, BookOpen } from "lucide-react";
 import { GLOSSARY_TERMS } from "../lib/glossary";
 
@@ -25,13 +26,16 @@ export default function GlossaryModal({ onClose }: { onClose: () => void }) {
     );
   }, [query]);
 
-  return (
+  // Portal to <body>: the sidebar <aside> forms its own stacking context, so a
+  // fixed overlay rendered inside it can be painted over by the Google Maps
+  // canvas in the main pane regardless of z-index.
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
       aria-label="Glossary of terms"
       onClick={onClose}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-[hsl(213_43%_16%_/_0.45)] p-5 backdrop-blur-[2px]"
+      className="fixed inset-0 z-[1000] flex items-center justify-center bg-[hsl(213_43%_16%_/_0.45)] p-5 backdrop-blur-[2px]"
     >
       <div
         onClick={(e) => e.stopPropagation()}
@@ -97,6 +101,7 @@ export default function GlossaryModal({ onClose }: { onClose: () => void }) {
           {filtered.length} of {GLOSSARY_TERMS.length} terms
         </footer>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
